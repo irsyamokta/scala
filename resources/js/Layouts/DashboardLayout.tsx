@@ -4,8 +4,8 @@ import { usePage } from "@inertiajs/react";
 import Backdrop from "@/Layouts/Backdrop";
 import { SidebarProvider, useSidebar } from "@/Context/SidebarContext";
 
-import AppHeader from "@/Components/app/AppHeader";
-import AppSidebar from "@/Components/app/AppSidebar";
+import AppHeader from "@/shared/components/app/AppHeader";
+import AppSidebar from "@/shared/components/app/AppSidebar";
 
 import { getSidebarConfig } from "@/config/sidebar.config";
 

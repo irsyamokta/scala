@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import AppNavbar from "@/Components/app/AppNavbar";
+import AppNavbar from "@/shared/components/app/AppNavbar";
 
 interface AppLayoutProps {
     className?: string;
