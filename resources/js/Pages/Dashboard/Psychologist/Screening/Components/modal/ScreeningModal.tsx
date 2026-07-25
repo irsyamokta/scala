@@ -269,19 +269,19 @@ export default function ScreeningDetailModal({
                                 <TableHeader className="border-netral-300 border-b">
                                     <TableRow>
 
-                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold">
+                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold whitespace-nowrap">
                                             Detail Aspek
                                         </TableCell>
 
-                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold">
+                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold whitespace-nowrap">
                                             Rentang Nilai
                                         </TableCell>
 
-                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold">
+                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold whitespace-nowrap">
                                             Hasil
                                         </TableCell>
 
-                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold">
+                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold whitespace-nowrap">
                                             Catatan Psikolog
                                         </TableCell>
 

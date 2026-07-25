@@ -56,7 +56,7 @@ export default function ScreeningBarChart({
         },
         yaxis: {
             title : {
-                text: "Jumalah"
+                text: "Jumlah"
             },
             min: 0,
             forceNiceScale: true,

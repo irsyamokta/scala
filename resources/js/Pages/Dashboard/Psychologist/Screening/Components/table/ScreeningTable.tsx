@@ -35,7 +35,15 @@ export default function ScreeningTable({
         }
 
         if (screening.srq_result) {
-            return screening.srq_result.gme_indication
+            const srq = screening.srq_result;
+
+            const isIndicated =
+                srq.gme_indication ||
+                srq.substance_use_indication ||
+                srq.psychotic_symptom_indication ||
+                srq.ptsd_symptom_indication;
+
+            return isIndicated
                 ? "Terindikasi"
                 : "Tidak Terindikasi";
         }
