@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Modules\PinBatch\Controllers;
+namespace App\Modules\Batch\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\PinBatch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-/**
- * Superadmin: melihat semua PIN Batch dari seluruh sekolah.
- */
 class SuperadminBatchController extends Controller
 {
     public function index(Request $request)
@@ -24,8 +22,13 @@ class SuperadminBatchController extends Controller
             'instrument:id,name',
             'assignedPsychologist:id,name',
         ])
-            ->withCount('studentPins')
-            ->withCount(['studentPins as used_pins_count' => fn ($q) => $q->whereNotNull('used_at')])
+            ->withCount(['entries as tested_count' => fn ($q) => $q->whereNotNull('used_at')])
+            ->addSelect(DB::raw('(
+                SELECT count(*) FROM subjects
+                WHERE subjects.owner_user_id = batches.school_user_id
+                AND subjects.is_self = 0
+                AND (subjects.class_id = batches.class_id OR batches.class_id IS NULL)
+            ) as total_subjects'))
             ->when($search, fn ($q) => $q->where('label', 'like', "%{$search}%")
                 ->orWhereHas('school', fn ($sq) => $sq->where('name', 'like', "%{$search}%"))
             )

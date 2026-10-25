@@ -20,7 +20,6 @@ const NAV_ITEMS: NavItem[] = [
     { name: "SDQ & SRQ", href: "/#sdq-srq", section: "sdq-srq" },
     { name: "Psikolog", href: "/#psikolog", section: "psikolog" },
     { name: "Uji Coba", href: "/uji-coba" },
-    { name: "Tes Skrining", href: "/skrining" },
 ];
 
 const Navbar = ({ hideOnScroll = true }: NavbarProps) => {

@@ -9,10 +9,10 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { PinBatch, PinBatchIndexPageProps } from "@/types/pin-batch";
+import { PinBatch as Batch, PinBatchIndexPageProps as BatchIndexPageProps } from "@/types/pin-batch";
 
 export default function PsychologistBatchIndex() {
-    const { batches } = usePage<PinBatchIndexPageProps>().props;
+    const { batches } = usePage<BatchIndexPageProps>().props;
 
     return (
         <DashboardLayout title="Batch Skrining">
@@ -65,14 +65,14 @@ export default function PsychologistBatchIndex() {
     );
 }
 
-function BatchCard({ batch }: { batch: PinBatch }) {
-    const usedCount  = batch.used_pins_count ?? 0;
-    const totalCount = batch.student_pins_count ?? 0;
+function BatchCard({ batch }: { batch: Batch }) {
+    const usedCount  = batch.tested_count ?? 0;
+    const totalCount = batch.total_subjects ?? 0;
     const pct        = totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
 
     return (
         <a
-            href={route("pin-batch.show", batch.id)}
+            href={route("batch.show", batch.id)}
             className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white px-5 py-4 transition hover:border-primary/30 hover:shadow-sm dark:border-gray-700 dark:bg-gray-900"
         >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

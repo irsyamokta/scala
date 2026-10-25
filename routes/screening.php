@@ -18,17 +18,6 @@ Route::middleware(['auth', 'onboarding.complete'])->prefix('tes-skrining')->grou
         Route::patch('/sdq-result/{id}', [ResultController::class, 'updateSdq'])->name('sdq-result.update');
         Route::patch('/srq-result/{id}', [ResultController::class, 'updateSrq'])->name('srq-result.update');
     });
-
-    Route::middleware('permission:take.screening')->prefix('pin')->group(function () {
-        Route::post('/validate', [ScreeningController::class, 'validatePin'])
-            ->name('screening.pin.validate');
-
-        Route::get('/{pin}/form', [ScreeningController::class, 'formByPin'])
-            ->name('screening.pin.form');
-
-        Route::post('/{pin}/submit', [ScreeningController::class, 'submitByPin'])
-            ->name('screening.pin.submit');
-    });
 });
 
 Route::middleware(['auth', 'onboarding.complete', 'permission:dashboard.student'])

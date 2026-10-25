@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Modules\PinBatch\Requests;
+namespace App\Modules\Batch\Requests;
 
+use App\Models\Clazz;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PinBatchRequest extends FormRequest
+class BatchRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,7 +15,6 @@ class PinBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'all' untuk semua kelas, atau UUID kelas tertentu
             'class_id' => [
                 'required',
                 'string',
@@ -27,7 +27,7 @@ class PinBatchRequest extends FormRequest
 
                         return;
                     }
-                    if (! \App\Models\Clazz::where('id', $value)->exists()) {
+                    if (! Clazz::where('id', $value)->exists()) {
                         $fail('Kelas tidak ditemukan.');
                     }
                 },
@@ -45,8 +45,7 @@ class PinBatchRequest extends FormRequest
             'instrument_id.required' => 'Instrumen wajib dipilih.',
             'instrument_id.exists' => 'Instrumen tidak ditemukan.',
             'label.required' => 'Label batch wajib diisi.',
-            'expires_at.after' => 'Tanggal kedaluwarsa harus di masa mendatang.',
-            'expires_at.date_format' => 'Format tanggal kedaluwarsa tidak valid.',
+            'expires_at.date' => 'Format tanggal kedaluwarsa tidak valid.',
         ];
     }
 }

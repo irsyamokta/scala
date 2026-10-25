@@ -6,33 +6,33 @@ import Select from "@/shared/components/forms/Select";
 import DateTimePicker from "@/shared/components/forms/DateTimePicker";
 import { Modal } from "@/shared/components/ui/modal";
 
-interface PinBatchForm {
+interface BatchForm {
     class_id: string;
     instrument_id: string;
     label: string;
     expires_at: string;
 }
 
-interface PinBatchModalProps {
+interface BatchModalProps {
     isOpen: boolean;
     onClose: () => void;
     classes: { id: string; class_name: string }[];
     instruments: { id: string; name: string }[];
 }
 
-export default function PinBatchModal({
+export default function BatchModal({
     isOpen,
     onClose,
     classes,
     instruments,
-}: PinBatchModalProps) {
+}: BatchModalProps) {
     const {
         data,
         setData,
         handleSubmit,
         loading,
         serverErrors,
-    } = useModalForm<PinBatchForm>({
+    } = useModalForm<BatchForm>({
         isOpen,
         onClose,
         initialValues: {
@@ -41,8 +41,8 @@ export default function PinBatchModal({
             label: "",
             expires_at: "",
         },
-        createMessage: "Batch PIN berhasil dibuat",
-        storeRoute: "pin-batch.store",
+        createMessage: "Batch Skrining berhasil dibuat",
+        storeRoute: "batch.store",
     });
 
     const classOptions = [
@@ -59,10 +59,10 @@ export default function PinBatchModal({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Buat PIN Batch"
-            subtitle="PIN akan di-generate otomatis untuk setiap siswa di kelas yang dipilih."
+            title="Buat Batch Skrining"
+            subtitle="Link tes akan di-generate otomatis. Siswa mengakses link atau QR code dengan NIS + tanggal lahir."
             formId="pin-batch-form"
-            submitLabel="Buat Batch & Generate PIN"
+            submitLabel="Buat Batch"
             cancelLabel="Batal"
             loading={loading}
             position="right"

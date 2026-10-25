@@ -9,7 +9,7 @@ import QuestionCard from "../../dashboard/pages/Parent/Screening/Components/card
 import Illustration from "@assets/svg/img-submit.svg";
 
 export default function GuestTest() {
-    const { questions, instrument, subject, pin } = usePage().props as any;
+    const { questions, instrument, subject, batch } = usePage().props as any;
 
     const [current, setCurrent]       = useState(0);
     const [answers, setAnswers]       = useState<Record<string, number | null>>({});
@@ -43,8 +43,8 @@ export default function GuestTest() {
                 score,
             }));
             router.post(
-                route("guest.screening.submit"),
-                { pin_id: pin.id, answers: payload },
+                route("guest.screening.submit", batch.token),
+                { batch_id: batch.id, answers: payload },
                 { onFinish: () => setSubmitting(false) }
             );
         }
@@ -135,7 +135,7 @@ export default function GuestTest() {
                                     <p className="text-sm font-semibold">Perhatian</p>
                                 </div>
                                 <p className="text-xs text-orange-700 leading-relaxed">
-                                    <span className="font-semibold">Jangan tutup atau refresh halaman ini</span> sebelum tes selesai. Jawaban yang sudah diisi akan hilang dan PIN tidak bisa digunakan lagi.
+                                    <span className="font-semibold">Jangan tutup atau refresh halaman ini</span> sebelum tes selesai. Jawaban yang sudah diisi akan hilang dan tidak bisa dilanjutkan.
                                 </p>
                             </div>
                         </div>

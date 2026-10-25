@@ -95,9 +95,9 @@ export const MENU = {
     },
 
     pin_batch: {
-        name: "PIN Batch",
+        name: "Batch Skrining",
         icon: <LuKeyRound size={22} />,
-        path: "/pin-batch",
+        path: "/batch",
     },
 
     import_student: {
@@ -115,13 +115,13 @@ export const MENU = {
     batch_assigned: {
         name: "Batch Skrining",
         icon: <LuClipboardList size={22} />,
-        path: "/pin-batch",
+        path: "/batch",
     },
 
     admin_pin_batch: {
         name: "Monitoring Batch",
         icon: <LuKeyRound size={22} />,
-        path: "/admin/pin-batch",
+        path: "/admin/batch",
     },
 } as const satisfies Record<string, MenuItem>;
 

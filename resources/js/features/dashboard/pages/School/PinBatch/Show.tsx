@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
-import { LuUserCheck, LuLock, LuDownload } from "react-icons/lu";
+import { LuUserCheck, LuLock, LuDownload, LuLink, LuQrCode } from "react-icons/lu";
 import { IoIosArrowRoundBack } from "react-icons/io";
+import { toast } from "sonner";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import Button from "@/shared/components/ui/button/Button";
@@ -11,21 +12,23 @@ import Form from "@/shared/components/forms/Form";
 import { Modal } from "@/shared/components/ui/modal";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import ScreeningDetailModal from "../Subject/Components/modal/ScreeningModal";
-import PinListTable from "./Components/table/PinListTable";
-import PinRecapTable from "./Components/table/PinRecapTable";
-import { PinBatchShowPageProps } from "@/types/pin-batch";
+import ParticipantTable from "./Components/table/ParticipantTable";
+import ParticipantRecapTable from "./Components/table/ParticipantRecapTable";
+import { PinBatchShowPageProps as BatchShowPageProps } from "@/types/pin-batch";
 import { ScreeningResult } from "@/types/screening";
 
 import Decorative from "@assets/svg/bg-decoration-2.svg";
 
-type TabType = "pins" | "recap";
+type TabType = "participants" | "recap";
 
-export default function PinBatchShow() {
-    const { batch, pins, psychologists = [] } = usePage<PinBatchShowPageProps>().props;
+export default function BatchShow() {
+    const { batch, participants, psychologists = [], screening_url, qr_code_svg } =
+        usePage<BatchShowPageProps>().props;
 
-    const [tab, setTab]               = useState<TabType>("pins");
-    const [assignOpen, setAssignOpen]   = useState(false);
-    const [detailOpen, setDetailOpen]   = useState(false);
+    const [tab, setTab]           = useState<TabType>("participants");
+    const [assignOpen, setAssignOpen] = useState(false);
+    const [qrOpen, setQrOpen]     = useState(false);
+    const [detailOpen, setDetailOpen] = useState(false);
     const [selectedScreening, setSelectedScreening] = useState<ScreeningResult | null>(null);
 
     function handleViewScreening(screening: ScreeningResult) {
@@ -37,44 +40,46 @@ export default function PinBatchShow() {
         psychologist_id: batch.assigned_psychologist_id ?? "",
     });
 
-    const isClosed   = batch.status === "closed";
-    const isExpired  = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
-    const usedCount  = pins.filter((p) => p.used_at).length;
-    const doneCount  = pins.filter((p) => (p.screening as any)?.status === "Selesai Dievaluasi").length;
-    const totalCount = pins.length;
+    const isClosed  = batch.status === "closed";
+    const isExpired = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
 
-    const statusColor: "success" | "error" | "warning" | "dark" =
+    const testedCount = participants.filter((s) => s.batch_entries.length > 0).length;
+    const doneCount   = participants.filter((s) =>
+        s.batch_entries[0]?.screening?.status === "Selesai Dievaluasi"
+    ).length;
+    const totalCount  = participants.length;
+
+    const statusColor: "success" | "error" | "dark" =
         isClosed ? "dark" : isExpired ? "error" : "success";
     const statusLabel = isClosed ? "Ditutup" : isExpired ? "Kedaluwarsa" : "Aktif";
 
     async function handleClose() {
         const confirmed = await ConfirmationDialog({
             title: "Tutup Batch Ini?",
-            text: "Siswa tidak bisa lagi menggunakan PIN setelah batch ditutup.",
+            text: "Siswa tidak bisa lagi mengakses link tes setelah batch ditutup.",
             confirmButtonText: "Ya, Tutup",
             cancelButtonText: "Batal",
         });
         if (!confirmed) return;
-        router.patch(route("pin-batch.close", batch.id));
+        router.patch(route("batch.close", batch.id));
     }
 
     function handleAssign(e: React.FormEvent) {
         e.preventDefault();
-        post(route("pin-batch.assign", batch.id), {
+        post(route("batch.assign", batch.id), {
             onSuccess: () => { setAssignOpen(false); reset(); },
         });
     }
 
-    function handleRegenerate(pinId: string) {
-        if (!confirm("Regenerate PIN ini? PIN lama akan dihapus.")) return;
-        router.post(route("pin.regenerate", { batch: batch.id, pin: pinId }));
+    function handleCopyLink() {
+        navigator.clipboard.writeText(screening_url);
+        toast.success("Link tes berhasil disalin.");
     }
 
     return (
         <DashboardLayout title={batch.label}>
             <Head title={batch.label} />
 
-            {/* Modal Detail Screening */}
             <ScreeningDetailModal
                 isOpen={detailOpen}
                 onClose={() => { setDetailOpen(false); setSelectedScreening(null); }}
@@ -107,14 +112,39 @@ export default function PinBatchShow() {
                 </Form>
             </Modal>
 
+            {/* Modal QR Code */}
+            <Modal
+                isOpen={qrOpen}
+                onClose={() => setQrOpen(false)}
+                title="QR Code Tes"
+                subtitle="Tampilkan QR code ini agar siswa bisa scan dan langsung mengakses tes."
+                position="center"
+                className="max-w-sm"
+            >
+                <div className="flex flex-col items-center gap-4 p-6">
+                    <div
+                        className="w-48 h-48"
+                        dangerouslySetInnerHTML={{ __html: qr_code_svg }}
+                    />
+                    <p className="text-xs text-gray-500 text-center break-all">{screening_url}</p>
+                    <Button
+                        variant="outline"
+                        startIcon={<LuLink size={14} />}
+                        onClick={handleCopyLink}
+                        className="w-full"
+                    >
+                        Salin Link
+                    </Button>
+                </div>
+            </Modal>
+
             <div className="grid grid-cols-12 gap-4 md:gap-6">
                 <div className="col-span-12">
                     <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300 overflow-hidden">
                         <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
 
-                        {/* Header — back + judul + badge + assign button di kanan */}
                         <div className="flex items-center gap-3">
-                            <Link href={route("pin-batch.index")}>
+                            <Link href={route("batch.index")}>
                                 <Button size="icon" variant="outline">
                                     <IoIosArrowRoundBack size={24} />
                                 </Button>
@@ -124,7 +154,6 @@ export default function PinBatchShow() {
                             </h2>
                             <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                            {/* Assign Psikolog di kanan atas */}
                             {!isClosed && (
                                 <Button
                                     startIcon={<LuUserCheck size={14} />}
@@ -136,7 +165,7 @@ export default function PinBatchShow() {
                             )}
                         </div>
 
-                        {/* Batch info */}
+                        {/* Info batch */}
                         <div className="grid grid-cols-[140px_1fr] gap-y-3 mt-6 max-w-md">
                             <p className="text-sm text-netral-600">Kelas</p>
                             <p className="text-sm font-semibold text-netral-900">
@@ -148,53 +177,68 @@ export default function PinBatchShow() {
                                 {batch.instrument?.name ?? "-"}
                             </p>
 
-                            {batch.expires_at && <>
-                                <p className="text-sm text-netral-600">Kedaluwarsa</p>
-                                <p className={`text-sm font-semibold ${isExpired ? "text-red-600" : "text-netral-900"}`}>
-                                    {new Date(batch.expires_at).toLocaleString("id-ID")}
-                                </p>
-                            </>}
+                            {batch.expires_at && (
+                                <>
+                                    <p className="text-sm text-netral-600">Kedaluwarsa</p>
+                                    <p className={`text-sm font-semibold ${isExpired ? "text-red-600" : "text-netral-900"}`}>
+                                        {new Date(batch.expires_at).toLocaleString("id-ID")}
+                                    </p>
+                                </>
+                            )}
 
-                            <p className="text-sm text-netral-600">Progress PIN</p>
+                            <p className="text-sm text-netral-600">Progress Tes</p>
                             <div className="flex items-center gap-3">
                                 <div className="flex-1 h-2 rounded-full bg-netral-200">
                                     <div
                                         className="h-2 rounded-full bg-primary transition-all"
-                                        style={{ width: `${totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0}%` }}
+                                        style={{ width: `${totalCount > 0 ? Math.round((testedCount / totalCount) * 100) : 0}%` }}
                                     />
                                 </div>
-                                <span className="text-sm font-semibold text-netral-900 shrink-0">{usedCount}/{totalCount}</span>
+                                <span className="text-sm font-semibold text-netral-900 shrink-0">
+                                    {testedCount}/{totalCount}
+                                </span>
                             </div>
 
                             <p className="text-sm text-netral-600">Psikolog</p>
                             <p className="text-sm font-semibold text-netral-900">
-                                {batch.assigned_psychologist?.name ?? <span className="italic text-netral-500">Belum ditugaskan</span>}
+                                {batch.assigned_psychologist?.name ?? (
+                                    <span className="italic text-netral-500">Belum ditugaskan</span>
+                                )}
                             </p>
                         </div>
 
-                        {/* Actions — tutup + export */}
+                        {/* Actions */}
                         <div className="flex flex-wrap gap-2 mt-6">
                             {!isClosed && (
-                                <Button
-                                    variant="outline"
-                                    startIcon={<LuLock size={14} />}
-                                    onClick={handleClose}
-                                    className="border-red-300 text-red-600 hover:bg-red-50"
-                                >
-                                    Tutup Batch
-                                </Button>
+                                <>
+                                    <Button
+                                        startIcon={<LuQrCode size={14} />}
+                                        onClick={() => setQrOpen(true)}
+                                        size="sm"
+                                    >
+                                        QR Code &amp; Link
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        startIcon={<LuLock size={14} />}
+                                        onClick={handleClose}
+                                        className="border-red-300 text-red-600 hover:bg-red-50"
+                                    >
+                                        Tutup Batch
+                                    </Button>
+                                </>
                             )}
                             <Button
                                 variant="outline"
                                 startIcon={<LuDownload size={14} />}
-                                onClick={() => window.location.href = route("pin-batch.export", batch.id)}
+                                onClick={() => window.location.href = route("batch.export", batch.id)}
                             >
-                                Export PIN
+                                Export Peserta
                             </Button>
                             <Button
                                 variant="outline"
                                 startIcon={<LuDownload size={14} />}
-                                onClick={() => window.location.href = route("pin-batch.export-recap", batch.id)}
+                                onClick={() => window.location.href = route("batch.export-recap", batch.id)}
                             >
                                 Export Rekap
                             </Button>
@@ -202,7 +246,7 @@ export default function PinBatchShow() {
 
                         {/* Tabs */}
                         <div className="flex gap-1 mt-6 border-b border-netral-200">
-                            {(["pins", "recap"] as TabType[]).map((t) => (
+                            {(["participants", "recap"] as TabType[]).map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => setTab(t)}
@@ -212,31 +256,27 @@ export default function PinBatchShow() {
                                             : "border-transparent text-netral-500 hover:text-netral-700"
                                     }`}
                                 >
-                                    {t === "pins" ? `Daftar PIN (${totalCount})` : "Rekap Hasil"}
+                                    {t === "participants"
+                                        ? `Peserta (${totalCount})`
+                                        : "Rekap Hasil"}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Tab: Daftar PIN */}
-                        {tab === "pins" && (
+                        {tab === "participants" && (
                             <div className="mt-4">
-                                <PinListTable
-                                    pins={pins}
-                                    batchClosed={isClosed}
-                                    onRegenerate={handleRegenerate}
-                                />
+                                <ParticipantTable participants={participants} />
                             </div>
                         )}
 
-                        {/* Tab: Rekap */}
                         {tab === "recap" && (
                             <div className="mt-4 space-y-4">
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {[
-                                        { label: "Total Siswa",        value: totalCount,           color: "bg-blue-50   text-blue-600" },
-                                        { label: "Sudah Tes",          value: usedCount,             color: "bg-yellow-50 text-yellow-600" },
-                                        { label: "Menunggu Analisis",  value: usedCount - doneCount, color: "bg-orange-50 text-orange-600" },
-                                        { label: "Selesai Dianalisis", value: doneCount,             color: "bg-green-50  text-green-600" },
+                                        { label: "Total Siswa",        value: totalCount,              color: "bg-blue-50   text-blue-600" },
+                                        { label: "Sudah Tes",          value: testedCount,             color: "bg-yellow-50 text-yellow-600" },
+                                        { label: "Menunggu Analisis",  value: testedCount - doneCount, color: "bg-orange-50 text-orange-600" },
+                                        { label: "Selesai Dianalisis", value: doneCount,               color: "bg-green-50  text-green-600" },
                                     ].map((s) => (
                                         <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
                                             <p className="text-2xl font-bold">{s.value}</p>
@@ -248,21 +288,24 @@ export default function PinBatchShow() {
                                 <div className="rounded-xl border border-netral-200 bg-white p-4">
                                     <div className="mb-1 flex justify-between text-xs text-netral-500">
                                         <span>Progress analisis</span>
-                                        <span>{usedCount > 0 ? Math.round((doneCount / usedCount) * 100) : 0}%</span>
+                                        <span>{testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%</span>
                                     </div>
                                     <div className="h-2.5 w-full rounded-full bg-netral-200">
                                         <div
                                             className="h-2.5 rounded-full bg-primary transition-all duration-500"
-                                            style={{ width: `${usedCount > 0 ? Math.round((doneCount / usedCount) * 100) : 0}%` }}
+                                            style={{ width: `${testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%` }}
                                         />
                                     </div>
                                     <div className="mt-1 flex justify-between text-xs text-netral-400">
                                         <span>{doneCount} dianalisis</span>
-                                        <span>{usedCount} tes selesai dari {totalCount} siswa</span>
+                                        <span>{testedCount} tes selesai dari {totalCount} siswa</span>
                                     </div>
                                 </div>
 
-                                <PinRecapTable pins={pins} onView={handleViewScreening} />
+                                <ParticipantRecapTable
+                                    participants={participants}
+                                    onView={handleViewScreening}
+                                />
                             </div>
                         )}
                     </div>

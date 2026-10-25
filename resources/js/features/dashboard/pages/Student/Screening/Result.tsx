@@ -2,7 +2,6 @@ import { Head, usePage } from "@inertiajs/react";
 import {
     LuClipboardList,
     LuCalendar,
-    LuKeyRound,
     LuArrowLeft,
     LuCircleCheck,
     LuClock,
@@ -59,11 +58,6 @@ export default function StudentResult() {
                                 month: "long",
                                 year: "numeric",
                             })}
-                        />
-                        <InfoRow
-                            icon={<LuKeyRound size={16} />}
-                            label="Batch"
-                            value={screening.student_pin?.batch?.label ?? "-"}
                         />
 
                         {/* Status */}

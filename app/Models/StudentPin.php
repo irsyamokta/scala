@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $id
  * @property string $batch_id
  * @property string $subject_id
- * @property string $pin_code
  * @property \Carbon\Carbon|null $used_at
  * @property string|null $screening_id
  * @property \Carbon\Carbon $created_at
@@ -20,7 +19,7 @@ class StudentPin extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'student_pins';
+    protected $table = 'batch_entries';
 
     public $incrementing = false;
 
@@ -29,7 +28,6 @@ class StudentPin extends Model
     protected $fillable = [
         'batch_id',
         'subject_id',
-        'pin_code',
         'used_at',
         'screening_id',
     ];
@@ -43,7 +41,6 @@ class StudentPin extends Model
         return $this->belongsTo(PinBatch::class, 'batch_id', 'id');
     }
 
-    /** Data siswa (Subject) */
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'subject_id', 'id');

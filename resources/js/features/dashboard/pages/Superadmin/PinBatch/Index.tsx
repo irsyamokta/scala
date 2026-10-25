@@ -11,11 +11,11 @@ import {
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import InputField from "@/shared/components/forms/InputField";
 import Select from "@/shared/components/forms/Select";
-import { PinBatch, PaginatedResponse } from "@/types/pin-batch";
+import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
 import { PageProps } from "@/types";
 
 interface SuperadminBatchPageProps extends PageProps {
-    batches: PaginatedResponse<PinBatch>;
+    batches: PaginatedResponse<Batch>;
     stats: {
         total: number;
         active: number;
@@ -29,7 +29,7 @@ interface SuperadminBatchPageProps extends PageProps {
     };
 }
 
-export default function SuperadminPinBatchIndex() {
+export default function SuperadminBatchIndex() {
     const { batches, stats, filters } = usePage<SuperadminBatchPageProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? "");
@@ -37,7 +37,7 @@ export default function SuperadminPinBatchIndex() {
 
     function applyFilter() {
         router.get(
-            route("admin.pin-batch.index"),
+            route("admin.batch.index"),
             { search: search || undefined, status: status || undefined },
             { preserveState: true, replace: true }
         );
@@ -48,15 +48,15 @@ export default function SuperadminPinBatchIndex() {
     }
 
     return (
-        <DashboardLayout title="Semua PIN Batch">
-            <Head title="Semua PIN Batch" />
+        <DashboardLayout title="Semua Batch Skrining">
+            <Head title="Semua Batch Skrining" />
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
 
                 {/* Header */}
                 <div className="col-span-12">
                     <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-                        Semua PIN Batch
+                        Semua Batch Skrining
                     </h1>
                     <p className="text-sm text-gray-500 mt-0.5">
                         Monitoring seluruh batch skrining dari semua sekolah.
@@ -100,7 +100,7 @@ export default function SuperadminPinBatchIndex() {
                                 const v = String(val);
                                 setStatus(v);
                                 router.get(
-                                    route("admin.pin-batch.index"),
+                                    route("admin.batch.index"),
                                     { search: search || undefined, status: v || undefined },
                                     { preserveState: true, replace: true }
                                 );
@@ -174,9 +174,9 @@ export default function SuperadminPinBatchIndex() {
 
 /* ------------------------------------------------------------------ */
 
-function BatchRow({ batch }: { batch: PinBatch }) {
-    const used  = batch.used_pins_count ?? 0;
-    const total = batch.student_pins_count ?? 0;
+function BatchRow({ batch }: { batch: Batch }) {
+    const used  = batch.tested_count ?? 0;
+    const total = batch.total_subjects ?? 0;
     const pct   = total > 0 ? Math.round((used / total) * 100) : 0;
     const isClosed = batch.status === "closed";
 
@@ -234,7 +234,7 @@ function BatchRow({ batch }: { batch: PinBatch }) {
             </td>
             <td className="px-4 py-3">
                 <a
-                    href={route("pin-batch.show", batch.id)}
+                    href={route("batch.show", batch.id)}
                     className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                 >
                     Detail <LuChevronRight size={12} />

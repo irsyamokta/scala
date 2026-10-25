@@ -3,16 +3,16 @@ import { router } from "@inertiajs/react";
 import { LuPlus, LuKeyRound, LuTrash2 } from "react-icons/lu";
 
 import Button from "@/shared/components/ui/button/Button";
-import PinBatchTable from "../table/PinBatchTable";
-import { PinBatch, PaginatedResponse } from "@/types/pin-batch";
+import BatchTable from "../table/PinBatchTable";
+import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 
-interface PinBatchCardProps {
-    batches: PaginatedResponse<PinBatch>;
+interface BatchCardProps {
+    batches: PaginatedResponse<Batch>;
     onCreate: () => void;
 }
 
-export default function PinBatchCard({ batches, onCreate }: PinBatchCardProps) {
+export default function BatchCard({ batches, onCreate }: BatchCardProps) {
     const [selected, setSelected] = useState<string[]>([]);
 
     const allIds   = batches.data.map((b) => b.id);
@@ -32,13 +32,13 @@ export default function PinBatchCard({ batches, onCreate }: PinBatchCardProps) {
     async function handleDeleteSelected() {
         const confirmed = await ConfirmationDialog({
             title: `Hapus ${selected.length} Batch?`,
-            text: "Seluruh PIN dan data terkait akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.",
+            text: "Seluruh data terkait batch akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.",
             confirmButtonText: "Ya, Hapus",
             cancelButtonText: "Batal",
         });
         if (!confirmed) return;
 
-        router.delete(route("pin-batch.destroy-bulk"), {
+        router.delete(route("batch.destroy-bulk"), {
             data: { ids: selected },
             onSuccess: () => setSelected([]),
         });
@@ -50,9 +50,9 @@ export default function PinBatchCard({ batches, onCreate }: PinBatchCardProps) {
             {/* Header */}
             <div className="w-full flex flex-col md:flex-row items-start justify-between gap-4 mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-netral-900">PIN Batch</h2>
+                    <h2 className="text-lg font-semibold text-netral-900">Batch Skrining</h2>
                     <p className="text-sm text-netral-600 mt-1">
-                        Kelola batch PIN untuk tes skrining siswa per kelas.
+                        Kelola batch tes skrining siswa per kelas. Siswa mengakses tes via link unik dan QR code.
                     </p>
                 </div>
 
@@ -81,9 +81,9 @@ export default function PinBatchCard({ batches, onCreate }: PinBatchCardProps) {
 
             {/* Content */}
             {batches.data.length === 0 ? (
-                <PinBatchEmptyState onCreateClick={onCreate} />
+                <BatchEmptyState onCreateClick={onCreate} />
             ) : (
-                <PinBatchTable
+                <BatchTable
                     batches={batches}
                     selected={selected}
                     allChecked={allChecked}
@@ -95,7 +95,7 @@ export default function PinBatchCard({ batches, onCreate }: PinBatchCardProps) {
     );
 }
 
-function PinBatchEmptyState({ onCreateClick }: { onCreateClick: () => void }) {
+function BatchEmptyState({ onCreateClick }: { onCreateClick: () => void }) {
     const steps = [
         {
             number: "1",
@@ -106,15 +106,15 @@ function PinBatchEmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         },
         {
             number: "2",
-            title: "Buat PIN Batch",
-            desc: "Pilih kelas dan instrumen. PIN unik di-generate per siswa.",
+            title: "Buat Batch Skrining",
+            desc: "Pilih kelas dan instrumen. Link unik dan QR code di-generate otomatis.",
             action: onCreateClick,
             linkLabel: "Buat batch sekarang →",
         },
         {
             number: "3",
-            title: "Bagikan PIN",
-            desc: "Export daftar PIN dan bagikan ke siswa.",
+            title: "Bagikan Link / QR",
+            desc: "Tampilkan QR code atau bagikan link tes kepada siswa.",
         },
         {
             number: "4",
@@ -129,9 +129,9 @@ function PinBatchEmptyState({ onCreateClick }: { onCreateClick: () => void }) {
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4">
                     <LuKeyRound size={32} />
                 </div>
-                <h3 className="text-base font-semibold text-netral-800">Belum ada PIN Batch</h3>
+                <h3 className="text-base font-semibold text-netral-800">Belum ada Batch Skrining</h3>
                 <p className="mt-1.5 text-sm text-netral-500 max-w-sm">
-                    PIN Batch adalah cara mudah mengatur tes skrining massal.
+                    Batch Skrining adalah cara mudah mengatur tes skrining massal.
                     Ikuti langkah-langkah berikut untuk memulai.
                 </p>
             </div>

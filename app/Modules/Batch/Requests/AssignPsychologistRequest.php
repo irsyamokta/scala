@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Modules\PinBatch\Requests;
+namespace App\Modules\Batch\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AssignPsychologistRequest extends FormRequest
@@ -18,9 +19,8 @@ class AssignPsychologistRequest extends FormRequest
                 'required',
                 'uuid',
                 'exists:users,id',
-                // Pastikan user yang dipilih memang role psychologist
                 function ($attribute, $value, $fail) {
-                    $user = \App\Models\User::find($value);
+                    $user = User::find($value);
                     if (! $user || $user->role !== 'psychologist') {
                         $fail('User yang dipilih bukan psikolog.');
                     }

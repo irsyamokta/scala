@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Modules\PinBatch\Exports;
+namespace App\Modules\Batch\Exports;
 
 use App\Models\PinBatch;
+use App\Models\Subject;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,33 +13,41 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PinBatchExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
+class BatchExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
     public function __construct(private PinBatch $batch) {}
 
     public function title(): string
     {
-        return substr($this->batch->label, 0, 31); // Max 31 chars untuk sheet name
+        return substr($this->batch->label, 0, 31);
     }
 
     public function headings(): array
     {
-        return ['No', 'Nama Siswa', 'NIS', 'Kelas', 'PIN', 'Status'];
+        return ['No', 'Nama Siswa', 'NIS', 'Kelas', 'Status Tes'];
     }
 
     public function array(): array
     {
-        return $this->batch->studentPins()
-            ->with('subject:id,name,nis,class_id', 'subject.class:id,class_name')
+        $doneSubjectIds = $this->batch->entries()->pluck('subject_id');
+
+        $query = Subject::with('class:id,class_name')
+            ->where('owner_user_id', $this->batch->school_user_id)
+            ->where('is_self', false);
+
+        if ($this->batch->class_id) {
+            $query->where('class_id', $this->batch->class_id);
+        }
+
+        return $query->orderBy('name')
             ->get()
-            ->map(function ($pin, $i) {
+            ->map(function ($subject, $i) use ($doneSubjectIds) {
                 return [
                     $i + 1,
-                    $pin->subject?->name ?? '-',
-                    $pin->subject?->nis ?? '-',
-                    $pin->subject?->class?->class_name ?? '-',
-                    $pin->pin_code,
-                    $pin->used_at ? 'Terpakai' : 'Belum Dipakai',
+                    $subject->name,
+                    $subject->nis ?? '-',
+                    $subject->class?->class_name ?? '-',
+                    $doneSubjectIds->contains($subject->id) ? 'Sudah Tes' : 'Belum Tes',
                 ];
             })
             ->toArray();

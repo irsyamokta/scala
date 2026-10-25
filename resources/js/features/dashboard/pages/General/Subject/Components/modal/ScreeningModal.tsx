@@ -35,7 +35,7 @@ export default function ScreeningDetailModal({
 
     const rows = getScreeningDetailRows(screening);
     const category = getScreeningCategory(screening);
-    const sdqRanges = getSdqRanges(screening.instrument_type.type_name);
+    const sdqRanges = getSdqRanges(screening.instrument_type?.type_name ?? "");
 
     const psychologist =
         screening.sdq_result?.psychologist ??
@@ -72,25 +72,21 @@ export default function ScreeningDetailModal({
                             <div className="flex justify-between">
                                 <p className="text-netral-600">Nama</p>
                                 <p className="font-medium">
-                                    {screening.subject.name}
+                                    {screening.subject?.name ?? "-"}
                                 </p>
                             </div>
 
                             <div className="flex justify-between">
                                 <p className="text-netral-600">Instrumen</p>
                                 <p className="font-medium">
-                                    {screening.instrument.name}
+                                    {screening.instrument?.name ?? "-"}
                                 </p>
                             </div>
 
                             <div className="flex justify-between">
                                 <p className="text-netral-600">Tipe Instrumen</p>
                                 <p className="font-medium">
-                                    {
-                                        typeLabels[
-                                        screening.instrument_type.type_name
-                                        ]
-                                    }
+                                    {typeLabels[screening.instrument_type?.type_name ?? ""] ?? "-"}
                                 </p>
                             </div>
 

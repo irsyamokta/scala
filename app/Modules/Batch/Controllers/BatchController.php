@@ -1,24 +1,31 @@
 <?php
 
-namespace App\Modules\PinBatch\Controllers;
+namespace App\Modules\Batch\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Clazz;
 use App\Models\Instrument;
+use App\Models\PinBatch;
 use App\Models\User;
-use App\Modules\PinBatch\Exports\PinBatchExport;
-use App\Modules\PinBatch\Requests\AssignPsychologistRequest;
-use App\Modules\PinBatch\Requests\PinBatchRequest;
-use App\Modules\PinBatch\Services\PinBatchService;
+use App\Modules\Batch\Exports\BatchExport;
+use App\Modules\Batch\Exports\BatchRecapExport;
+use App\Modules\Batch\Requests\AssignPsychologistRequest;
+use App\Modules\Batch\Requests\BatchRequest;
+use App\Modules\Batch\Services\BatchService;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use DomainException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
-class PinBatchController extends Controller
+class BatchController extends Controller
 {
     public function __construct(
-        protected PinBatchService $service
+        protected BatchService $service
     ) {}
 
     public function index(Request $request)
@@ -36,7 +43,7 @@ class PinBatchController extends Controller
 
         $batches = $this->service->getBatchesForSchool($user->id, $perPage);
 
-        $classes = \App\Models\Clazz::where('school_user_id', $user->id)
+        $classes = Clazz::where('school_user_id', $user->id)
             ->select('id', 'class_name')
             ->get();
 
@@ -49,7 +56,7 @@ class PinBatchController extends Controller
         ]);
     }
 
-    public function store(PinBatchRequest $request)
+    public function store(BatchRequest $request)
     {
         try {
             $batch = $this->service->createBatch(
@@ -58,8 +65,8 @@ class PinBatchController extends Controller
             );
 
             return redirect()
-                ->route('pin-batch.show', $batch->id)
-                ->with('success', 'Batch PIN berhasil dibuat.');
+                ->route('batch.show', $batch->id)
+                ->with('success', 'Batch berhasil dibuat.');
         } catch (DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (Throwable $e) {
@@ -73,12 +80,15 @@ class PinBatchController extends Controller
     {
         $user = auth()->user();
         $batch = $this->service->getBatchDetail($id);
-        $pins = $this->service->getPinsForBatch($id);
+        $participants = $this->service->getParticipantsForBatch($id);
+
+        $screeningUrl = route('guest.screening.index', $batch->access_token);
+        $qrCodeSvg = $this->generateQrSvg($screeningUrl);
 
         if ($user->role === 'psychologist') {
             return Inertia::render('Dashboard/Psychologist/Batch/Show', [
                 'batch' => $batch,
-                'pins' => $pins,
+                'participants' => $participants,
             ]);
         }
 
@@ -88,8 +98,10 @@ class PinBatchController extends Controller
 
         return Inertia::render('Dashboard/School/PinBatch/Show', [
             'batch' => $batch,
-            'pins' => $pins,
+            'participants' => $participants,
             'psychologists' => $psychologists,
+            'screening_url' => $screeningUrl,
+            'qr_code_svg' => $qrCodeSvg,
         ]);
     }
 
@@ -127,28 +139,13 @@ class PinBatchController extends Controller
         }
     }
 
-    public function regeneratePin(string $batchId, string $pinId)
-    {
-        try {
-            $this->service->regeneratePin($batchId, $pinId, auth()->id());
-
-            return back()->with('success', 'PIN berhasil di-regenerate.');
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        } catch (Throwable $e) {
-            report($e);
-
-            return back()->with('error', 'Terjadi kesalahan sistem.');
-        }
-    }
-
     public function export(string $id)
     {
         try {
             $batch = $this->service->getBatchDetail($id);
-            $filename = 'pin-'.\Illuminate\Support\Str::slug($batch->label).'.xlsx';
+            $filename = 'peserta-'.\Illuminate\Support\Str::slug($batch->label).'.xlsx';
 
-            return Excel::download(new PinBatchExport($batch), $filename);
+            return Excel::download(new BatchExport($batch), $filename);
         } catch (Throwable $e) {
             report($e);
 
@@ -167,10 +164,7 @@ class PinBatchController extends Controller
 
             $filename = 'rekap-'.\Illuminate\Support\Str::slug($batch->label).'.xlsx';
 
-            return Excel::download(
-                new \App\Modules\PinBatch\Exports\PinBatchRecapExport($batch),
-                $filename
-            );
+            return Excel::download(new BatchRecapExport($batch), $filename);
         } catch (Throwable $e) {
             report($e);
 
@@ -189,7 +183,7 @@ class PinBatchController extends Controller
 
             $batch->delete();
 
-            return redirect()->route('pin-batch.index')
+            return redirect()->route('batch.index')
                 ->with('success', 'Batch berhasil dihapus.');
         } catch (Throwable $e) {
             report($e);
@@ -202,11 +196,11 @@ class PinBatchController extends Controller
     {
         $request->validate([
             'ids' => 'required|array|min:1',
-            'ids.*' => 'uuid|exists:pin_batches,id',
+            'ids.*' => 'uuid|exists:batches,id',
         ]);
 
         try {
-            $deleted = \App\Models\PinBatch::whereIn('id', $request->ids)
+            $deleted = PinBatch::whereIn('id', $request->ids)
                 ->where('school_user_id', auth()->id())
                 ->delete();
 
@@ -216,5 +210,15 @@ class PinBatchController extends Controller
 
             return back()->with('error', 'Terjadi kesalahan sistem.');
         }
+    }
+
+    private function generateQrSvg(string $url): string
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(200),
+            new SvgImageBackEnd
+        );
+
+        return (new Writer($renderer))->writeString($url);
     }
 }

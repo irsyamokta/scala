@@ -12,23 +12,23 @@ import Badge from "@/shared/components/ui/badge/Badge";
 import Pagination from "@/shared/components/ui/pagination/Pagination";
 import Checkbox from "@/shared/components/forms/Checkbox";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
-import { PinBatch, PaginatedResponse } from "@/types/pin-batch";
+import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
 
-interface PinBatchTableProps {
-    batches: PaginatedResponse<PinBatch>;
+interface BatchTableProps {
+    batches: PaginatedResponse<Batch>;
     selected: string[];
     allChecked: boolean;
     onToggleAll: () => void;
     onToggleOne: (id: string) => void;
 }
 
-export default function PinBatchTable({
+export default function BatchTable({
     batches,
     selected,
     allChecked,
     onToggleAll,
     onToggleOne,
-}: PinBatchTableProps) {
+}: BatchTableProps) {
     if (batches.data.length === 0) return null;
 
     return (
@@ -71,7 +71,7 @@ export default function PinBatchTable({
                 <Pagination
                     links={batches.links}
                     filters={{}}
-                    routeName="pin-batch.index"
+                    routeName="batch.index"
                 />
             )}
         </div>
@@ -83,14 +83,14 @@ function BatchItem({
     checked,
     onCheck,
 }: {
-    batch: PinBatch;
+    batch: Batch;
     checked: boolean;
     onCheck: () => void;
 }) {
     const isClosed   = batch.status === "closed";
     const isExpired  = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
-    const usedCount  = batch.used_pins_count ?? 0;
-    const totalCount = batch.student_pins_count ?? 0;
+    const usedCount  = batch.tested_count ?? 0;
+    const totalCount = batch.total_subjects ?? 0;
 
     const statusColor: "success" | "error" | "info" | "dark" =
         isClosed ? "dark"
@@ -109,13 +109,13 @@ function BatchItem({
 
         const confirmed = await ConfirmationDialog({
             title: "Hapus Batch Ini?",
-            text: `"${batch.label}" beserta seluruh PIN dan data terkait akan terhapus permanen.`,
+            text: `"${batch.label}" beserta seluruh data terkait akan terhapus permanen.`,
             confirmButtonText: "Ya, Hapus",
             cancelButtonText: "Batal",
         });
         if (!confirmed) return;
 
-        router.delete(route("pin-batch.destroy", batch.id));
+        router.delete(route("batch.destroy", batch.id));
     }
 
     return (
@@ -129,7 +129,7 @@ function BatchItem({
 
             {/* Icon */}
             <TableCell className="px-2 py-3 w-12">
-                <a href={route("pin-batch.show", batch.id)} className="flex no-underline">
+                <a href={route("batch.show", batch.id)} className="flex no-underline">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                         isClosed || isExpired ? "bg-netral-200 text-netral-400" : "bg-primary/10 text-primary"
                     }`}>
@@ -140,7 +140,7 @@ function BatchItem({
 
             {/* Info */}
             <TableCell className="px-4 py-3 w-full">
-                <a href={route("pin-batch.show", batch.id)} className="block no-underline">
+                <a href={route("batch.show", batch.id)} className="block no-underline">
                     <p className="font-semibold text-netral-900 truncate">{batch.label}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-netral-600">
                         <span className="flex items-center gap-1">
@@ -180,7 +180,7 @@ function BatchItem({
                         <LuTrash2 size={15} />
                     </button>
 
-                    <a href={route("pin-batch.show", batch.id)} className="no-underline">
+                    <a href={route("batch.show", batch.id)} className="no-underline">
                         <LuChevronRight size={16} className="text-netral-400" />
                     </a>
                 </div>

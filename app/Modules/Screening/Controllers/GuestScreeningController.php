@@ -5,8 +5,9 @@ namespace App\Modules\Screening\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\Screening;
-use App\Models\StudentPin;
 use App\Models\Subject;
+use App\Modules\Batch\Repositories\BatchEntryRepository;
+use App\Modules\Batch\Repositories\BatchRepository;
 use App\Modules\Screening\Repositories\AnswerRepository;
 use App\Modules\Screening\Repositories\InstrumentRepository;
 use App\Modules\Screening\Repositories\SdqResultRepository;
@@ -16,84 +17,85 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Throwable;
 
-/**
- * Alur skrining publik (guest) — siswa cukup input NIS + PIN.
- * Tidak perlu login/akun.
- */
 class GuestScreeningController extends Controller
 {
     public function __construct(
+        protected BatchRepository $batchRepo,
+        protected BatchEntryRepository $participantRepo,
         protected InstrumentRepository $instrumentRepo,
         protected AnswerRepository $answerRepo,
         protected SdqResultRepository $sdqRepo,
         protected SrqResultRepository $srqRepo
     ) {}
 
-    public function index()
+    public function index(string $token)
     {
-        return Inertia::render('Screening/Index');
+        $batch = $this->batchRepo->findByToken($token);
+
+        if (! $batch || ! $batch->isUsable()) {
+            return Inertia::render('Screening/Invalid');
+        }
+
+        return Inertia::render('Screening/Index', [
+            'batch' => [
+                'token' => $batch->access_token,
+                'label' => $batch->label,
+                'instrument' => $batch->instrument?->name,
+                'expires_at' => $batch->expires_at?->toISOString(),
+            ],
+        ]);
     }
 
-    public function enter(Request $request)
+    public function enter(Request $request, string $token)
     {
         $request->validate([
             'nis' => 'required|string|max:20',
-            'pin_code' => 'required|string|size:8',
+            'tanggal_lahir' => 'required|date_format:Y-m-d',
         ], [
             'nis.required' => 'NIS wajib diisi.',
-            'pin_code.required' => 'PIN wajib diisi.',
-            'pin_code.size' => 'PIN harus 8 karakter.',
+            'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+            'tanggal_lahir.date_format' => 'Format tanggal lahir tidak valid.',
         ]);
 
         try {
-            $pinCode = strtoupper(trim($request->pin_code));
-            $nis = trim($request->nis);
+            $batch = $this->batchRepo->findByToken($token);
 
-            $subject = Subject::where('nis', $nis)->first();
+            if (! $batch) {
+                return back()->withErrors(['nis' => 'Link tes tidak valid.']);
+            }
+
+            if (! $batch->isUsable()) {
+                return back()->withErrors(['nis' => 'Sesi tes ini sudah ditutup atau kedaluwarsa.']);
+            }
+
+            $subject = $this->resolveSubject($request->nis, $request->tanggal_lahir, $batch);
 
             if (! $subject) {
                 return back()->withErrors([
-                    'nis' => 'NIS tidak ditemukan. Pastikan NIS Anda benar.',
+                    'nis' => 'NIS atau tanggal lahir tidak cocok. Pastikan data Anda sesuai dengan yang didaftarkan.',
                 ]);
             }
 
-            $pin = StudentPin::with('batch.instrument')
-                ->where('pin_code', $pinCode)
-                ->where('subject_id', $subject->id)
-                ->first();
-
-            if (! $pin) {
+            if ($this->participantRepo->findByBatchAndSubject($batch->id, $subject->id)) {
                 return back()->withErrors([
-                    'pin_code' => 'PIN tidak valid atau bukan milik NIS ini.',
+                    'nis' => 'Anda sudah pernah mengikuti tes ini.',
                 ]);
             }
 
-            if ($pin->isUsed()) {
-                return back()->withErrors([
-                    'pin_code' => 'PIN ini sudah pernah digunakan.',
-                ]);
-            }
+            $instrument = $batch->instrument;
 
-            if (! $pin->batch || $pin->batch->status === 'closed') {
+            if ($instrument->name === 'SDQ' && $subject->age > 17) {
                 return back()->withErrors([
-                    'pin_code' => 'Batch PIN ini sudah ditutup oleh Guru BK.',
-                ]);
-            }
-
-            if ($pin->batch->isExpired()) {
-                $exp = $pin->batch->expires_at->translatedFormat('d F Y, H:i');
-
-                return back()->withErrors([
-                    'pin_code' => "PIN ini sudah kedaluwarsa sejak {$exp}.",
+                    'nis' => 'Instrumen SDQ hanya untuk siswa berusia 17 tahun ke bawah.',
                 ]);
             }
 
             session([
-                'guest_pin_id' => $pin->id,
+                'guest_batch_id' => $batch->id,
                 'guest_subject_id' => $subject->id,
             ]);
 
-            return redirect()->route('guest.screening.form');
+            return redirect()->route('guest.screening.form', $token);
 
         } catch (Throwable $e) {
             report($e);
@@ -102,43 +104,49 @@ class GuestScreeningController extends Controller
         }
     }
 
-    public function form()
+    public function form(string $token)
     {
-        $pinId = session('guest_pin_id');
+        $batchId = session('guest_batch_id');
         $subjectId = session('guest_subject_id');
 
-        if (! $pinId || ! $subjectId) {
-            return redirect()->route('guest.screening.index')
-                ->with('error', 'Sesi tidak valid. Silakan masukkan NIS dan PIN kembali.');
+        if (! $batchId || ! $subjectId) {
+            return redirect()->route('guest.screening.index', $token)
+                ->with('error', 'Sesi tidak valid. Silakan masukkan NIS dan tanggal lahir kembali.');
         }
 
         try {
-            $pin = StudentPin::with('batch.instrument')->findOrFail($pinId);
-            $subject = Subject::findOrFail($subjectId);
+            $batch = $this->batchRepo->findByToken($token);
 
-            if ($pin->isUsed()) {
-                session()->forget(['guest_pin_id', 'guest_subject_id']);
+            if (! $batch || $batch->id !== $batchId) {
+                session()->forget(['guest_batch_id', 'guest_subject_id']);
 
-                return redirect()->route('guest.screening.index')
-                    ->with('error', 'PIN ini sudah pernah digunakan.');
+                return redirect()->route('guest.screening.index', $token)
+                    ->with('error', 'Sesi tidak valid.');
             }
 
-            $instrument = $pin->batch->instrument;
+            if (! $batch->isUsable()) {
+                session()->forget(['guest_batch_id', 'guest_subject_id']);
+
+                return Inertia::render('Screening/Invalid');
+            }
+
+            $subject = Subject::findOrFail($subjectId);
+            $instrument = $batch->instrument;
             $typeName = 'youth_self_report';
 
             $type = $this->instrumentRepo->findTypeByName($instrument->id, $typeName);
 
             if ($subject->age < $type->min_age || $subject->age > $type->max_age) {
-                session()->forget(['guest_pin_id', 'guest_subject_id']);
+                session()->forget(['guest_batch_id', 'guest_subject_id']);
 
-                return redirect()->route('guest.screening.index')
+                return redirect()->route('guest.screening.index', $token)
                     ->with('error', 'Usia tidak sesuai dengan instrumen tes.');
             }
 
             $questions = $this->instrumentRepo->getQuestions($type->id);
 
             return Inertia::render('Screening/Test', [
-                'pin' => ['id' => $pin->id, 'pin_code' => $pin->pin_code],
+                'batch' => ['id' => $batch->id, 'token' => $batch->access_token],
                 'subject' => ['id' => $subject->id, 'name' => $subject->name],
                 'instrument' => $instrument,
                 'instrument_type' => $type,
@@ -148,41 +156,45 @@ class GuestScreeningController extends Controller
         } catch (Throwable $e) {
             report($e);
 
-            return redirect()->route('guest.screening.index')
+            return redirect()->route('guest.screening.index', $token)
                 ->with('error', 'Terjadi kesalahan. Silakan coba lagi.');
         }
     }
 
-    public function submit(Request $request)
+    public function submit(Request $request, string $token)
     {
         $request->validate([
-            'pin_id' => 'required|uuid|exists:student_pins,id',
+            'batch_id' => 'required|uuid|exists:batches,id',
             'answers' => 'required|array|min:1',
             'answers.*.question_id' => 'required|uuid|exists:questions,id',
             'answers.*.score' => 'required|integer|min:0|max:2',
         ]);
 
-        $pinId = session('guest_pin_id');
+        $batchId = session('guest_batch_id');
         $subjectId = session('guest_subject_id');
 
-        if ($pinId !== $request->pin_id) {
+        if ($batchId !== $request->batch_id) {
             return back()->with('error', 'Sesi tidak valid. Silakan mulai ulang.');
         }
 
         try {
-            $pin = StudentPin::with('batch.instrument')->findOrFail($pinId);
-            $subject = Subject::findOrFail($subjectId);
+            $batch = $this->batchRepo->findByToken($token);
 
-            if ($pin->isUsed()) {
-                return back()->with('error', 'PIN ini sudah pernah digunakan.');
+            if (! $batch || ! $batch->isUsable()) {
+                return back()->with('error', 'Sesi tes ini sudah ditutup atau kedaluwarsa.');
             }
 
-            $instrument = $pin->batch->instrument;
+            $subject = Subject::findOrFail($subjectId);
+
+            if ($this->participantRepo->findByBatchAndSubject($batch->id, $subject->id)) {
+                return back()->with('error', 'Anda sudah pernah mengikuti tes ini.');
+            }
+
+            $instrument = $batch->instrument;
             $typeName = 'youth_self_report';
             $type = $this->instrumentRepo->findTypeByName($instrument->id, $typeName);
 
-            DB::transaction(function () use ($request, $pin, $subject, $instrument, $type, $typeName) {
-
+            DB::transaction(function () use ($request, $batch, $subject, $instrument, $type, $typeName) {
                 $questionIds = collect($request->answers)->pluck('question_id');
                 $questionMap = Question::whereIn('id', $questionIds)
                     ->pluck('question_number', 'id');
@@ -192,7 +204,6 @@ class GuestScreeningController extends Controller
                     'reporter_user_id' => $subject->owner_user_id,
                     'instrument_id' => $instrument->id,
                     'type_id' => $type->id,
-                    'pin_id' => $pin->id,
                     'date_taken' => now(),
                     'status' => 'Menunggu Evaluasi',
                 ]);
@@ -209,15 +220,12 @@ class GuestScreeningController extends Controller
                     $this->calculateSDQ($screening->id, $answers, $typeName, $questionMap);
                 }
 
-                $pin->update([
-                    'used_at' => now(),
-                    'screening_id' => $screening->id,
-                ]);
+                $this->participantRepo->markUsed($batch->id, $subject->id, $screening->id);
             });
 
-            session()->forget(['guest_pin_id', 'guest_subject_id']);
+            session()->forget(['guest_batch_id', 'guest_subject_id']);
 
-            return redirect()->route('guest.screening.done');
+            return redirect()->route('guest.screening.done', $token);
 
         } catch (Throwable $e) {
             report($e);
@@ -226,9 +234,26 @@ class GuestScreeningController extends Controller
         }
     }
 
-    public function done()
+    public function done(string $token)
     {
         return Inertia::render('Screening/Done');
+    }
+
+    /**
+     * Untuk batch lintas kelas (class_id null), cari di semua kelas milik sekolah.
+     */
+    private function resolveSubject(string $nis, string $tanggalLahir, $batch): ?Subject
+    {
+        $query = Subject::where('nis', $nis)
+            ->where('tanggal_lahir', $tanggalLahir)
+            ->where('owner_user_id', $batch->school_user_id)
+            ->where('is_self', false);
+
+        if ($batch->class_id) {
+            $query->where('class_id', $batch->class_id);
+        }
+
+        return $query->first();
     }
 
     private function calculateSDQ(string $screeningId, array $answers, string $type, $questionMap): void

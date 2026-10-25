@@ -3,7 +3,6 @@
 namespace App\Modules\Screening\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Screening\Requests\PinScreeningRequest;
 use App\Modules\Screening\Requests\ScreeningRequest;
 use App\Modules\Screening\Services\ScreeningService;
 use App\Modules\Subject\Services\ClassService;
@@ -194,69 +193,6 @@ class ScreeningController extends Controller
                 'error',
                 'Terjadi kesalahan sistem'
             );
-        }
-    }
-
-    public function validatePin(Request $request)
-    {
-        $request->validate([
-            'pin_code' => 'required|string|size:8',
-        ], [
-            'pin_code.required' => 'PIN wajib diisi.',
-            'pin_code.size' => 'PIN harus 8 karakter.',
-        ]);
-
-        try {
-            $pin = $this->service->validatePin(
-                $request->pin_code,
-                auth()->id()
-            );
-
-            return redirect()->route('screening.pin.form', $pin->pin_code);
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        } catch (Throwable $e) {
-            report($e);
-
-            return back()->with('error', 'Terjadi kesalahan sistem.');
-        }
-    }
-
-    public function formByPin(string $pinCode)
-    {
-        try {
-            $data = $this->service->getScreeningFormByPin(
-                $pinCode,
-                auth()->id()
-            );
-
-            return Inertia::render('Dashboard/Student/Screening/Test', $data);
-        } catch (DomainException $e) {
-            return redirect()->route('student.dashboard')
-                ->with('error', $e->getMessage());
-        } catch (Throwable $e) {
-            report($e);
-
-            return redirect()->route('student.dashboard')
-                ->with('error', 'Terjadi kesalahan sistem.');
-        }
-    }
-
-    public function submitByPin(PinScreeningRequest $request, string $pinCode)
-    {
-        try {
-            $data = array_merge($request->validated(), ['pin_code' => $pinCode]);
-
-            $screening = $this->service->submitByPin($data, auth()->id());
-
-            return redirect()->route('student.screening.result', $screening->id)
-                ->with('success', 'Tes selesai! Hasil sedang dianalisis.');
-        } catch (DomainException $e) {
-            return back()->with('error', $e->getMessage());
-        } catch (Throwable $e) {
-            report($e);
-
-            return back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
 }

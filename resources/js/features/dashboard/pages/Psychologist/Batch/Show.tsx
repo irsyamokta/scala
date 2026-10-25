@@ -10,29 +10,27 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { PinBatchShowPageProps, StudentPin } from "@/types/pin-batch";
+import { PinBatchShowPageProps as BatchShowPageProps, BatchSubject, BatchParticipant } from "@/types/pin-batch";
 import { ScreeningResult } from "@/types/screening";
 import ScreeningDetailModal from "../Screening/Components/modal/ScreeningModal";
 
 export default function PsychologistBatchShow() {
-    const { batch, pins } = usePage<PinBatchShowPageProps>().props;
+    const { batch, participants } = usePage<BatchShowPageProps>().props;
 
     const [modalOpen, setModalOpen] = useState(false);
     const [selected, setSelected] = useState<ScreeningResult | null>(null);
 
-    const usedCount  = pins.filter((p) => p.used_at).length;
-    const doneCount  = pins.filter(
-        (p) => p.screening?.status === "Selesai Dievaluasi"
+    const testedCount = participants.filter((s) => s.batch_entries.length > 0).length;
+    const doneCount   = participants.filter(
+        (s) => s.batch_entries[0]?.screening?.status === "Selesai Dievaluasi"
     ).length;
 
-    function handleView(pin: StudentPin) {
-        if (!pin.screening) return;
-        // Build a ScreeningResult shape dari data pin.screening
-        // Psikolog butuh full screening data — kita fetch via route show
-        // Untuk saat ini, buka halaman detail screening
+    function handleView(subject: BatchSubject) {
+        const record = subject.batch_entries[0];
+        if (!record?.screening_id) return;
         window.location.href = route("screening.batch.screening", {
             batch: batch.id,
-            screening: pin.screening.id,
+            screening: record.screening_id,
         });
     }
 
@@ -48,10 +46,9 @@ export default function PsychologistBatchShow() {
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
 
-                {/* Breadcrumb */}
                 <div className="col-span-12 flex items-center gap-3">
                     <a
-                        href={route("pin-batch.index")}
+                        href={route("batch.index")}
                         className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition hover:text-primary"
                     >
                         <LuArrowLeft size={15} />
@@ -63,7 +60,6 @@ export default function PsychologistBatchShow() {
                     </span>
                 </div>
 
-                {/* Summary */}
                 <div className="col-span-12 md:col-span-4">
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 space-y-4">
                         <h2 className="font-bold text-gray-800 dark:text-white">{batch.label}</h2>
@@ -71,7 +67,7 @@ export default function PsychologistBatchShow() {
                         <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                             <p className="flex items-center gap-2">
                                 <LuUsers size={14} className="text-gray-400" />
-                                Kelas: <strong>{batch.class?.class_name ?? "-"}</strong>
+                                Kelas: <strong>{batch.class?.class_name ?? "Semua Kelas"}</strong>
                             </p>
                             <p className="flex items-center gap-2">
                                 <LuKeyRound size={14} className="text-gray-400" />
@@ -83,24 +79,22 @@ export default function PsychologistBatchShow() {
                             </p>
                         </div>
 
-                        {/* Stats */}
                         <div className="grid grid-cols-3 gap-2 pt-2">
-                            <StatChip label="Total PIN" value={pins.length} color="blue" />
-                            <StatChip label="Tes Selesai" value={usedCount} color="yellow" />
+                            <StatChip label="Total Siswa" value={participants.length} color="blue" />
+                            <StatChip label="Sudah Tes" value={testedCount} color="yellow" />
                             <StatChip label="Dianalisis" value={doneCount} color="green" />
                         </div>
 
-                        {/* Progress */}
                         <div>
                             <div className="mb-1 flex justify-between text-xs text-gray-500">
                                 <span>Progress analisis</span>
-                                <span>{usedCount > 0 ? Math.round((doneCount / usedCount) * 100) : 0}%</span>
+                                <span>{testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%</span>
                             </div>
                             <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                                 <div
                                     className="h-2 rounded-full bg-primary transition-all"
                                     style={{
-                                        width: `${usedCount > 0 ? Math.round((doneCount / usedCount) * 100) : 0}%`,
+                                        width: `${testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%`,
                                     }}
                                 />
                             </div>
@@ -108,13 +102,12 @@ export default function PsychologistBatchShow() {
                     </div>
                 </div>
 
-                {/* Screening list */}
                 <div className="col-span-12 md:col-span-8">
                     <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 overflow-hidden">
                         <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-700">
                             <LuClipboardList size={16} className="text-gray-400" />
                             <h3 className="font-semibold text-gray-800 dark:text-white">
-                                Daftar Screening ({usedCount} tes selesai)
+                                Daftar Peserta ({testedCount} tes selesai)
                             </h3>
                         </div>
 
@@ -129,11 +122,11 @@ export default function PsychologistBatchShow() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {pins.map((pin) => (
-                                        <PinScreeningRow
-                                            key={pin.id}
-                                            pin={pin}
-                                            onAnalyze={() => handleView(pin)}
+                                    {participants.map((subject) => (
+                                        <ParticipantRow
+                                            key={subject.id}
+                                            subject={subject}
+                                            onAnalyze={() => handleView(subject)}
                                         />
                                     ))}
                                 </tbody>
@@ -147,29 +140,26 @@ export default function PsychologistBatchShow() {
     );
 }
 
-/* ------------------------------------------------------------------ */
-
-function PinScreeningRow({
-    pin,
+function ParticipantRow({
+    subject,
     onAnalyze,
 }: {
-    pin: StudentPin;
+    subject: BatchSubject;
     onAnalyze: () => void;
 }) {
-    const isUsed    = !!pin.used_at;
-    const isDone    = pin.screening?.status === "Selesai Dievaluasi";
-    const isPending = isUsed && !isDone;
+    const record    = subject.batch_entries[0] as BatchParticipant | undefined;
+    const hasTested = !!record;
+    const isDone    = record?.screening?.status === "Selesai Dievaluasi";
+    const isPending = hasTested && !isDone;
 
     return (
         <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
             <td className="px-4 py-3">
-                <p className="font-medium text-gray-800 dark:text-white">
-                    {pin.subject?.name ?? "-"}
-                </p>
-                {pin.subject?.nis && <p className="text-xs text-gray-400">NIS: {pin.subject.nis}</p>}
+                <p className="font-medium text-gray-800 dark:text-white">{subject.name}</p>
+                {subject.nis && <p className="text-xs text-gray-400">NIS: {subject.nis}</p>}
             </td>
             <td className="px-4 py-3">
-                {!isUsed && (
+                {!hasTested && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
                         Belum Tes
                     </span>
@@ -188,45 +178,30 @@ function PinScreeningRow({
                 )}
             </td>
             <td className="px-4 py-3 text-xs text-gray-500">
-                {pin.screening?.date_taken
-                    ? new Date(pin.screening.date_taken).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                      })
+                {record?.screening?.date_taken
+                    ? new Date(record.screening.date_taken).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                    })
                     : "-"}
             </td>
             <td className="px-4 py-3">
-                {isUsed && (
-                    <a
-                        href={route("screening.batch.screening", {
-                            batch: pin.batch_id,
-                            screening: pin.screening?.id,
-                        })}
+                {hasTested && (
+                    <button
+                        onClick={onAnalyze}
                         className="inline-flex items-center gap-1 rounded-lg border border-primary px-3 py-1.5 text-xs font-medium text-primary transition hover:bg-primary hover:text-white"
                     >
                         {isDone ? "Lihat Analisis" : "Analisis"}
-                    </a>
+                    </button>
                 )}
             </td>
         </tr>
     );
 }
 
-function StatChip({
-    label,
-    value,
-    color,
-}: {
-    label: string;
-    value: number;
-    color: "blue" | "yellow" | "green";
-}) {
-    const bg = {
-        blue:   "bg-blue-50 text-blue-700",
-        yellow: "bg-yellow-50 text-yellow-700",
-        green:  "bg-green-50 text-green-700",
-    };
+function StatChip({ label, value, color }: { label: string; value: number; color: "blue" | "yellow" | "green" }) {
+    const bg = { blue: "bg-blue-50 text-blue-700", yellow: "bg-yellow-50 text-yellow-700", green: "bg-green-50 text-green-700" };
     return (
         <div className={`rounded-xl p-2 text-center ${bg[color]}`}>
             <p className="text-lg font-bold">{value}</p>

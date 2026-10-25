@@ -77,7 +77,7 @@ class Screening extends Model
         return $this->hasOne(SrqResult::class, 'screening_id', 'id');
     }
 
-    public function studentPin()
+    public function batchEntry()
     {
         return $this->belongsTo(StudentPin::class, 'pin_id', 'id');
     }

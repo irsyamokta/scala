@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $instrument_id
  * @property string|null $assigned_psychologist_id
  * @property string $label
+ * @property string $access_token
  * @property string $status active|closed
  * @property \Carbon\Carbon|null $expires_at
  * @property \Carbon\Carbon $created_at
@@ -22,7 +23,7 @@ class PinBatch extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'pin_batches';
+    protected $table = 'batches';
 
     public $incrementing = false;
 
@@ -34,6 +35,7 @@ class PinBatch extends Model
         'instrument_id',
         'assigned_psychologist_id',
         'label',
+        'access_token',
         'status',
         'expires_at',
     ];
@@ -62,7 +64,7 @@ class PinBatch extends Model
         return $this->belongsTo(User::class, 'assigned_psychologist_id', 'id');
     }
 
-    public function studentPins()
+    public function entries()
     {
         return $this->hasMany(StudentPin::class, 'batch_id', 'id');
     }

@@ -65,7 +65,7 @@ class Subject extends Model
         return $this->hasMany(Screening::class, 'subject_id', 'id');
     }
 
-    public function studentPins()
+    public function batchEntries()
     {
         return $this->hasMany(StudentPin::class, 'subject_id', 'id');
     }

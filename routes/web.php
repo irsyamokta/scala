@@ -20,7 +20,7 @@ Route::prefix('srq-test')->group(function () {
     Route::get('/hasil', fn () => Inertia::render('Trial/TestResult'));
 });
 
-Route::prefix('skrining')->group(function () {
+Route::prefix('skrining/{token}')->group(function () {
     Route::get('/', [GuestScreeningController::class, 'index'])
         ->name('guest.screening.index');
 
@@ -45,6 +45,6 @@ require __DIR__.'/instrument.php';
 require __DIR__.'/screening.php';
 require __DIR__.'/subject.php';
 require __DIR__.'/class.php';
-require __DIR__.'/pin_batch.php';
+require __DIR__.'/batch.php';
 require __DIR__.'/student_import.php';
 require __DIR__.'/auth.php';

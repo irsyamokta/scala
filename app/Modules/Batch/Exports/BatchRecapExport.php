@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\PinBatch\Exports;
+namespace App\Modules\Batch\Exports;
 
 use App\Models\PinBatch;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PinBatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
+class BatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
     public function __construct(private PinBatch $batch) {}
 
@@ -24,24 +24,15 @@ class PinBatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, Wi
     public function headings(): array
     {
         return [
-            'No',
-            'Nama Siswa',
-            'NIS',
-            'Jenis Kelamin',
-            'Kelas',
-            'Tanggal Tes',
-            'Emotional Symptoms',
-            'Conduct Problems',
-            'Hyperactivity',
-            'Peer Problems',
-            'Prosocial Behavior',
-            'Hasil Akhir',
+            'No', 'Nama Siswa', 'NIS', 'Jenis Kelamin', 'Kelas', 'Tanggal Tes',
+            'Emotional Symptoms', 'Conduct Problems', 'Hyperactivity',
+            'Peer Problems', 'Prosocial Behavior', 'Hasil Akhir',
         ];
     }
 
     public function array(): array
     {
-        $pins = $this->batch->studentPins()
+        $entries = $this->batch->entries()
             ->with([
                 'subject:id,name,nis,gender,class_id',
                 'subject.class:id,class_name',
@@ -50,9 +41,9 @@ class PinBatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, Wi
             ])
             ->get();
 
-        return $pins->map(function ($pin, $i) {
-            $subject = $pin->subject;
-            $screening = $pin->screening;
+        return $entries->map(function ($entry, $i) {
+            $subject = $entry->subject;
+            $screening = $entry->screening;
             $sdq = $screening?->sdqResult;
 
             $gender = match ($subject?->gender) {
@@ -67,10 +58,7 @@ class PinBatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, Wi
                 $subject?->nis ?? '-',
                 $gender,
                 $subject?->class?->class_name ?? '-',
-                $screening?->date_taken
-                    ? $screening->date_taken->format('d/m/Y')
-                    : 'Belum tes',
-                // Gunakan null coalescing dengan 0 sebagai fallback, bukan '-'
+                $screening?->date_taken ? $screening->date_taken->format('d/m/Y') : 'Belum tes',
                 $sdq !== null ? (int) $sdq->emotional_score : '-',
                 $sdq !== null ? (int) $sdq->conduct_score : '-',
                 $sdq !== null ? (int) $sdq->hyperactivity_score : '-',

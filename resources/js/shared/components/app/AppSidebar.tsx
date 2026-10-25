@@ -28,7 +28,7 @@ type AppSidebarProps = {
 /** Tentukan apakah menu item tertentu perlu badge notifikasi */
 function resolveNotifCount(itemPath: string | undefined, notifications: any): number {
     if (!itemPath || !notifications) return 0;
-    if (itemPath === "/pin-batch") {
+    if (itemPath === "/batch") {
         const count = (notifications.pending_analysis ?? 0) + (notifications.batch_unassigned ?? 0);
         return count > 0 ? count : 0;
     }

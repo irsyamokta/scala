@@ -109,8 +109,7 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('is_self', false);
     }
 
-    // Relasi khusus role school: Batch PIN yang dibuat Guru BK
-    public function pinBatches()
+    public function batches()
     {
         return $this->hasMany(PinBatch::class, 'school_user_id', 'id');
     }
