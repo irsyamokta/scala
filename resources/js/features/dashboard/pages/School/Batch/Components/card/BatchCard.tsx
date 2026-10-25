@@ -3,8 +3,8 @@ import { router } from "@inertiajs/react";
 import { LuPlus, LuKeyRound, LuTrash2 } from "react-icons/lu";
 
 import Button from "@/shared/components/ui/button/Button";
-import BatchTable from "../table/PinBatchTable";
-import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
+import BatchTable from "../table/BatchTable";
+import { Batch, PaginatedResponse } from "@/types/batch";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 
 interface BatchCardProps {

@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class UserSeeder extends Seeder
 {
@@ -17,10 +16,10 @@ class UserSeeder extends Seeder
         $superadmin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name'                    => 'Administrator',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'superadmin',
+                'name' => 'Administrator',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'superadmin',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -34,10 +33,10 @@ class UserSeeder extends Seeder
         $parent = User::updateOrCreate(
             ['email' => 'parent@example.com'],
             [
-                'name'                    => 'Sarinah',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'parent',
+                'name' => 'Sarinah',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'parent',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -47,10 +46,10 @@ class UserSeeder extends Seeder
         $school = User::updateOrCreate(
             ['email' => 'school@example.com'],
             [
-                'name'                    => 'Ahmad',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'school',
+                'name' => 'Ahmad',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'school',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -60,10 +59,10 @@ class UserSeeder extends Seeder
         $general = User::updateOrCreate(
             ['email' => 'general@example.com'],
             [
-                'name'                    => 'Hasbi',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'general',
+                'name' => 'Hasbi',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'general',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -73,10 +72,10 @@ class UserSeeder extends Seeder
         $psychologist = User::updateOrCreate(
             ['email' => 'psychologist@example.com'],
             [
-                'name'                    => 'Lina',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'psychologist',
+                'name' => 'Lina',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'psychologist',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -86,10 +85,10 @@ class UserSeeder extends Seeder
         $student = User::updateOrCreate(
             ['email' => 'student@example.com'],
             [
-                'name'                    => 'Budi Santoso',
-                'password'                => Hash::make('Password123!'),
-                'email_verified_at'       => now(),
-                'role'                    => 'student',
+                'name' => 'Budi Santoso',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'role' => 'student',
                 // Siswa tidak melewati onboarding biasa; langsung di-set completed
                 'onboarding_completed_at' => now(),
             ]

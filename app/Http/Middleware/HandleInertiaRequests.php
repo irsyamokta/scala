@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Batch;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -33,7 +34,7 @@ class HandleInertiaRequests extends Middleware
 
         $psychologistNotif = null;
         if ($user && $user->role === 'psychologist') {
-            $psychologistNotif = \App\Models\PinBatch::where('assigned_psychologist_id', $user->id)
+            $psychologistNotif = Batch::where('assigned_psychologist_id', $user->id)
                 ->whereHas('entries', fn ($q) => $q->whereNotNull('used_at'))
                 ->whereHas('entries.screening', fn ($q) => $q->where('status', 'Menunggu Evaluasi'))
                 ->count();

@@ -8,7 +8,7 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { StudentResultPageProps } from "@/types/pin-batch";
+import { StudentResultPageProps } from "@/types/batch";
 
 export default function StudentResult() {
     const { screening } = usePage<StudentResultPageProps>().props;

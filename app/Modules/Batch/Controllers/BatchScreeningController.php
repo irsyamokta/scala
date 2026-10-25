@@ -3,7 +3,7 @@
 namespace App\Modules\Batch\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\PinBatch;
+use App\Models\Batch;
 use App\Models\Screening;
 use Inertia\Inertia;
 
@@ -13,7 +13,7 @@ class BatchScreeningController extends Controller
     {
         $user = auth()->user();
 
-        $batch = PinBatch::where('id', $batchId)
+        $batch = Batch::where('id', $batchId)
             ->where('assigned_psychologist_id', $user->id)
             ->firstOrFail();
 

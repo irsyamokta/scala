@@ -10,7 +10,7 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { PinBatchShowPageProps as BatchShowPageProps, BatchSubject, BatchParticipant } from "@/types/pin-batch";
+import { BatchShowPageProps, BatchSubject, BatchParticipant } from "@/types/batch";
 import { ScreeningResult } from "@/types/screening";
 import ScreeningDetailModal from "../Screening/Components/modal/ScreeningModal";
 

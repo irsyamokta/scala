@@ -20,7 +20,7 @@ interface BatchPsychologist {
     name: string;
 }
 
-interface PinBatch {
+interface Batch {
     id: string;
     label: string;
     access_token: string;
@@ -92,12 +92,12 @@ interface PaginatedResponse<T> {
     links: { url: string | null; label: string; active: boolean }[];
 }
 
-interface PinBatchIndexPageProps extends PageProps {
-    batches: PaginatedResponse<PinBatch>;
+interface BatchIndexPageProps extends PageProps {
+    batches: PaginatedResponse<Batch>;
 }
 
-interface PinBatchShowPageProps extends PageProps {
-    batch: PinBatch;
+interface BatchShowPageProps extends PageProps {
+    batch: Batch;
     participants: BatchSubject[];
     psychologists?: { id: string; name: string }[];
     screening_url: string;
@@ -145,12 +145,12 @@ interface StudentResultPageProps extends PageProps {
 }
 
 export type {
-    PinBatch,
+    Batch,
     BatchParticipant,
     BatchSubject,
     PaginatedResponse,
-    PinBatchIndexPageProps,
-    PinBatchShowPageProps,
+    BatchIndexPageProps,
+    BatchShowPageProps,
     StudentDashboardPageProps,
     StudentScreeningHistory,
     StudentResultPageProps,

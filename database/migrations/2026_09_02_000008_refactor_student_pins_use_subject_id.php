@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Ganti student_user_id → subject_id di tabel student_pins.
-     * PIN sekarang terkait langsung ke Subject (data siswa),
+     * Ganti student_user_id → subject_id di tabel batch entries.
+     * Entry sekarang terkait langsung ke Subject (data siswa),
      * bukan ke akun User siswa.
      */
     public function up(): void

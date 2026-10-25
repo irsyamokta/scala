@@ -13,8 +13,8 @@ import { Modal } from "@/shared/components/ui/modal";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import ScreeningDetailModal from "../Subject/Components/modal/ScreeningModal";
 import ParticipantTable from "./Components/table/ParticipantTable";
-import ParticipantRecapTable from "./Components/table/ParticipantRecapTable";
-import { PinBatchShowPageProps as BatchShowPageProps } from "@/types/pin-batch";
+import ParticipantRecapTable from "../Batch/Components/table/ParticipantRecapTable";
+import { BatchShowPageProps } from "@/types/batch";
 import { ScreeningResult } from "@/types/screening";
 
 import Decorative from "@assets/svg/bg-decoration-2.svg";

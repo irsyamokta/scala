@@ -9,7 +9,7 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { PinBatch as Batch, PinBatchIndexPageProps as BatchIndexPageProps } from "@/types/pin-batch";
+import { Batch, BatchIndexPageProps } from "@/types/batch";
 
 export default function PsychologistBatchIndex() {
     const { batches } = usePage<BatchIndexPageProps>().props;

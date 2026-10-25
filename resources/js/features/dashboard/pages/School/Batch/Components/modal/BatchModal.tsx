@@ -61,7 +61,7 @@ export default function BatchModal({
             onClose={onClose}
             title="Buat Batch Skrining"
             subtitle="Link tes akan di-generate otomatis. Siswa mengakses link atau QR code dengan NIS + tanggal lahir."
-            formId="pin-batch-form"
+            formId="batch-form"
             submitLabel="Buat Batch"
             cancelLabel="Batal"
             loading={loading}
@@ -69,7 +69,7 @@ export default function BatchModal({
             className="max-w-110"
         >
             <Form
-                id="pin-batch-form"
+                id="batch-form"
                 onSubmit={handleSubmit}
                 className="p-4 space-y-5"
             >

@@ -3,7 +3,7 @@
 namespace App\Modules\Batch\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\PinBatch;
+use App\Models\Batch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class SuperadminBatchController extends Controller
         $status = $request->status;
         $perPage = $request->integer('per_page', 15);
 
-        $batches = PinBatch::with([
+        $batches = Batch::with([
             'school:id,name',
             'class:id,class_name',
             'instrument:id,name',
@@ -38,13 +38,13 @@ class SuperadminBatchController extends Controller
             ->withQueryString();
 
         $stats = [
-            'total' => PinBatch::count(),
-            'active' => PinBatch::where('status', 'active')->count(),
-            'closed' => PinBatch::where('status', 'closed')->count(),
-            'assigned' => PinBatch::whereNotNull('assigned_psychologist_id')->count(),
+            'total' => Batch::count(),
+            'active' => Batch::where('status', 'active')->count(),
+            'closed' => Batch::where('status', 'closed')->count(),
+            'assigned' => Batch::whereNotNull('assigned_psychologist_id')->count(),
         ];
 
-        return Inertia::render('Dashboard/Superadmin/PinBatch/Index', [
+        return Inertia::render('Dashboard/Superadmin/Batch/Index', [
             'batches' => $batches,
             'stats' => $stats,
             'filters' => [

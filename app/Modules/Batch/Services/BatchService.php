@@ -2,8 +2,8 @@
 
 namespace App\Modules\Batch\Services;
 
+use App\Models\Batch;
 use App\Models\Clazz;
-use App\Models\PinBatch;
 use App\Models\Subject;
 use App\Modules\Batch\Repositories\BatchRepository;
 use DomainException;
@@ -26,7 +26,7 @@ class BatchService
         return $this->batchRepo->getPaginatedByPsychologist($psychologistId, $perPage);
     }
 
-    public function getBatchDetail(string $batchId): PinBatch
+    public function getBatchDetail(string $batchId): Batch
     {
         return $this->batchRepo->findOrFail($batchId);
     }
@@ -37,7 +37,7 @@ class BatchService
     }
 
     /** Satu batch = satu link akses unik. Siswa tes via link/QR tanpa PIN individual. */
-    public function createBatch(array $data, string $schoolUserId): PinBatch
+    public function createBatch(array $data, string $schoolUserId): Batch
     {
         $allClasses = $data['class_id'] === 'all';
 
@@ -98,7 +98,7 @@ class BatchService
         });
     }
 
-    public function closeBatch(string $batchId, string $schoolUserId): PinBatch
+    public function closeBatch(string $batchId, string $schoolUserId): Batch
     {
         $batch = $this->batchRepo->findOrFail($batchId);
 
@@ -111,7 +111,7 @@ class BatchService
         return $this->batchRepo->update($batch, ['status' => 'closed']);
     }
 
-    public function assignPsychologist(string $batchId, string $psychologistId, string $schoolUserId): PinBatch
+    public function assignPsychologist(string $batchId, string $psychologistId, string $schoolUserId): Batch
     {
         $batch = $this->batchRepo->findOrFail($batchId);
 
@@ -123,7 +123,7 @@ class BatchService
     }
 
     /** Pastikan batch memang milik Guru BK yang bersangkutan. */
-    private function authorizeSchool(PinBatch $batch, string $schoolUserId): void
+    private function authorizeSchool(Batch $batch, string $schoolUserId): void
     {
         if ($batch->school_user_id !== $schoolUserId) {
             throw new DomainException('Anda tidak memiliki akses ke batch ini.');
@@ -134,7 +134,7 @@ class BatchService
     {
         do {
             $token = strtoupper(Str::random(12));
-        } while (PinBatch::where('access_token', $token)->exists());
+        } while (Batch::where('access_token', $token)->exists());
 
         return $token;
     }

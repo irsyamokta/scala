@@ -12,7 +12,7 @@ import Badge from "@/shared/components/ui/badge/Badge";
 import Pagination from "@/shared/components/ui/pagination/Pagination";
 import Checkbox from "@/shared/components/forms/Checkbox";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
-import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
+import { Batch, PaginatedResponse } from "@/types/batch";
 
 interface BatchTableProps {
     batches: PaginatedResponse<Batch>;

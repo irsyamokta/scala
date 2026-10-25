@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
-class PinBatch extends Model
+class Batch extends Model
 {
     use HasFactory, HasUuids;
 
@@ -66,7 +66,7 @@ class PinBatch extends Model
 
     public function entries()
     {
-        return $this->hasMany(StudentPin::class, 'batch_id', 'id');
+        return $this->hasMany(BatchEntry::class, 'batch_id', 'id');
     }
 
     /** Cek apakah batch sudah expired berdasarkan expires_at. */

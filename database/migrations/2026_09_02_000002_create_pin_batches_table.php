@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Tabel batch PIN yang dibuat Guru BK per kelas/instrumen.
+     * Tabel batch skrining yang dibuat Guru BK per kelas/instrumen.
      */
     public function up(): void
     {

@@ -79,6 +79,6 @@ class Screening extends Model
 
     public function batchEntry()
     {
-        return $this->belongsTo(StudentPin::class, 'pin_id', 'id');
+        return $this->belongsTo(BatchEntry::class, 'pin_id', 'id');
     }
 }

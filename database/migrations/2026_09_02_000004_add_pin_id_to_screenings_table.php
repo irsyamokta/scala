@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Tambah kolom pin_id ke tabel screenings untuk traceability
-     * screening yang berasal dari alur PIN Guru BK.
+     * screening yang berasal dari alur batch Guru BK.
      */
     public function up(): void
     {

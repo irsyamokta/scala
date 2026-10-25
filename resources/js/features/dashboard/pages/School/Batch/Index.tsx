@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import BatchModal from "./Components/modal/PinBatchModal";
-import BatchCard from "./Components/card/PinBatchCard";
-import { PinBatchIndexPageProps as BatchIndexPageProps } from "@/types/pin-batch";
+import BatchModal from "./Components/modal/BatchModal";
+import BatchCard from "./Components/card/BatchCard";
+import { BatchIndexPageProps } from "@/types/batch";
 
 interface BatchPageProps extends BatchIndexPageProps {
     classes: { id: string; class_name: string }[];

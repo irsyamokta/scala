@@ -7,7 +7,7 @@ import {
 } from "@/shared/components/ui/table";
 import Badge from "@/shared/components/ui/badge/Badge";
 import { EmptyTable } from "@/shared/components/empty/EmptyTable";
-import { BatchSubject } from "@/types/pin-batch";
+import { BatchSubject } from "@/types/batch";
 
 interface ParticipantTableProps {
     participants: BatchSubject[];

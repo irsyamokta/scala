@@ -94,7 +94,7 @@ export const MENU = {
         path: "/profil",
     },
 
-    pin_batch: {
+    batch_skrining: {
         name: "Batch Skrining",
         icon: <LuKeyRound size={22} />,
         path: "/batch",
@@ -118,7 +118,7 @@ export const MENU = {
         path: "/batch",
     },
 
-    admin_pin_batch: {
+    admin_batch: {
         name: "Monitoring Batch",
         icon: <LuKeyRound size={22} />,
         path: "/admin/batch",

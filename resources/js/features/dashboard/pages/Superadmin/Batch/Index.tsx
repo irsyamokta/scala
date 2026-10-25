@@ -11,7 +11,7 @@ import {
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import InputField from "@/shared/components/forms/InputField";
 import Select from "@/shared/components/forms/Select";
-import { PinBatch as Batch, PaginatedResponse } from "@/types/pin-batch";
+import { Batch, PaginatedResponse } from "@/types/batch";
 import { PageProps } from "@/types";
 
 interface SuperadminBatchPageProps extends PageProps {

@@ -2,7 +2,7 @@
 
 namespace App\Modules\Batch\Repositories;
 
-use App\Models\PinBatch;
+use App\Models\Batch;
 use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 
@@ -11,13 +11,13 @@ class BatchRepository
     public function getPaginatedBySchool(string $schoolUserId, int $perPage = 10)
     {
         // Auto-close batch expired sebelum query agar status tampil akurat
-        PinBatch::where('school_user_id', $schoolUserId)
+        Batch::where('school_user_id', $schoolUserId)
             ->where('status', 'active')
             ->whereNotNull('expires_at')
             ->where('expires_at', '<=', now())
             ->update(['status' => 'closed']);
 
-        return PinBatch::with([
+        return Batch::with([
             'class:id,class_name',
             'instrument:id,name',
             'assignedPsychologist:id,name',
@@ -32,7 +32,7 @@ class BatchRepository
 
     public function getPaginatedByPsychologist(string $psychologistId, int $perPage = 10)
     {
-        return PinBatch::with([
+        return Batch::with([
             'class:id,class_name',
             'instrument:id,name',
             'school:id,name',
@@ -45,9 +45,9 @@ class BatchRepository
             ->withQueryString();
     }
 
-    public function findOrFail(string $id): PinBatch
+    public function findOrFail(string $id): Batch
     {
-        $batch = PinBatch::with([
+        $batch = Batch::with([
             'class:id,class_name',
             'instrument:id,name',
             'assignedPsychologist:id,name',
@@ -64,12 +64,12 @@ class BatchRepository
         ]);
     }
 
-    public function create(array $data): PinBatch
+    public function create(array $data): Batch
     {
-        return PinBatch::create($data);
+        return Batch::create($data);
     }
 
-    public function update(PinBatch $batch, array $data): PinBatch
+    public function update(Batch $batch, array $data): Batch
     {
         $batch->update($data);
 
@@ -81,7 +81,7 @@ class BatchRepository
      */
     public function getParticipants(string $batchId)
     {
-        $batch = PinBatch::findOrFail($batchId);
+        $batch = Batch::findOrFail($batchId);
 
         $query = Subject::with([
             'class:id,class_name',
@@ -106,9 +106,9 @@ class BatchRepository
         return $query->orderBy('name')->get();
     }
 
-    public function findByToken(string $token): ?PinBatch
+    public function findByToken(string $token): ?Batch
     {
-        $batch = PinBatch::with([
+        $batch = Batch::with([
             'class:id,class_name',
             'instrument:id,name',
         ])->where('access_token', $token)->first();

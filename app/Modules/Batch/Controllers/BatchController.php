@@ -3,9 +3,9 @@
 namespace App\Modules\Batch\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Batch;
 use App\Models\Clazz;
 use App\Models\Instrument;
-use App\Models\PinBatch;
 use App\Models\User;
 use App\Modules\Batch\Exports\BatchExport;
 use App\Modules\Batch\Exports\BatchRecapExport;
@@ -49,7 +49,7 @@ class BatchController extends Controller
 
         $instruments = Instrument::select('id', 'name')->get();
 
-        return Inertia::render('Dashboard/School/PinBatch/Index', [
+        return Inertia::render('Dashboard/School/Batch/Index', [
             'batches' => $batches,
             'classes' => $classes,
             'instruments' => $instruments,
@@ -96,7 +96,7 @@ class BatchController extends Controller
             ->select('id', 'name')
             ->get();
 
-        return Inertia::render('Dashboard/School/PinBatch/Show', [
+        return Inertia::render('Dashboard/School/Batch/Show', [
             'batch' => $batch,
             'participants' => $participants,
             'psychologists' => $psychologists,
@@ -200,7 +200,7 @@ class BatchController extends Controller
         ]);
 
         try {
-            $deleted = PinBatch::whereIn('id', $request->ids)
+            $deleted = Batch::whereIn('id', $request->ids)
                 ->where('school_user_id', auth()->id())
                 ->delete();
 

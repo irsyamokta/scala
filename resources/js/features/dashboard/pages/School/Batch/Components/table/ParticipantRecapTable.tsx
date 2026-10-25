@@ -8,7 +8,7 @@ import {
 import Badge from "@/shared/components/ui/badge/Badge";
 import Button from "@/shared/components/ui/button/Button";
 import { EmptyTable } from "@/shared/components/empty/EmptyTable";
-import { BatchSubject } from "@/types/pin-batch";
+import { BatchSubject } from "@/types/batch";
 import { ScreeningResult } from "@/types/screening";
 import { IoEyeOutline } from "react-icons/io5";
 

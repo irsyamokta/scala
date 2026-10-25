@@ -42,7 +42,7 @@ return new class extends Migration
                 'gme_note',
                 'substance_use_note',
                 'psychotic_symptom_note',
-                'ptsd_symptom_note'
+                'ptsd_symptom_note',
             ]);
         });
     }

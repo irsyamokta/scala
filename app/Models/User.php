@@ -111,6 +111,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function batches()
     {
-        return $this->hasMany(PinBatch::class, 'school_user_id', 'id');
+        return $this->hasMany(Batch::class, 'school_user_id', 'id');
     }
 }

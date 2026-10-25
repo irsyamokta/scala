@@ -2,7 +2,7 @@
 
 namespace App\Modules\Batch\Exports;
 
-use App\Models\PinBatch;
+use App\Models\Batch;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class BatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
-    public function __construct(private PinBatch $batch) {}
+    public function __construct(private Batch $batch) {}
 
     public function title(): string
     {

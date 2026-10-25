@@ -7,7 +7,7 @@ import {
 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { StudentDashboardPageProps } from "@/types/pin-batch";
+import { StudentDashboardPageProps } from "@/types/batch";
 
 export default function StudentDashboard() {
     const { screening_history } = usePage<StudentDashboardPageProps>().props;

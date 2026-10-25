@@ -2,13 +2,13 @@
 
 namespace App\Modules\Batch\Repositories;
 
-use App\Models\StudentPin;
+use App\Models\BatchEntry;
 
 class BatchEntryRepository
 {
     public function getByBatch(string $batchId)
     {
-        return StudentPin::with([
+        return BatchEntry::with([
             'subject:id,name,nis,class_id',
             'subject.class:id,class_name',
             'screening:id,subject_id,reporter_user_id,instrument_id,type_id,pin_id,date_taken,status',
@@ -23,16 +23,16 @@ class BatchEntryRepository
             ->get();
     }
 
-    public function findByBatchAndSubject(string $batchId, string $subjectId): ?StudentPin
+    public function findByBatchAndSubject(string $batchId, string $subjectId): ?BatchEntry
     {
-        return StudentPin::where('batch_id', $batchId)
+        return BatchEntry::where('batch_id', $batchId)
             ->where('subject_id', $subjectId)
             ->first();
     }
 
-    public function markUsed(string $batchId, string $subjectId, string $screeningId): StudentPin
+    public function markUsed(string $batchId, string $subjectId, string $screeningId): BatchEntry
     {
-        return StudentPin::create([
+        return BatchEntry::create([
             'batch_id' => $batchId,
             'subject_id' => $subjectId,
             'used_at' => now(),

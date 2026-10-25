@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Tabel PIN individual per siswa, satu PIN per siswa per batch.
+     * Tabel batch entry per siswa, satu entry per siswa per batch.
      */
     public function up(): void
     {
@@ -22,13 +22,12 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            // PIN 8 karakter alfanumerik huruf besar, unik secara global
             $table->string('pin_code', 8)->unique();
 
-            // Kapan PIN digunakan (null = belum dipakai)
+            // Kapan entry digunakan (null = belum dipakai)
             $table->timestamp('used_at')->nullable();
 
-            // Screening yang terkait setelah PIN digunakan
+            // Screening yang terkait setelah entry digunakan
             $table->foreignUuid('screening_id')
                 ->nullable()
                 ->constrained('screenings')

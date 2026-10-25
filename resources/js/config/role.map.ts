@@ -13,7 +13,7 @@ export const ROLE_MENU: Record<
     Record<string, MenuKey[]>
 > = {
     superadmin: {
-        main: ["dashboard", "test_screening", "instrument", "user", "admin_pin_batch"],
+        main: ["dashboard", "test_screening", "instrument", "user", "admin_batch"],
         other: ["profile"],
     },
 
@@ -23,7 +23,7 @@ export const ROLE_MENU: Record<
     },
 
     school: {
-        main: ["dashboard", "student", "class", "test_screening", "pin_batch"],
+        main: ["dashboard", "student", "class", "test_screening", "batch_skrining"],
         other: ["school"],
     },
 

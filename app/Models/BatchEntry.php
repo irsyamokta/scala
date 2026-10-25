@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
-class StudentPin extends Model
+class BatchEntry extends Model
 {
     use HasFactory, HasUuids;
 
@@ -38,7 +38,7 @@ class StudentPin extends Model
 
     public function batch()
     {
-        return $this->belongsTo(PinBatch::class, 'batch_id', 'id');
+        return $this->belongsTo(Batch::class, 'batch_id', 'id');
     }
 
     public function subject()
