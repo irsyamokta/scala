@@ -2,15 +2,16 @@
 
 namespace App\Modules\Screening\Controllers;
 
-use Throwable;
-use DomainException;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Modules\Screening\Requests\PinScreeningRequest;
+use App\Modules\Screening\Requests\ScreeningRequest;
+use App\Modules\Screening\Services\ScreeningService;
 use App\Modules\Subject\Services\ClassService;
 use App\Modules\Subject\Services\SubjectService;
-use App\Modules\Screening\Services\ScreeningService;
-use App\Modules\Screening\Requests\ScreeningRequest;
+use DomainException;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Throwable;
 
 class ScreeningController extends Controller
 {
@@ -31,7 +32,7 @@ class ScreeningController extends Controller
         $filters = [
             'search' => $search,
             'category' => $categories,
-            'per_page' => $perPage
+            'per_page' => $perPage,
         ];
 
         if (in_array($user->role, ['superadmin', 'psychologist'])) {
@@ -48,7 +49,7 @@ class ScreeningController extends Controller
 
             return Inertia::render($view, [
                 'screenings' => $screenings,
-                'filters' => $filters
+                'filters' => $filters,
             ]);
         }
 
@@ -63,7 +64,7 @@ class ScreeningController extends Controller
             );
 
             return Inertia::render('Dashboard/Parent/Screening/Index', [
-                'subjects' => $subjects
+                'subjects' => $subjects,
             ]);
         }
 
@@ -81,7 +82,7 @@ class ScreeningController extends Controller
 
             return Inertia::render('Dashboard/School/Screening/Index', [
                 'classes' => $classes,
-                'subjects' => $subjects
+                'subjects' => $subjects,
             ]);
         }
 
@@ -95,11 +96,14 @@ class ScreeningController extends Controller
                 null
             );
 
-            $classes = $this->class->getClasses($user->id);
-
             return Inertia::render('Dashboard/General/Screening/Index', [
-                'subjects' => $subjects
+                'subjects' => $subjects,
             ]);
+        }
+
+        // Siswa: redirect ke dashboard mereka
+        if ($user->role === 'student') {
+            return redirect()->route('student.dashboard');
         }
     }
 
@@ -135,7 +139,7 @@ class ScreeningController extends Controller
         } catch (DomainException $e) {
 
             return back()->with(
-                "error",
+                'error',
                 $e->getMessage()
             );
         } catch (Throwable $e) {
@@ -143,8 +147,8 @@ class ScreeningController extends Controller
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem"
+                'error',
+                'Terjadi kesalahan sistem'
             );
         }
     }
@@ -187,9 +191,72 @@ class ScreeningController extends Controller
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem"
+                'error',
+                'Terjadi kesalahan sistem'
             );
+        }
+    }
+
+    public function validatePin(Request $request)
+    {
+        $request->validate([
+            'pin_code' => 'required|string|size:8',
+        ], [
+            'pin_code.required' => 'PIN wajib diisi.',
+            'pin_code.size' => 'PIN harus 8 karakter.',
+        ]);
+
+        try {
+            $pin = $this->service->validatePin(
+                $request->pin_code,
+                auth()->id()
+            );
+
+            return redirect()->route('screening.pin.form', $pin->pin_code);
+        } catch (DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Terjadi kesalahan sistem.');
+        }
+    }
+
+    public function formByPin(string $pinCode)
+    {
+        try {
+            $data = $this->service->getScreeningFormByPin(
+                $pinCode,
+                auth()->id()
+            );
+
+            return Inertia::render('Dashboard/Student/Screening/Test', $data);
+        } catch (DomainException $e) {
+            return redirect()->route('student.dashboard')
+                ->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Terjadi kesalahan sistem.');
+        }
+    }
+
+    public function submitByPin(PinScreeningRequest $request, string $pinCode)
+    {
+        try {
+            $data = array_merge($request->validated(), ['pin_code' => $pinCode]);
+
+            $screening = $this->service->submitByPin($data, auth()->id());
+
+            return redirect()->route('student.screening.result', $screening->id)
+                ->with('success', 'Tes selesai! Hasil sedang dianalisis.');
+        } catch (DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
 }

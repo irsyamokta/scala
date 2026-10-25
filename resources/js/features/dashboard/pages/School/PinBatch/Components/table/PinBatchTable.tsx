@@ -1,0 +1,190 @@
+import { router } from "@inertiajs/react";
+import { LuKeyRound, LuUsers, LuChevronRight, LuLock, LuTrash2 } from "react-icons/lu";
+
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableRow,
+} from "@/shared/components/ui/table";
+import Badge from "@/shared/components/ui/badge/Badge";
+import Pagination from "@/shared/components/ui/pagination/Pagination";
+import Checkbox from "@/shared/components/forms/Checkbox";
+import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
+import { PinBatch, PaginatedResponse } from "@/types/pin-batch";
+
+interface PinBatchTableProps {
+    batches: PaginatedResponse<PinBatch>;
+    selected: string[];
+    allChecked: boolean;
+    onToggleAll: () => void;
+    onToggleOne: (id: string) => void;
+}
+
+export default function PinBatchTable({
+    batches,
+    selected,
+    allChecked,
+    onToggleAll,
+    onToggleOne,
+}: PinBatchTableProps) {
+    if (batches.data.length === 0) return null;
+
+    return (
+        <div>
+            <div className="border border-netral-300 rounded-xl overflow-hidden">
+                <div className="w-full overflow-x-auto">
+                    <Table>
+                        <TableHeader className="border-b border-netral-300">
+                            <TableRow>
+                                {/* Checkbox select all */}
+                                <TableCell isHeader className="px-4 py-3 w-10">
+                                    <Checkbox
+                                        checked={allChecked}
+                                        onChange={onToggleAll}
+                                        label=""
+                                    />
+                                </TableCell>
+                                <TableCell isHeader className="px-4 py-3" colSpan={1}>
+                                    <span className="text-sm font-semibold text-netral-900 text-start">
+                                        Batch
+                                    </span>
+                                </TableCell>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {batches.data.map((batch) => (
+                                <BatchItem
+                                    key={batch.id}
+                                    batch={batch}
+                                    checked={selected.includes(batch.id)}
+                                    onCheck={() => onToggleOne(batch.id)}
+                                />
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+
+            {batches.last_page > 1 && (
+                <Pagination
+                    links={batches.links}
+                    filters={{}}
+                    routeName="pin-batch.index"
+                />
+            )}
+        </div>
+    );
+}
+
+function BatchItem({
+    batch,
+    checked,
+    onCheck,
+}: {
+    batch: PinBatch;
+    checked: boolean;
+    onCheck: () => void;
+}) {
+    const isClosed   = batch.status === "closed";
+    const isExpired  = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
+    const usedCount  = batch.used_pins_count ?? 0;
+    const totalCount = batch.student_pins_count ?? 0;
+
+    const statusColor: "success" | "error" | "info" | "dark" =
+        isClosed ? "dark"
+        : isExpired ? "error"
+        : batch.assigned_psychologist_id ? "info"
+        : "success";
+
+    const statusLabel = isClosed ? "Ditutup"
+        : isExpired ? "Kedaluwarsa"
+        : batch.assigned_psychologist_id ? "Assigned"
+        : "Aktif";
+
+    async function handleDelete(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const confirmed = await ConfirmationDialog({
+            title: "Hapus Batch Ini?",
+            text: `"${batch.label}" beserta seluruh PIN dan data terkait akan terhapus permanen.`,
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+        });
+        if (!confirmed) return;
+
+        router.delete(route("pin-batch.destroy", batch.id));
+    }
+
+    return (
+        <TableRow className="border-b border-netral-300 hover:bg-netral-50 transition">
+            {/* Checkbox */}
+            <TableCell className="px-4 py-3 w-10">
+                <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox checked={checked} onChange={onCheck} label="" />
+                </div>
+            </TableCell>
+
+            {/* Icon */}
+            <TableCell className="px-2 py-3 w-12">
+                <a href={route("pin-batch.show", batch.id)} className="flex no-underline">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                        isClosed || isExpired ? "bg-netral-200 text-netral-400" : "bg-primary/10 text-primary"
+                    }`}>
+                        {isClosed ? <LuLock size={18} /> : <LuKeyRound size={18} />}
+                    </div>
+                </a>
+            </TableCell>
+
+            {/* Info */}
+            <TableCell className="px-4 py-3 w-full">
+                <a href={route("pin-batch.show", batch.id)} className="block no-underline">
+                    <p className="font-semibold text-netral-900 truncate">{batch.label}</p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-netral-600">
+                        <span className="flex items-center gap-1">
+                            <LuUsers size={10} />
+                            {batch.class?.class_name ?? "Semua Kelas"}
+                        </span>
+                        <span className="font-medium">{batch.instrument?.name ?? "-"}</span>
+                        <span className="text-netral-600">
+                            Dibuat {new Date(batch.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                        </span>
+                        {batch.expires_at ? (
+                            <span className={isExpired ? "text-red-500" : "text-netral-600"}>
+                                {isExpired ? "Kedaluwarsa" : "Berlaku s/d"}{" "}
+                                {new Date(batch.expires_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                            </span>
+                        ) : (
+                            <span className="text-netral-600">Tidak ada batas waktu</span>
+                        )}
+                    </div>
+                </a>
+            </TableCell>
+
+            {/* Status + Progress + Actions */}
+            <TableCell className="px-4 py-3 whitespace-nowrap">
+                <div className="flex items-center gap-3 justify-end">
+                    {totalCount > 0 && (
+                        <span className="text-xs text-netral-500">{usedCount}/{totalCount} terpakai</span>
+                    )}
+                    <Badge color={statusColor} size="sm">{statusLabel}</Badge>
+
+                    {/* Delete button */}
+                    <button
+                        onClick={handleDelete}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition"
+                        title="Hapus batch"
+                    >
+                        <LuTrash2 size={15} />
+                    </button>
+
+                    <a href={route("pin-batch.show", batch.id)} className="no-underline">
+                        <LuChevronRight size={16} className="text-netral-400" />
+                    </a>
+                </div>
+            </TableCell>
+        </TableRow>
+    );
+}

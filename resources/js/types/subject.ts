@@ -3,8 +3,10 @@ import { PageProps } from ".";
 interface Subject {
     id: string;
     name: string;
+    nis?: string;
     gender: string;
     age: string;
+    tanggal_lahir?: string;
     owner_user_id: string;
     class_id?: string;
     class?: Class;
@@ -39,8 +41,10 @@ interface SubjectSelectedModalProps {
 
 interface SubjectForm {
     name: string;
+    nis?: string;
     gender: string;
-    age: string;
+    tanggal_lahir?: string;
+    age?: string;              // dipakai role parent (input manual usia)
     class_id?: string;
     is_self?: boolean;
     has_previous_screening: boolean;

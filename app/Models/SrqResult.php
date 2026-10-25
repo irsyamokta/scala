@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 /**
  * @property string $id
@@ -32,6 +32,7 @@ class SrqResult extends Model
     protected $table = 'srq_results';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -53,7 +54,7 @@ class SrqResult extends Model
         'ptsd_symptom_note',
 
         'psychologist_note',
-        
+
         'recommendation',
         'date_analysis',
     ];

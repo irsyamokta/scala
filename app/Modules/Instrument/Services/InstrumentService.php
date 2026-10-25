@@ -2,10 +2,10 @@
 
 namespace App\Modules\Instrument\Services;
 
-use Illuminate\Support\Facades\DB;
-use App\Models\Question;
 use App\Models\InstrumentType;
+use App\Models\Question;
 use App\Modules\Instrument\Repositories\InstrumentRepository;
+use Illuminate\Support\Facades\DB;
 
 class InstrumentService
 {
@@ -31,12 +31,12 @@ class InstrumentService
                 $instrumentType = InstrumentType::updateOrCreate(
                     [
                         'instrument_id' => $instrument->id,
-                        'type_name' => $type['type_name']
+                        'type_name' => $type['type_name'],
                     ],
                     [
                         'min_age' => $type['min_age'],
                         'max_age' => $type['max_age'],
-                        'is_baseline' => $type['is_baseline'] ?? false
+                        'is_baseline' => $type['is_baseline'] ?? false,
                     ]
                 );
 
@@ -58,7 +58,7 @@ class InstrumentService
                         'text' => $question['text'],
                         'domain' => $domain,
                         'is_reverse_scored' => $question['is_reverse_scored'] ?? false,
-                        'options' => json_encode($options)
+                        'options' => json_encode($options),
                     ]);
                 }
             }
@@ -88,12 +88,12 @@ class InstrumentService
                 $instrumentType = InstrumentType::updateOrCreate(
                     [
                         'instrument_id' => $instrument->id,
-                        'type_name' => $type['type_name']
+                        'type_name' => $type['type_name'],
                     ],
                     [
                         'min_age' => $type['min_age'],
                         'max_age' => $type['max_age'],
-                        'is_baseline' => $type['is_baseline'] ?? false
+                        'is_baseline' => $type['is_baseline'] ?? false,
                     ]
                 );
 
@@ -115,7 +115,7 @@ class InstrumentService
                         'text' => $question['text'],
                         'domain' => $domain,
                         'is_reverse_scored' => $question['is_reverse_scored'] ?? false,
-                        'options' => json_encode($options)
+                        'options' => json_encode($options),
                     ]);
                 }
             }

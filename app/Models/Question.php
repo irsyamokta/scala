@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 /**
  * @property string $id
  * @property string $instrument_id
  * @property string|null $type_id
- * @property integer $question_number
+ * @property int $question_number
  * @property string $text
  * @property string $domain
  * @property bool $is_reverse_scored
@@ -23,7 +23,9 @@ class Question extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'questions';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

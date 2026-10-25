@@ -3,8 +3,8 @@
 namespace App\Modules\Onboarding\services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use App\Modules\Onboarding\Repositories\OnboardingRepository;
+use Illuminate\Support\Facades\DB;
 
 class OnboardingService
 {
@@ -62,7 +62,7 @@ class OnboardingService
             'owner_user_id' => $user->id,
             'is_self' => false,
             'has_previous_screening' => $data['has_previous_screening'],
-            'last_result' => $data['last_result'] ?? null
+            'last_result' => $data['last_result'] ?? null,
         ]);
     }
 
@@ -73,7 +73,7 @@ class OnboardingService
             'owner_user_id' => $user->id,
             'is_self' => true,
             'has_previous_screening' => $data['has_previous_screening'],
-            'last_result' => $data['last_result'] ?? null
+            'last_result' => $data['last_result'] ?? null,
         ]);
     }
 

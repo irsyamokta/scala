@@ -2,8 +2,8 @@
 
 namespace App\Modules\Screening\Services;
 
-use Illuminate\Support\Facades\DB;
 use App\Modules\Screening\Repositories\ResultRepository;
+use Illuminate\Support\Facades\DB;
 
 class ResultService
 {
@@ -20,11 +20,11 @@ class ResultService
             $updated = $this->repo->updateSdq($result, [
                 ...$data,
                 'psychologist_user_id' => $user->id,
-                'date_analysis' => now()
+                'date_analysis' => now(),
             ]);
 
             $updated->screening()->update([
-                'status' => 'Selesai Dievaluasi'
+                'status' => 'Selesai Dievaluasi',
             ]);
 
             return $updated;
@@ -40,11 +40,11 @@ class ResultService
             $updated = $this->repo->updateSrq($result, [
                 ...$data,
                 'psychologist_user_id' => $user->id,
-                'date_analysis' => now()
+                'date_analysis' => now(),
             ]);
 
             $updated->screening()->update([
-                'status' => 'Selesai Dievaluasi'
+                'status' => 'Selesai Dievaluasi',
             ]);
 
             return $updated;

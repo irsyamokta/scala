@@ -5,14 +5,15 @@ export type Role =
     | "parent"
     | "school"
     | "general"
-    | "psychologist";
+    | "psychologist"
+    | "student";
 
 export const ROLE_MENU: Record<
     Role,
     Record<string, MenuKey[]>
 > = {
     superadmin: {
-        main: ["dashboard", "test_screening", "instrument", "user"],
+        main: ["dashboard", "test_screening", "instrument", "user", "admin_pin_batch"],
         other: ["profile"],
     },
 
@@ -22,7 +23,7 @@ export const ROLE_MENU: Record<
     },
 
     school: {
-        main: ["dashboard", "student", "class", "test_screening"],
+        main: ["dashboard", "student", "class", "test_screening", "pin_batch"],
         other: ["school"],
     },
 
@@ -32,7 +33,12 @@ export const ROLE_MENU: Record<
     },
 
     psychologist: {
-        main: ["dashboard", "test_screening"],
+        main: ["dashboard", "test_screening", "batch_assigned"],
         other: ["profile"],
+    },
+
+    student: {
+        main: ["student_dashboard"],
+        other: [],
     },
 };

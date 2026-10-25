@@ -2,12 +2,12 @@
 
 namespace App\Modules\Subject\Controllers;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Modules\Subject\Requests\ClassRequest;
+use App\Modules\Subject\Services\ClassService;
 use DomainException;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
-use App\Modules\Subject\Services\ClassService;
-use App\Modules\Subject\Requests\ClassRequest;
+use Throwable;
 
 class ClassController extends Controller
 {
@@ -20,7 +20,7 @@ class ClassController extends Controller
         $classes = $this->service->getClasses(auth()->id());
 
         return Inertia::render('Dashboard/School/Class/Index', [
-            'classes' => $classes
+            'classes' => $classes,
         ]);
     }
 
@@ -30,20 +30,20 @@ class ClassController extends Controller
 
             $this->service->createClass([
                 ...$request->validated(),
-                'school_user_id' => auth()->id()
+                'school_user_id' => auth()->id(),
             ]);
 
             return back();
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'class_name' => $e->getMessage()
+                'class_name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             report($e);
 
-            return back()->with("error", "Terjadi kesalahan sistem");
+            return back()->with('error', 'Terjadi kesalahan sistem');
         }
     }
 
@@ -58,7 +58,7 @@ class ClassController extends Controller
 
             report($e);
 
-            return back()->with("error", "Terjadi kesalahan sistem");
+            return back()->with('error', 'Terjadi kesalahan sistem');
         }
     }
 
@@ -72,13 +72,13 @@ class ClassController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'class_name' => $e->getMessage()
+                'class_name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             report($e);
 
-            return back()->with("error", "Terjadi kesalahan sistem");
+            return back()->with('error', 'Terjadi kesalahan sistem');
         }
     }
 }

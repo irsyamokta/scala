@@ -2,9 +2,7 @@
 
 namespace App\Modules\Profile\Requests;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ProfileSchoolUpdateRequest extends FormRequest
 {

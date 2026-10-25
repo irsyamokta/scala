@@ -3,9 +3,9 @@
 namespace App\Modules\Profile\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Profile\Requests\ProfileDestroyRequest;
 use App\Modules\Profile\Requests\ProfileSchoolUpdateRequest;
 use App\Modules\Profile\Requests\ProfileUpdateRequest;
-use App\Modules\Profile\Requests\ProfileDestroyRequest;
 use App\Modules\Profile\Services\ProfileService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ class ProfileController extends Controller
         $subject = $user->subjects()->where('is_self', true)->first();
 
         return Inertia::render('Profile/Index', [
-            'subject' => $subject
+            'subject' => $subject,
         ]);
     }
 

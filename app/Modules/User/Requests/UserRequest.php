@@ -27,17 +27,17 @@ class UserRequest extends FormRequest
         $userId = $this->route('id');
 
         return [
-            "name" => "required|string|max:100",
+            'name' => 'required|string|max:100',
 
-            "email" => [
-                "required",
-                "email",
-                "unique:users,email," . $userId
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email,'.$userId,
             ],
 
-            "role" => "required|string|in:parent,school,general,psychologist",
+            'role' => 'required|string|in:parent,school,general,psychologist',
 
-            "contact" => [
+            'contact' => [
                 'required',
                 'string',
                 'min:10',
@@ -45,9 +45,9 @@ class UserRequest extends FormRequest
                 Rule::unique('users', 'contact')->ignore($userId),
             ],
 
-            "password" => $this->isMethod('post')
-                ? "required|string|min:8"
-                : "nullable|string|min:8",
+            'password' => $this->isMethod('post')
+                ? 'required|string|min:8'
+                : 'nullable|string|min:8',
         ];
     }
 }

@@ -2,12 +2,11 @@
 
 namespace App\Modules\Dashboard\Repositories;
 
-use App\Models\Screening;
-use App\Models\Subject;
 use App\Models\Clazz;
+use App\Models\Screening;
 use App\Models\SdqResult;
 use App\Models\SrqResult;
-use Illuminate\Support\Facades\DB;
+use App\Models\Subject;
 use Carbon\Carbon;
 
 class DashboardRepository
@@ -54,7 +53,7 @@ class DashboardRepository
 
         // SDQ
         $sdq = SdqResult::query()
-            ->when($start && $end, fn($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->when($start && $end, fn ($q) => $q->whereBetween('created_at', [$start, $end]))
             ->selectRaw('overall_category, COUNT(*) as total')
             ->groupBy('overall_category')
             ->pluck('total', 'overall_category')
@@ -62,7 +61,7 @@ class DashboardRepository
 
         // SRQ
         $srq = SrqResult::query()
-            ->when($start && $end, fn($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->when($start && $end, fn ($q) => $q->whereBetween('created_at', [$start, $end]))
             ->selectRaw('
             CASE
                 WHEN gme_indication = 1
@@ -147,7 +146,7 @@ class DashboardRepository
         foreach ($screenings as $item) {
             $month = Carbon::parse($item->date_taken)->format('M');
 
-            if (!isset($result[$month])) {
+            if (! isset($result[$month])) {
                 $result[$month] = [
                     'Normal' => 0,
                     'Borderline' => 0,
@@ -183,7 +182,7 @@ class DashboardRepository
     public function latestResults($userId)
     {
         return Screening::with(['subject', 'sdqResult', 'srqResult'])
-            ->whereHas('subject', fn($q) => $q->where('owner_user_id', $userId))
+            ->whereHas('subject', fn ($q) => $q->where('owner_user_id', $userId))
             ->latest('date_taken')
             ->limit(4)
             ->get()
@@ -258,7 +257,9 @@ class DashboardRepository
             ->get();
 
         foreach ($screenings as $item) {
-            if (!$item->subject || !$item->subject->class) continue;
+            if (! $item->subject || ! $item->subject->class) {
+                continue;
+            }
 
             // SDQ
             if ($item->sdqResult) {
@@ -290,7 +291,7 @@ class DashboardRepository
                 [
                     'name' => 'Jumlah Siswa',
                     'data' => array_values($result),
-                ]
+                ],
             ],
         ];
     }
@@ -316,7 +317,9 @@ class DashboardRepository
             ->latest('date_taken')
             ->first();
 
-        if (!$item) return null;
+        if (! $item) {
+            return null;
+        }
 
         $category = null;
 

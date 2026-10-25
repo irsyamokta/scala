@@ -19,8 +19,6 @@ class BasicInfoRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -29,7 +27,7 @@ class BasicInfoRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'domicile' => 'required|string|max:255',
-            "contact" => [
+            'contact' => [
                 'required',
                 'string',
                 'min:10',

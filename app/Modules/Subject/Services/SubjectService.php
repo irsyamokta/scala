@@ -2,10 +2,11 @@
 
 namespace App\Modules\Subject\Services;
 
+use App\Modules\Subject\Repositories\ClassRepository;
+use App\Modules\Subject\Repositories\SubjectRepository;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
-use App\Modules\Subject\Repositories\SubjectRepository;
-use App\Modules\Subject\Repositories\ClassRepository;
 
 class SubjectService
 {
@@ -36,15 +37,20 @@ class SubjectService
 
     public function createSubject(array $data, string $role)
     {
-        if ($this->repo->existsByName($data['name'], $data['owner_user_id']))
-            throw new DomainException("Nama tersebut sudah ada");
+        if ($this->repo->existsByName($data['name'], $data['owner_user_id'])) {
+            throw new DomainException('Nama tersebut sudah ada');
+        }
 
         if ($role === 'school') {
-
-            if (empty($data['class_id']))
-                throw new DomainException("Kelas wajib dipilih");
+            if (empty($data['class_id'])) {
+                throw new DomainException('Kelas wajib dipilih');
+            }
 
             $this->classRepo->find($data['class_id']);
+        }
+
+        if (! empty($data['tanggal_lahir'])) {
+            $data['age'] = (int) Carbon::parse($data['tanggal_lahir'])->age;
         }
 
         return DB::transaction(function () use ($data) {
@@ -63,8 +69,13 @@ class SubjectService
                 $data['name'],
                 $subject->owner_user_id
             )
-        )
-            throw new DomainException("Nama tersebut sudah ada");
+        ) {
+            throw new DomainException('Nama tersebut sudah ada');
+        }
+
+        if (! empty($data['tanggal_lahir'])) {
+            $data['age'] = (int) Carbon::parse($data['tanggal_lahir'])->age;
+        }
 
         return $this->repo->update($subject, $data);
     }
@@ -73,8 +84,9 @@ class SubjectService
     {
         $subject = $this->repo->find($id);
 
-        if ($subject->is_self)
-            throw new DomainException("Anda tidak dapat menghapus diri sendiri");
+        if ($subject->is_self) {
+            throw new DomainException('Anda tidak dapat menghapus diri sendiri');
+        }
 
         return $this->repo->delete($subject);
     }

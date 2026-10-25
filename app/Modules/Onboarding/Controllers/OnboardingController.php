@@ -2,19 +2,18 @@
 
 namespace App\Modules\Onboarding\Controllers;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Modules\Onboarding\Requests\BasicInfoRequest;
+use App\Modules\Onboarding\Requests\GeneralSubjectRequest;
+use App\Modules\Onboarding\Requests\ParentSubjectRequest;
+use App\Modules\Onboarding\Requests\RoleRequest;
+use App\Modules\Onboarding\Requests\SchoolRequest;
+use App\Modules\Onboarding\Services\OnboardingService;
 use DomainException;
-use Inertia\Inertia;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
-use App\Modules\Onboarding\Services\OnboardingService;
-use App\Modules\Onboarding\Requests\RoleRequest;
-use App\Modules\Onboarding\Requests\BasicInfoRequest;
-use App\Modules\Onboarding\Requests\ParentSubjectRequest;
-use App\Modules\Onboarding\Requests\SchoolRequest;
-use App\Modules\Onboarding\Requests\GeneralSubjectRequest;
+use Inertia\Inertia;
+use Throwable;
 
 class OnboardingController extends Controller
 {
@@ -26,7 +25,7 @@ class OnboardingController extends Controller
     {
         $user = auth()->user()->load([
             'selfSubject',
-            'childSubjects'
+            'childSubjects',
         ]);
 
         if ($user->onboarding_completed_at) {
@@ -50,11 +49,11 @@ class OnboardingController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'role' => $e->getMessage()
+                'role' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
             return back()->withErrors([
-                'Terjadi kesalahan, silahkan coba lagi'
+                'Terjadi kesalahan, silahkan coba lagi',
             ]);
         }
     }
@@ -70,12 +69,13 @@ class OnboardingController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'name' => $e->getMessage()
+                'name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
             \Log::error($e);
+
             return back()->withErrors([
-                'Terjadi kesalahan, silahkan coba lagi'
+                'Terjadi kesalahan, silahkan coba lagi',
             ]);
         }
     }
@@ -91,12 +91,12 @@ class OnboardingController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'subject' => $e->getMessage()
+                'subject' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             return back()->withErrors([
-                'Terjadi kesalahan, silahkan coba lagi'
+                'Terjadi kesalahan, silahkan coba lagi',
             ]);
         }
     }
@@ -111,12 +111,12 @@ class OnboardingController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'school' => $e->getMessage()
+                'school' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             return back()->withErrors([
-                'Terjadi kesalahan, silahkan coba lagi'
+                'Terjadi kesalahan, silahkan coba lagi',
             ]);
         }
     }
@@ -132,12 +132,12 @@ class OnboardingController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'subject' => $e->getMessage()
+                'subject' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             return back()->withErrors([
-                'Terjadi kesalahan, silahkan coba lagi'
+                'Terjadi kesalahan, silahkan coba lagi',
             ]);
         }
     }

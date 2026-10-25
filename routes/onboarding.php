@@ -1,8 +1,8 @@
 <?php
 
+use App\Modules\Onboarding\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Modules\Onboarding\Controllers\OnboardingController;
 
 Route::middleware('auth')->prefix('onboarding')->group(function () {
 
@@ -14,7 +14,7 @@ Route::middleware('auth')->prefix('onboarding')->group(function () {
     Route::post('/school', [OnboardingController::class, 'school'])->name('onboarding.school');
     Route::post('/public', [OnboardingController::class, 'public'])->name('onboarding.general');
 
-    Route::get('/processing', fn() => Inertia::render('Onboarding/Partials/ProcessingStep'))
+    Route::get('/processing', fn () => Inertia::render('Onboarding/Partials/ProcessingStep'))
         ->name('onboarding.processing');
 
     Route::post('/complete', [OnboardingController::class, 'complete'])

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 /**
  * @property string $id
@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
  * @property string $reporter_user_id
  * @property string $instrument_id
  * @property string $type_id
+ * @property string|null $pin_id
  * @property \Carbon\Carbon $date_taken
  * @property string $status
  * @property \Carbon\Carbon $created_at
@@ -22,7 +23,9 @@ class Screening extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'screenings';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -30,6 +33,7 @@ class Screening extends Model
         'reporter_user_id',
         'instrument_id',
         'type_id',
+        'pin_id',
         'date_taken',
         'status',
     ];
@@ -71,5 +75,10 @@ class Screening extends Model
     public function srqResult()
     {
         return $this->hasOne(SrqResult::class, 'screening_id', 'id');
+    }
+
+    public function studentPin()
+    {
+        return $this->belongsTo(StudentPin::class, 'pin_id', 'id');
     }
 }

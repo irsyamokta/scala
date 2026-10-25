@@ -18,8 +18,6 @@ class SchoolRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -27,7 +25,7 @@ class SchoolRequest extends FormRequest
             'school_level' => 'required|in:TK,SD/MI,SMP/Mts,SMA/SMK',
             'school_name' => 'required|string|max:255',
             'school_address' => 'required|string|max:255',
-            'screening_scope' => 'required|in:single_student,multiple_student,classroom'
+            'screening_scope' => 'required|in:single_student,multiple_student,classroom',
         ];
     }
 }

@@ -6,21 +6,32 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class SubjectRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
-            "name" => "required|string|max:100",
-            "gender" => "required|in:male,female",
-            "age" => "required|integer|min:4|max:100",
-            "class_id" => "nullable|uuid|exists:classes,id",
-            "is_self" => "boolean",
-            "has_previous_screening" => "boolean",
-            "last_result" => "nullable|in:Normal,Borderline,Abnormal,Terindikasi,Tidak Terindikasi",
+            'name' => 'required|string|max:100',
+            'nis' => 'required|digits_between:1,20',
+            'gender' => 'required|in:male,female',
+            'tanggal_lahir' => 'required|date',
+            'class_id' => 'nullable|uuid|exists:classes,id',
+            'is_self' => 'boolean',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama wajib diisi.',
+            'nis.required' => 'NIS wajib diisi.',
+            'nis.digits_between' => 'NIS harus berupa angka.',
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
+            'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+            'tanggal_lahir.date' => 'Format tanggal lahir tidak valid.',
         ];
     }
 }

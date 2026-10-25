@@ -9,7 +9,7 @@ class InstrumentRepository
     public function getAll()
     {
         return Instrument::with([
-            'instrumentTypes.questions'
+            'instrumentTypes.questions',
         ])
             ->orderByDesc('created_at')
             ->get();
@@ -18,7 +18,7 @@ class InstrumentRepository
     public function find($id)
     {
         return Instrument::with([
-            'instrumentTypes.questions'
+            'instrumentTypes.questions',
         ])->findOrFail($id);
     }
 
@@ -37,6 +37,7 @@ class InstrumentRepository
     public function update(Instrument $instrument, array $data)
     {
         $instrument->update($data);
+
         return $instrument;
     }
 

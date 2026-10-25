@@ -31,6 +31,14 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
+        $psychologistNotif = null;
+        if ($user && $user->role === 'psychologist') {
+            $psychologistNotif = \App\Models\PinBatch::where('assigned_psychologist_id', $user->id)
+                ->whereHas('studentPins', fn ($q) => $q->whereNotNull('used_at'))
+                ->whereHas('studentPins.screening', fn ($q) => $q->where('status', 'Menunggu Evaluasi'))
+                ->count();
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -43,11 +51,15 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $user
                     ? $request->user()->getAllPermissions()->pluck('name')
                     : [],
+
+                'notifications' => [
+                    'pending_analysis' => $psychologistNotif,
+                ],
             ],
-            
+
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }

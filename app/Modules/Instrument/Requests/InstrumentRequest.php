@@ -16,7 +16,6 @@ class InstrumentRequest extends FormRequest
         return true;
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,25 +24,25 @@ class InstrumentRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'name'     => ['required', 'string'],
+            'name' => ['required', 'string'],
 
-            'types'               => ['required', 'array'],
-            'types.*.type_name'   => ['required_with:types', 'string'],
-            'types.*.min_age'  => ['required', 'integer'],
-            'types.*.max_age'  => ['required', 'integer'],
+            'types' => ['required', 'array'],
+            'types.*.type_name' => ['required_with:types', 'string'],
+            'types.*.min_age' => ['required', 'integer'],
+            'types.*.max_age' => ['required', 'integer'],
             'types.*.is_baseline' => ['boolean'],
 
-            'types.*.questions'         => ['nullable', 'array'],
-            'types.*.questions.*'       => ['sometimes', 'array'],
+            'types.*.questions' => ['nullable', 'array'],
+            'types.*.questions.*' => ['sometimes', 'array'],
             'types.*.questions.*.question_number' => ['required_with:types.*.questions.*', 'integer'],
-            'types.*.questions.*.text'  => ['required_with:types.*.questions.*', 'string', 'min:1'],
+            'types.*.questions.*.text' => ['required_with:types.*.questions.*', 'string', 'min:1'],
             'types.*.questions.*.is_reverse_scored' => ['boolean'],
         ];
 
         if ($this->name === 'SDQ') {
             $rules['types.*.questions.*.domain'] = [
                 'required_with:types.*.questions.*',
-                'in:emotional_symptoms,conduct_problems,hyperactivity,peer_problems,prosocial'
+                'in:emotional_symptoms,conduct_problems,hyperactivity,peer_problems,prosocial',
             ];
         } else {
             $rules['types.*.questions.*.domain'] = ['nullable', 'string'];

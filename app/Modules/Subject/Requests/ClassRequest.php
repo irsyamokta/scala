@@ -14,7 +14,7 @@ class ClassRequest extends FormRequest
     public function rules()
     {
         return [
-            "class_name" => "required|string|max:100"
+            'class_name' => 'required|string|max:100',
         ];
     }
 }

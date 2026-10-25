@@ -2,11 +2,11 @@
 
 namespace App\Modules\Screening\Controllers;
 
-use Throwable;
-use DomainException;
 use App\Http\Controllers\Controller;
-use App\Modules\Screening\Services\ResultService;
 use App\Modules\Screening\Requests\PsychologistNoteRequest;
+use App\Modules\Screening\Services\ResultService;
+use DomainException;
+use Throwable;
 
 class ResultController extends Controller
 {
@@ -28,15 +28,15 @@ class ResultController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem, silakan coba lagi"
+                'error',
+                'Terjadi kesalahan sistem, silakan coba lagi'
             );
         }
     }
@@ -55,15 +55,15 @@ class ResultController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem, silakan coba lagi"
+                'error',
+                'Terjadi kesalahan sistem, silakan coba lagi'
             );
         }
     }

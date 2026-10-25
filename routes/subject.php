@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Modules\Subject\Controllers\SubjectController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarding.complete', 'permission:manage.subject'])->group(function () {
 

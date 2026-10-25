@@ -2,13 +2,13 @@
 
 namespace App\Modules\User\Controllers;
 
-use Throwable;
-use DomainException;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Modules\User\Services\UserService;
 use App\Modules\User\Requests\UserRequest;
+use App\Modules\User\Services\UserService;
+use DomainException;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -35,7 +35,7 @@ class UserController extends Controller
             'filters' => [
                 'search' => $search,
                 'roles' => $roles,
-                'per_page' => $perPage
+                'per_page' => $perPage,
             ],
         ]);
     }
@@ -48,14 +48,14 @@ class UserController extends Controller
             return back();
         } catch (DomainException $e) {
             return back()->withErrors([
-                'name' => $e->getMessage()
+                'name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem, silakan coba lagi"
+                'error',
+                'Terjadi kesalahan sistem, silakan coba lagi'
             );
         }
     }
@@ -68,14 +68,14 @@ class UserController extends Controller
             return back();
         } catch (DomainException $e) {
             return back()->withErrors([
-                'name' => $e->getMessage()
+                'name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem, silakan coba lagi"
+                'error',
+                'Terjadi kesalahan sistem, silakan coba lagi'
             );
         }
     }
@@ -90,8 +90,8 @@ class UserController extends Controller
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem, silakan coba lagi"
+                'error',
+                'Terjadi kesalahan sistem, silakan coba lagi'
             );
         }
     }

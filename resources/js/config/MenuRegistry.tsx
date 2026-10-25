@@ -6,6 +6,7 @@ import { PiFolderOpen, PiUsers, PiChalkboardTeacher, PiBuildingApartment } from 
 import { RiUserSettingsLine } from "react-icons/ri";
 import { LiaFileAltSolid } from "react-icons/lia";
 import { TbHistoryToggle } from "react-icons/tb";
+import { LuKeyRound, LuUpload, LuClipboardList } from "react-icons/lu";
 
 type MenuContext = {
     subjectId?: string;
@@ -91,6 +92,36 @@ export const MENU = {
         name: "Profil Saya",
         icon: <RiUserSettingsLine size={22} />,
         path: "/profil",
+    },
+
+    pin_batch: {
+        name: "PIN Batch",
+        icon: <LuKeyRound size={22} />,
+        path: "/pin-batch",
+    },
+
+    import_student: {
+        name: "Import Siswa",
+        icon: <LuUpload size={22} />,
+        path: "/import-siswa",
+    },
+
+    student_dashboard: {
+        name: "Dashboard",
+        icon: <BiHomeAlt2 size={22} />,
+        path: "/student/dashboard",
+    },
+
+    batch_assigned: {
+        name: "Batch Skrining",
+        icon: <LuClipboardList size={22} />,
+        path: "/pin-batch",
+    },
+
+    admin_pin_batch: {
+        name: "Monitoring Batch",
+        icon: <LuKeyRound size={22} />,
+        path: "/admin/pin-batch",
     },
 } as const satisfies Record<string, MenuItem>;
 

@@ -1,5 +1,6 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
+import { toast } from "sonner";
 
 import Backdrop from "@/Layouts/Backdrop";
 import { SidebarProvider, useSidebar } from "@/Context/SidebarContext";
@@ -8,13 +9,19 @@ import AppHeader from "@/shared/components/app/AppHeader";
 import AppSidebar from "@/shared/components/app/AppSidebar";
 
 import { getSidebarConfig } from "@/config/sidebar.config";
+import { PageProps } from "@/types";
 
 function LayoutContent({ children, title }: PropsWithChildren<{ title: string }>) {
-    const { auth }: any = usePage().props;
+    const { auth, flash } = usePage<PageProps>().props;
     const role = auth?.user?.role;
 
     const navItems = getSidebarConfig(role);
     const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error)   toast.error(flash.error);
+    }, [flash?.success, flash?.error]);
 
     return (
         <div className="min-h-screen xl:flex bg-netral-200">
@@ -27,7 +34,7 @@ function LayoutContent({ children, title }: PropsWithChildren<{ title: string }>
                     } ${isMobileOpen ? "ml-0" : ""}`}
             >
                 <AppHeader title={title} />
-                <div className="py-4 md:py-6 px-3 mx-auto max-w-(--breakpoint-2xl)">
+                <div className="py-4 px-3 mx-auto max-w-(--breakpoint-2xl)">
                     {children}
                 </div>
             </div>

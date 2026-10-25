@@ -18,13 +18,11 @@ class RoleRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
-            'role' => 'required|in:parent,school,general'
+            'role' => 'required|in:parent,school,general',
         ];
     }
 }

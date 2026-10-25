@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Modules\Subject\Controllers\ClassController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarding.complete', 'permission:manage.class'])->group(function () {
     Route::prefix('daftar-kelas')->group(function () {

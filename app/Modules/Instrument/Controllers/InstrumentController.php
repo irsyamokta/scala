@@ -2,12 +2,12 @@
 
 namespace App\Modules\Instrument\Controllers;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Modules\Instrument\Requests\InstrumentRequest;
+use App\Modules\Instrument\Services\InstrumentService;
 use DomainException;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
-use App\Modules\Instrument\Services\InstrumentService;
-use App\Modules\Instrument\Requests\InstrumentRequest;
+use Throwable;
 
 class InstrumentController extends Controller
 {
@@ -26,7 +26,7 @@ class InstrumentController extends Controller
         };
 
         return Inertia::render($page, [
-            'instruments' => $instruments
+            'instruments' => $instruments,
         ]);
     }
 
@@ -42,7 +42,7 @@ class InstrumentController extends Controller
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'name' => $e->getMessage()
+                'name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 

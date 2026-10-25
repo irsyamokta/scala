@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Modules\Instrument\Controllers\InstrumentController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarding.complete', 'permission:dashboard.superadmin'])
     ->middleware('permission:manage.instrument')

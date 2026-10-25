@@ -1,14 +1,12 @@
+import { useState } from "react";
 import { router } from "@inertiajs/react";
-import { useDelete } from "@/shared/hooks/useDelete";
+import { LuPlus, LuTrash2 } from "react-icons/lu";
 
 import { SubjectCardProps } from "@/types/subject";
-
+import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import FilterBar from "@/shared/components/filter/FilterBar";
 import Button from "@/shared/components/ui/button/Button";
-import SubjectCard from "@/shared/components/card/SubjectCard";
-import EmptyState from "@/shared/components/empty/EmptyState";
-
-import { LuPlus } from "react-icons/lu";
+import SubjectStudentTable from "../table/SubjectStudentTable";
 
 export default function SubjectStudentCard({
     subjects,
@@ -18,38 +16,61 @@ export default function SubjectStudentCard({
     onCreate,
     onEdit,
 }: SubjectCardProps) {
+    const [selected, setSelected] = useState<string[]>([]);
 
-    const { handleDelete } = useDelete({
-        routeName: "subject.destroy",
-        confirmTitle: "Hapus Data Siswa?",
-        confirmText: "Jika Anda menghapus data siswa ini, maka seluruh riwayat tes yang sudah dilakukan akan ikut terhapus.",
-        successMessage: "Data siswa berhasil dihapus",
-        errorMessage: "Gagal menghapus data siswa",
-    });
+    const allIds     = subjects.map((s) => s.id);
+    const allChecked = allIds.length > 0 && allIds.every((id) => selected.includes(id));
+
+    function toggleAll() {
+        setSelected(allChecked ? [] : allIds);
+    }
+
+    function toggleOne(id: string) {
+        setSelected((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    }
+
+    async function handleDeleteSelected() {
+        const confirmed = await ConfirmationDialog({
+            title: `Hapus ${selected.length} Siswa?`,
+            text: "Seluruh riwayat tes siswa yang dipilih akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.",
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+        });
+        if (!confirmed) return;
+
+        for (const id of selected) {
+            await new Promise<void>((resolve) => {
+                router.delete(route("subject.destroy", id), {
+                    preserveState: true,
+                    onFinish: () => resolve(),
+                });
+            });
+        }
+
+        setSelected([]);
+        router.reload();
+    }
 
     return (
         <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
 
             {/* Header */}
             <div className="w-full flex flex-col lg:flex-row items-start justify-between gap-4">
-
                 <div>
-                    <h2 className="text-lg font-semibold text-netral-900">
-                        Daftar Siswa
-                    </h2>
-
+                    <h2 className="text-lg font-semibold text-netral-900">Daftar Siswa</h2>
                     <p className="text-sm text-netral-600 mt-1">
                         Berikut adalah daftar siswa yang dapat Anda lakukan tes skrining.
                     </p>
                 </div>
 
                 <div className="w-full lg:w-auto flex flex-col md:flex-row items-center gap-2">
-                    {/* Filter Subject */}
                     <FilterBar
-                        className="w-full lg:flex-1"
+                        className="w-full lg:w-2/3"
                         search={{
                             value: filters.search,
-                            placeholder: "Cari siswa",
+                            placeholder: "Cari nama atau NIS...",
                             onChange: (value) => setFilter("search", value),
                         }}
                         filters={[
@@ -74,39 +95,38 @@ export default function SubjectStudentCard({
                         ]}
                     />
 
-                    {/* Add Subject */}
+                    {selected.length > 0 && (
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            startIcon={<LuTrash2 size={15} />}
+                            onClick={handleDeleteSelected}
+                            className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap shrink-0"
+                        >
+                            Hapus ({selected.length})
+                        </Button>
+                    )}
+
                     <Button
                         size="lg"
                         startIcon={<LuPlus />}
                         onClick={onCreate}
-                        className="text-sm w-full md:w-1/2 lg:w-auto"
+                        className="text-sm w-full md:w-auto whitespace-nowrap shrink-0"
                     >
                         Tambah Siswa
                     </Button>
                 </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-6">
-                {subjects.length > 0 ? (
-                    subjects.map((subject) => (
-                        <SubjectCard
-                            key={subject.id}
-                            name={subject.name}
-                            gender={subject.gender}
-                            age={subject.age}
-                            classLevel={subject.class?.class_name}
-                            lastResult={subject.last_result ?? "-"}
-                            onDelete={() => handleDelete(subject.id)}
-                            onEdit={() => onEdit(subject)}
-                            onClick={() => router.visit(route("subject.school.show", subject.id))}
-                        />
-                    ))
-                ) : (
-                    <div className="col-span-full">
-                        <EmptyState title="Tidak ditemukan data siswa!" />
-                    </div>
-                )}
-            </div>
+            {/* Table */}
+            <SubjectStudentTable
+                subjects={subjects}
+                selected={selected}
+                allChecked={allChecked}
+                onToggleAll={toggleAll}
+                onToggleOne={toggleOne}
+                onEdit={onEdit}
+            />
         </div>
     );
 }

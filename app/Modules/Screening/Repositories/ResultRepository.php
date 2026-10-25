@@ -20,12 +20,14 @@ class ResultRepository
     public function updateSdq(SdqResult $result, array $data)
     {
         $result->update($data);
+
         return $result;
     }
 
     public function updateSrq(SrqResult $result, array $data)
     {
         $result->update($data);
+
         return $result;
     }
 }

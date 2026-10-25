@@ -513,3 +513,75 @@
 .swal-btn-secondary:hover {
     background: #E6E6E6;
 }
+
+/* ── Flatpickr time-only popup: compact width ── */
+.flatpickr-calendar.hasTime.noCalendar {
+    width: 130px !important;
+    min-width: 130px !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time {
+    max-width: 130px;
+}
+
+/* ── Flatpickr primary color override (#0c968d) ── */
+
+/* Hari yang dipilih */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange,
+.flatpickr-day.endRange:hover {
+    background: #0c968d !important;
+    border-color: #0c968d !important;
+    color: #fff !important;
+}
+
+/* Hover hari */
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover {
+    background: #e6f1f1 !important;
+    border-color: #e6f1f1 !important;
+    color: #0c968d !important;
+}
+
+/* Hari "today" (belum dipilih) */
+.flatpickr-day.today {
+    border-color: #0c968d !important;
+    color: #0c968d !important;
+}
+
+.flatpickr-day.today:hover {
+    background: #0c968d !important;
+    color: #fff !important;
+}
+
+/* Bulan & navigasi */
+.flatpickr-months .flatpickr-month,
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: #0c968d !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    color: #0c968d !important;
+}
+
+/* Time picker: warna numInput saat focus */
+.flatpickr-time input:focus,
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:focus,
+.flatpickr-time .flatpickr-am-pm:hover {
+    background: #e6f1f1 !important;
+}
+
+/* Range dalam bulan */
+.flatpickr-day.inRange {
+    background: #e6f1f1 !important;
+    border-color: #e6f1f1 !important;
+    color: #0c968d !important;
+    box-shadow: -5px 0 0 #e6f1f1, 5px 0 0 #e6f1f1 !important;
+}

@@ -29,7 +29,7 @@ class PsychologistNoteRequest extends FormRequest
             'ptsd_symptom_note' => 'nullable|string',
             'psychologist_note' => 'nullable|string',
 
-            'recommendation' => 'required|string'
+            'recommendation' => 'required|string',
         ];
     }
 }

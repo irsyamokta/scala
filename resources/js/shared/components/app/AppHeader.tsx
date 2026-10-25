@@ -1,14 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { usePage, Link } from "@inertiajs/react";
-import { FiSidebar, FiUser, FiLogOut } from "react-icons/fi";
+import { FiSidebar, FiUser, FiLogOut, FiMoon, FiSun, FiBell } from "react-icons/fi";
 
 import { useSidebar } from "@/Context/SidebarContext";
 
 type Props = {
     title: string;
+    onToggleDarkMode?: () => void;
+    isDarkMode?: boolean;
+    onToggleNotifications?: () => void;
+    notificationCount?: number;
 };
 
-const AppHeader: React.FC<Props> = ({ title }) => {
+const AppHeader: React.FC<Props> = ({
+    title,
+    onToggleDarkMode,
+    isDarkMode = false,
+    onToggleNotifications,
+    notificationCount = 0,
+}) => {
     const { toggleSidebar, toggleMobileSidebar } = useSidebar();
     const { auth }: any = usePage().props;
 
@@ -63,12 +73,41 @@ const AppHeader: React.FC<Props> = ({ title }) => {
                 </div>
 
                 {/* RIGHT */}
-                <div className="relative" ref={dropdownRef}>
+                <div className="flex items-center gap-2">
+
+                    {/* Dark mode toggle */}
+                    <button
+                        onClick={onToggleDarkMode}
+                        title={isDarkMode ? "Beralih ke Light Mode" : "Beralih ke Dark Mode"}
+                        className="flex items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
+                    >
+                        {isDarkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
+                    </button>
+
+                    {/* Notification bell */}
+                    <button
+                        onClick={onToggleNotifications}
+                        title="Notifikasi"
+                        className="relative flex items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
+                    >
+                        <FiBell size={18} />
+                        {notificationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                                <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                                    {notificationCount > 9 ? "9+" : notificationCount}
+                                </span>
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Profile dropdown */}
+                    <div className="relative" ref={dropdownRef}>
 
                     {/* Avatar button */}
                     <button
                         onClick={() => setOpen(!open)}
-                        className="flex items-center justify-center w-10 h-10 border rounded-lg hover:bg-netral-100"
+                        className="flex items-center justify-center w-10 h-10 border rounded-lg hover:bg-netral-200"
                     >
                         <FiUser size={18} />
                     </button>
@@ -100,6 +139,7 @@ const AppHeader: React.FC<Props> = ({ title }) => {
                             </Link>
                         </div>
                     )}
+                    </div>
                 </div>
             </div>
         </header>

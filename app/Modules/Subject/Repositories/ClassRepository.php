@@ -41,6 +41,7 @@ class ClassRepository
     public function update(Clazz $class, array $data)
     {
         $class->update($data);
+
         return $class;
     }
 

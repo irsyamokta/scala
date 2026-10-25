@@ -14,15 +14,15 @@ class ScreeningRequest extends FormRequest
     public function rules()
     {
         return [
-            "subject_id" => "required|uuid|exists:subjects,id",
+            'subject_id' => 'required|uuid|exists:subjects,id',
 
-            "instrument" => "required|in:SDQ,SRQ",
+            'instrument' => 'required|in:SDQ,SRQ',
 
-            "answers" => "required|array|min:1",
+            'answers' => 'required|array|min:1',
 
-            "answers.*.question_id" => "required|uuid|exists:questions,id",
+            'answers.*.question_id' => 'required|uuid|exists:questions,id',
 
-            "answers.*.score" => "required|integer|min:0|max:2"
+            'answers.*.score' => 'required|integer|min:0|max:2',
         ];
     }
 }

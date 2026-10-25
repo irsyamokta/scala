@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
@@ -18,25 +17,27 @@ class UserSeeder extends Seeder
         $superadmin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'id' => (string) Str::uuid(),
-                'name' => 'Administrator',
-                'password' => Hash::make('Password123!'),
-                'email_verified_at' => now(),
-                'role' => 'superadmin',
+                'name'                    => 'Administrator',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'superadmin',
                 'onboarding_completed_at' => now(),
             ]
         );
+
+        if (! $superadmin->wasRecentlyCreated) {
+            $superadmin->id = $superadmin->id; // tetap UUID lama
+        }
 
         $superadmin->assignRole('superadmin');
 
         $parent = User::updateOrCreate(
             ['email' => 'parent@example.com'],
             [
-                'id' => (string) Str::uuid(),
-                'name' => 'Sarinah',
-                'password' => Hash::make('Password123!'),
-                'email_verified_at' => now(),
-                'role' => 'parent',
+                'name'                    => 'Sarinah',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'parent',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -46,11 +47,10 @@ class UserSeeder extends Seeder
         $school = User::updateOrCreate(
             ['email' => 'school@example.com'],
             [
-                'id' => (string) Str::uuid(),
-                'name' => 'Ahmad',
-                'password' => Hash::make('Password123!'),
-                'email_verified_at' => now(),
-                'role' => 'school',
+                'name'                    => 'Ahmad',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'school',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -60,11 +60,10 @@ class UserSeeder extends Seeder
         $general = User::updateOrCreate(
             ['email' => 'general@example.com'],
             [
-                'id' => (string) Str::uuid(),
-                'name' => 'Hasbi',
-                'password' => Hash::make('Password123!'),
-                'email_verified_at' => now(),
-                'role' => 'general',
+                'name'                    => 'Hasbi',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'general',
                 'onboarding_completed_at' => now(),
             ]
         );
@@ -74,15 +73,28 @@ class UserSeeder extends Seeder
         $psychologist = User::updateOrCreate(
             ['email' => 'psychologist@example.com'],
             [
-                'id' => (string) Str::uuid(),
-                'name' => 'Lina',
-                'password' => Hash::make('Password123!'),
-                'email_verified_at' => now(),
-                'role' => 'psychologist',
+                'name'                    => 'Lina',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'psychologist',
                 'onboarding_completed_at' => now(),
             ]
         );
 
         $psychologist->assignRole('psychologist');
+
+        $student = User::updateOrCreate(
+            ['email' => 'student@example.com'],
+            [
+                'name'                    => 'Budi Santoso',
+                'password'                => Hash::make('Password123!'),
+                'email_verified_at'       => now(),
+                'role'                    => 'student',
+                // Siswa tidak melewati onboarding biasa; langsung di-set completed
+                'onboarding_completed_at' => now(),
+            ]
+        );
+
+        $student->assignRole('student');
     }
 }

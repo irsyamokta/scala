@@ -19,7 +19,7 @@ class UserRepository
                 if ($user->role === 'parent') {
                     $children = $user->subjects
                         ->where('is_self', false)
-                        ->map(fn($s) => [
+                        ->map(fn ($s) => [
                             'name' => $s->name,
                             'gender' => $s->gender,
                             'age' => $s->age,
@@ -32,7 +32,7 @@ class UserRepository
                 if ($user->role === 'school') {
                     $students = $user->subjects
                         ->where('is_self', false)
-                        ->map(fn($s) => [
+                        ->map(fn ($s) => [
                             'name' => $s->name,
                             'gender' => $s->gender,
                             'age' => $s->age,
@@ -89,7 +89,7 @@ class UserRepository
             )
             ->with([
                 'selfSubject:id,owner_user_id,gender,age,is_self',
-                'subjects:id,owner_user_id,name,gender,age,is_self'
+                'subjects:id,owner_user_id,name,gender,age,is_self',
             ])
             ->where('role', '!=', 'superadmin')
             ->when($search, function ($query) use ($search) {
@@ -129,6 +129,7 @@ class UserRepository
     public function update(User $user, array $data)
     {
         $user->update($data);
+
         return $user;
     }
 

@@ -2,10 +2,10 @@
 
 namespace App\Modules\User\Services;
 
+use App\Modules\User\Repositories\UserRepository;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Modules\User\Repositories\UserRepository;
 
 class UserService
 {
@@ -28,8 +28,9 @@ class UserService
 
     public function createUser(array $data)
     {
-        if ($this->repo->existsByEmail($data['email']))
-            throw new DomainException("Email sudah terdaftar");
+        if ($this->repo->existsByEmail($data['email'])) {
+            throw new DomainException('Email sudah terdaftar');
+        }
 
         return DB::transaction(function () use ($data) {
 
@@ -37,9 +38,9 @@ class UserService
 
             $user = $this->repo->create([
                 ...$data,
-                "password" => Hash::make($data["password"]),
-                "email_verified_at" => now(),
-                "onboarding_completed_at" => now()
+                'password' => Hash::make($data['password']),
+                'email_verified_at' => now(),
+                'onboarding_completed_at' => now(),
             ]);
 
             $user->assignRole($role);
@@ -55,10 +56,11 @@ class UserService
         if (
             isset($data['email']) &&
             $this->repo->existsByEmailExcept($id, $data['email'])
-        )
-            throw new DomainException("Email sudah terdaftar");
+        ) {
+            throw new DomainException('Email sudah terdaftar');
+        }
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);

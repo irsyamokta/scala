@@ -17,6 +17,7 @@ interface DatePickerProps {
 
     required?: boolean;
     disabled?: boolean;
+    hideIcon?: boolean;
 
     hint?: string;
     error?: string;
@@ -34,6 +35,7 @@ export default function DatePicker({
     placeholder,
     required = false,
     disabled = false,
+    hideIcon = false,
     hint,
     error,
     className = "",
@@ -128,12 +130,15 @@ export default function DatePicker({
             focus:outline-none focus:ring-1
             disabled:bg-gray-100 disabled:cursor-not-allowed
             bg-transparent text-gray-800
+            ${hideIcon ? "" : "pr-10"}
             ${borderState}`}
                 />
 
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2">
-                    <LuCalendar className="size-5" />
-                </span>
+                {!hideIcon && (
+                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2">
+                        <LuCalendar className="size-5" />
+                    </span>
+                )}
             </div>
 
             {/* HINT / ERROR */}

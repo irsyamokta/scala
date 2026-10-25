@@ -51,13 +51,13 @@ class ScreeningRepository
 
                 $query->where(function ($q) use ($sdqCategories, $srqCategories) {
 
-                    if (!empty($sdqCategories)) {
+                    if (! empty($sdqCategories)) {
                         $q->whereHas('sdqResult', function ($sdq) use ($sdqCategories) {
                             $sdq->whereIn('overall_category', $sdqCategories);
                         });
                     }
 
-                    if (!empty($srqCategories)) {
+                    if (! empty($srqCategories)) {
 
                         $q->orWhereHas('srqResult', function ($srq) use ($srqCategories) {
 
@@ -87,7 +87,7 @@ class ScreeningRepository
             'instrumentType',
             'answers',
             'sdqResult',
-            'srqResult'
+            'srqResult',
         ])->findOrFail($id);
     }
 

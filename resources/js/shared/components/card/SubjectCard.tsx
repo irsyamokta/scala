@@ -4,8 +4,10 @@ import Badge from "@/shared/components/ui/badge/Badge";
 
 type SubjectCardProps = {
     name: string;
+    nis?: string;
     gender: string;
     age: string;
+    tanggal_lahir?: string;
     classLevel?: string | number;
     lastResult: string;
     is_self?: boolean;
@@ -16,8 +18,10 @@ type SubjectCardProps = {
 
 const SubjectCard: React.FC<SubjectCardProps> = ({
     name,
+    nis,
     gender,
     age,
+    tanggal_lahir,
     classLevel,
     lastResult,
     is_self,
@@ -46,20 +50,38 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
                 </div>
             </div>
 
-            {/* Gender Badge */}
-            <div>
+            {/* NIS + Gender Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
                 <Badge
                     size="sm"
                     color={gender === "female" ? "pink" : "info"}
                 >
                     {gender === "female" ? "Perempuan" : "Laki-laki"}
                 </Badge>
+                {nis && (
+                    <span className="text-xs text-netral-500 bg-netral-200 rounded-full px-2 py-0.5">
+                        NIS: {nis}
+                    </span>
+                )}
             </div>
 
             {/* Info Section */}
-            <div className="mt-4 grid grid-cols-3 justify-between gap-6">
+            <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="flex flex-col">
-                    <span className="text-sm text-netral-600">Usia</span>
+                    <span className="text-xs text-netral-500">Tanggal Lahir</span>
+                    <span className="text-sm font-medium text-netral-900">
+                        {tanggal_lahir
+                            ? new Date(tanggal_lahir).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                              })
+                            : "-"}
+                    </span>
+                </div>
+
+                <div className="flex flex-col">
+                    <span className="text-xs text-netral-500">Usia</span>
                     <span className="text-sm font-medium text-netral-900">
                         {age} Tahun
                     </span>
@@ -67,17 +89,15 @@ const SubjectCard: React.FC<SubjectCardProps> = ({
 
                 {classLevel && (
                     <div className="flex flex-col">
-                        <span className="text-sm text-netral-600">Kelas</span>
+                        <span className="text-xs text-netral-500">Kelas</span>
                         <span className="text-sm font-medium text-netral-900">
                             {classLevel}
                         </span>
                     </div>
                 )}
 
-                <div className={`${classLevel ? "col-span-1" : "col-span-2"} flex flex-col`}>
-                    <span className="text-sm text-netral-600">
-                        Hasil Terakhir
-                    </span>
+                <div className="flex flex-col">
+                    <span className="text-xs text-netral-500">Hasil Terakhir</span>
                     <span className="text-sm font-medium text-netral-900">
                         {lastResult ?? "-"}
                     </span>

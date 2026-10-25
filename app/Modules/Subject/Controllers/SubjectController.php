@@ -2,14 +2,14 @@
 
 namespace App\Modules\Subject\Controllers;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Modules\Subject\Requests\SubjectRequest;
+use App\Modules\Subject\Services\ClassService;
+use App\Modules\Subject\Services\SubjectService;
 use DomainException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
-use App\Modules\Subject\Services\ClassService;
-use App\Modules\Subject\Services\SubjectService;
-use App\Modules\Subject\Requests\SubjectRequest;
+use Throwable;
 
 class SubjectController extends Controller
 {
@@ -48,7 +48,7 @@ class SubjectController extends Controller
         $classes = $this->class->getClasses($user->id);
 
         return Inertia::render('Dashboard/School/Subject/Index', [
-            'classes' => $classes->map(fn($c) => [
+            'classes' => $classes->map(fn ($c) => [
                 'value' => (string) $c->id,
                 'label' => $c->class_name,
             ]),
@@ -72,20 +72,20 @@ class SubjectController extends Controller
         if ($user->role == 'parent') {
             return Inertia::render('Dashboard/Parent/Subject/Show', [
                 'subject' => $subject,
-                'screenings' => $screenings
+                'screenings' => $screenings,
             ]);
         }
 
         if ($user->role == 'school') {
             return Inertia::render('Dashboard/School/Subject/Show', [
                 'subject' => $subject,
-                'screenings' => $screenings
+                'screenings' => $screenings,
             ]);
         }
 
         return Inertia::render('Dashboard/General/Subject/Show', [
             'subject' => $subject,
-            'screenings' => $screenings
+            'screenings' => $screenings,
         ]);
     }
 
@@ -95,22 +95,22 @@ class SubjectController extends Controller
 
             $this->service->createSubject([
                 ...$request->validated(),
-                'owner_user_id' => auth()->id()
+                'owner_user_id' => auth()->id(),
             ], auth()->user()->role);
 
             return back();
         } catch (DomainException $e) {
 
             return back()->withErrors([
-                'class_id' => $e->getMessage()
+                'class_id' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
 
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem"
+                'error',
+                'Terjadi kesalahan sistem'
             );
         }
     }
@@ -127,8 +127,8 @@ class SubjectController extends Controller
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem"
+                'error',
+                'Terjadi kesalahan sistem'
             );
         }
     }
@@ -145,8 +145,8 @@ class SubjectController extends Controller
             report($e);
 
             return back()->with(
-                "error",
-                "Terjadi kesalahan sistem"
+                'error',
+                'Terjadi kesalahan sistem'
             );
         }
     }

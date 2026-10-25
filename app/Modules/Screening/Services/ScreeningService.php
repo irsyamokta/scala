@@ -2,16 +2,15 @@
 
 namespace App\Modules\Screening\Services;
 
-use DomainException;
-use Illuminate\Support\Facades\DB;
-use App\Models\Subject;
 use App\Models\Question;
-
+use App\Models\Subject;
 use App\Modules\Screening\Repositories\AnswerRepository;
-use App\Modules\Screening\Repositories\ScreeningRepository;
 use App\Modules\Screening\Repositories\InstrumentRepository;
+use App\Modules\Screening\Repositories\ScreeningRepository;
 use App\Modules\Screening\Repositories\SdqResultRepository;
 use App\Modules\Screening\Repositories\SrqResultRepository;
+use DomainException;
+use Illuminate\Support\Facades\DB;
 
 class ScreeningService
 {
@@ -26,6 +25,165 @@ class ScreeningService
     public function getScreenings(?string $search, ?array $categories, int $perPage = 10)
     {
         return $this->screeningRepo->getPaginated($search, $categories, $perPage);
+    }
+
+    /**
+     * Validasi PIN yang dimasukkan siswa.
+     * Kembalikan StudentPin jika valid, lempar DomainException jika tidak.
+     *
+     * Edge cases yang ditangani:
+     * - PIN tidak ditemukan
+     * - PIN bukan milik user yang sedang login
+     * - PIN sudah digunakan
+     * - Batch sudah ditutup
+     * - Batch sudah expired
+     * - Siswa tidak punya Subject (is_self = true) — belum punya profil
+     *
+     * @throws DomainException
+     */
+    public function validatePin(string $pinCode, string $studentUserId): \App\Models\StudentPin
+    {
+        $pinCode = strtoupper(trim($pinCode));
+
+        if (strlen($pinCode) !== 8) {
+            throw new DomainException('Format PIN tidak valid. PIN harus 8 karakter.');
+        }
+
+        $pin = \App\Models\StudentPin::with('batch.instrument')
+            ->where('pin_code', $pinCode)
+            ->first();
+
+        // PIN tidak ada
+        if (! $pin) {
+            throw new DomainException('PIN tidak ditemukan atau bukan milik Anda.');
+        }
+
+        // Pastikan PIN milik subject yang dimiliki user ini
+        $subjectIds = \App\Models\Subject::where('owner_user_id', $studentUserId)
+            ->pluck('id');
+
+        if (! $subjectIds->contains($pin->subject_id)) {
+            throw new DomainException('PIN tidak ditemukan atau bukan milik Anda.');
+        }
+
+        if ($pin->isUsed()) {
+            throw new DomainException('PIN ini sudah pernah digunakan. Hubungi Guru BK jika ada kesalahan.');
+        }
+
+        if (! $pin->batch) {
+            throw new DomainException('Data batch tidak ditemukan. Hubungi Guru BK.');
+        }
+
+        if ($pin->batch->status === 'closed') {
+            throw new DomainException('Batch PIN ini sudah ditutup oleh Guru BK.');
+        }
+
+        if ($pin->batch->isExpired()) {
+            $exp = $pin->batch->expires_at->translatedFormat('d F Y, H:i');
+            throw new DomainException("PIN ini sudah kedaluwarsa sejak {$exp}.");
+        }
+
+        return $pin;
+    }
+
+    /**
+     * Ambil data form tes berdasarkan PIN (untuk siswa).
+     *
+     * @throws DomainException
+     */
+    public function getScreeningFormByPin(string $pinCode, string $studentUserId): array
+    {
+        $pin = $this->validatePin($pinCode, $studentUserId);
+        $instrument = $pin->batch->instrument;
+
+        $subject = Subject::where('owner_user_id', $studentUserId)
+            ->where('is_self', true)
+            ->first();
+
+        if (! $subject) {
+            throw new DomainException(
+                'Profil siswa tidak ditemukan. Hubungi Guru BK untuk memastikan data Anda sudah diimport dengan benar.'
+            );
+        }
+
+        $typeName = $this->resolveType('student', $instrument->name);
+
+        $type = $this->instrumentRepo->findTypeByName($instrument->id, $typeName);
+
+        $this->validateAge($subject->age, $type->min_age, $type->max_age);
+
+        $questions = $this->instrumentRepo->getQuestions($type->id);
+
+        return [
+            'pin' => ['id' => $pin->id, 'pin_code' => $pin->pin_code],
+            'subject' => $subject,
+            'instrument' => $instrument,
+            'instrument_type' => $type,
+            'questions' => $questions,
+        ];
+    }
+
+    /**
+     * Submit jawaban tes via PIN (khusus alur siswa).
+     *
+     * @throws DomainException
+     */
+    public function submitByPin(array $data, string $studentUserId): \App\Models\Screening
+    {
+        $pin = $this->validatePin($data['pin_code'], $studentUserId);
+
+        $instrument = $pin->batch->instrument;
+
+        $subject = Subject::where('owner_user_id', $studentUserId)
+            ->where('is_self', true)
+            ->firstOrFail();
+
+        $typeName = $this->resolveType('student', $instrument->name);
+
+        $type = $this->instrumentRepo->findTypeByName($instrument->id, $typeName);
+
+        $this->validateAge($subject->age, $type->min_age, $type->max_age);
+
+        return DB::transaction(function () use ($data, $studentUserId, $pin, $subject, $instrument, $type, $typeName) {
+
+            $questionIds = collect($data['answers'])->pluck('question_id');
+
+            $questionMap = Question::whereIn('id', $questionIds)
+                ->pluck('question_number', 'id');
+
+            $screening = $this->screeningRepo->create([
+                'subject_id' => $subject->id,
+                'reporter_user_id' => $studentUserId,
+                'instrument_id' => $instrument->id,
+                'type_id' => $type->id,
+                'pin_id' => $pin->id,
+                'date_taken' => now(),
+                'status' => 'Menunggu Evaluasi',
+            ]);
+
+            $answers = collect($data['answers'])->map(fn ($ans) => [
+                'screening_id' => $screening->id,
+                'question_id' => $ans['question_id'],
+                'raw_score' => $ans['score'],
+            ])->toArray();
+
+            $this->answerRepo->insertMany($answers);
+
+            if ($instrument->name === 'SDQ') {
+                $this->calculateSDQ($screening->id, $answers, $typeName, $questionMap);
+            }
+
+            if ($instrument->name === 'SRQ') {
+                $this->calculateSRQ($screening->id, $answers, $questionMap);
+            }
+
+            $pin->update([
+                'used_at' => now(),
+                'screening_id' => $screening->id,
+            ]);
+
+            return $screening;
+        });
     }
 
     public function getScreeningForm($instrumentName, $subjectId, $user)
@@ -51,7 +209,7 @@ class ScreeningService
             'subject' => $subject,
             'instrument' => $instrument,
             'instrument_type' => $type,
-            'questions' => $questions
+            'questions' => $questions,
         ];
     }
 
@@ -87,14 +245,14 @@ class ScreeningService
                 'instrument_id' => $instrument->id,
                 'type_id' => $type->id,
                 'date_taken' => now(),
-                'status' => 'Menunggu Evaluasi'
+                'status' => 'Menunggu Evaluasi',
             ]);
 
             $answers = collect($data['answers'])->map(function ($ans) use ($screening) {
                 return [
                     'screening_id' => $screening->id,
                     'question_id' => $ans['question_id'],
-                    'raw_score' => $ans['score']
+                    'raw_score' => $ans['score'],
                 ];
             })->toArray();
 
@@ -120,7 +278,8 @@ class ScreeningService
                 'parent' => 'parent_report',
                 'school' => 'teacher_report',
                 'general' => 'youth_self_report',
-                default => throw new DomainException("Role tidak diperbolehkan"),
+                'student' => 'youth_self_report',  // Siswa melaporkan diri sendiri
+                default => throw new DomainException('Role tidak diperbolehkan'),
             };
         }
 
@@ -128,13 +287,13 @@ class ScreeningService
             return 'self_report';
         }
 
-        throw new DomainException("Instrument tidak dikenali");
+        throw new DomainException('Instrument tidak dikenali');
     }
 
     private function validateAge($age, $min, $max)
     {
         if ($age < $min || $age > $max) {
-            throw new DomainException("Usia tidak sesuai dengan instrumen");
+            throw new DomainException('Usia tidak sesuai dengan instrumen');
         }
     }
 
@@ -142,6 +301,7 @@ class ScreeningService
     {
         $answers = collect($answers)->map(function ($a) use ($questionMap) {
             $a['question_number'] = $questionMap[$a['question_id']];
+
             return $a;
         });
 
@@ -181,14 +341,14 @@ class ScreeningService
             'prosocial_score' => $prosocial,
 
             'total_difficulties' => $total,
-            'overall_category' => $category
+            'overall_category' => $category,
         ]);
 
         Subject::whereHas('screenings', function ($q) use ($screeningId) {
             $q->where('id', $screeningId);
         })->update([
             'last_result' => $category,
-            'has_previous_screening' => true
+            'has_previous_screening' => true,
         ]);
     }
 
@@ -198,6 +358,7 @@ class ScreeningService
             ->where('raw_score', 1)
             ->map(function ($a) use ($questionMap) {
                 $a['question_number'] = $questionMap[$a['question_id']];
+
                 return $a;
             });
 
@@ -233,14 +394,14 @@ class ScreeningService
             'gme_indication' => $gme >= 5,
             'substance_use_indication' => $substanceUse,
             'psychotic_symptom_indication' => $psychotic,
-            'ptsd_symptom_indication' => $ptsd
+            'ptsd_symptom_indication' => $ptsd,
         ]);
 
         Subject::whereHas('screenings', function ($q) use ($screeningId) {
             $q->where('id', $screeningId);
         })->update([
             'last_result' => $status,
-            'has_previous_screening' => true
+            'has_previous_screening' => true,
         ]);
     }
 
@@ -251,7 +412,7 @@ class ScreeningService
             $instrumentId
         );
 
-        if (!$lastScreening) {
+        if (! $lastScreening) {
             return;
         }
 

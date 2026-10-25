@@ -2,9 +2,9 @@
 
 namespace App\Modules\Subject\Services;
 
+use App\Modules\Subject\Repositories\ClassRepository;
 use DomainException;
 use Illuminate\Support\Facades\DB;
-use App\Modules\Subject\Repositories\ClassRepository;
 
 class ClassService
 {
@@ -22,8 +22,9 @@ class ClassService
         if ($this->repo->existsByName(
             $data['class_name'],
             $data['school_user_id']
-        ))
-            throw new DomainException("Nama kelas sudah ada");
+        )) {
+            throw new DomainException('Nama kelas sudah ada');
+        }
 
         return DB::transaction(function () use ($data) {
             return $this->repo->create($data);
@@ -41,8 +42,9 @@ class ClassService
                 $data['class_name'],
                 $class->school_user_id
             )
-        )
-            throw new DomainException("Nama kelas sudah ada");
+        ) {
+            throw new DomainException('Nama kelas sudah ada');
+        }
 
         return $this->repo->update($class, $data);
     }
@@ -51,8 +53,9 @@ class ClassService
     {
         $class = $this->repo->find($id);
 
-        if ($class->subjects()->count() > 0)
-            throw new DomainException("Kelas masih memiliki siswa");
+        if ($class->subjects()->count() > 0) {
+            throw new DomainException('Kelas masih memiliki siswa');
+        }
 
         return $this->repo->delete($class);
     }

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Subject\Repositories;
 
-use App\Models\Subject;
 use App\Models\Screening;
+use App\Models\Subject;
 
 class SubjectRepository
 {
@@ -33,7 +33,10 @@ class SubjectRepository
             })
 
             ->when($search, function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('nis', 'like', "%{$search}%");
+                });
             })
 
             ->when($genders, function ($q) use ($genders) {
@@ -89,6 +92,7 @@ class SubjectRepository
     public function update(Subject $subject, array $data)
     {
         $subject->update($data);
+
         return $subject;
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 /**
  * @property string $id
@@ -21,7 +21,9 @@ class InstrumentType extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'instrument_types';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

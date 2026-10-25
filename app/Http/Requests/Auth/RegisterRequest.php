@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\RateLimiter;
 
 class RegisterRequest extends FormRequest
 {
@@ -39,6 +39,6 @@ class RegisterRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return 'register|' . $this->ip();
+        return 'register|'.$this->ip();
     }
 }

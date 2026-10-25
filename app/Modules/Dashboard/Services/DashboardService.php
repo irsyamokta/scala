@@ -86,7 +86,7 @@ class DashboardService
         }
 
         return [
-            'subjects' => $subjects->map(fn($s) => [
+            'subjects' => $subjects->map(fn ($s) => [
                 'value' => $s->id,
                 'label' => $s->name,
             ]),
@@ -115,12 +115,12 @@ class DashboardService
                 [
                     'value' => 'all',
                     'label' => 'Semua Kelas',
-                ]
+                ],
             ])->merge(
                 Clazz::where('school_user_id', $userId)
                     ->orderBy('class_name')
                     ->pluck('class_name')
-                    ->map(fn($c) => [
+                    ->map(fn ($c) => [
                         'value' => $c,
                         'label' => $c,
                     ])
@@ -138,7 +138,9 @@ class DashboardService
     {
         $subject = $this->repo->selfSubject($userId);
 
-        if (!$subject) return [];
+        if (! $subject) {
+            return [];
+        }
 
         $trendRaw = $this->repo->subjectCategoryTrend($subject->id);
 
@@ -185,8 +187,8 @@ class DashboardService
             $weekEnd = $current->copy()->endOfWeek();
 
             $weeks[] = [
-                'value' => $weekStart->toDateString() . '|' . $weekEnd->toDateString(),
-                'label' => 'Minggu ' . $i,
+                'value' => $weekStart->toDateString().'|'.$weekEnd->toDateString(),
+                'label' => 'Minggu '.$i,
             ];
 
             $current->addWeek();

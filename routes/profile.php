@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Modules\Profile\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarding.complete', 'permission:manage.profile.account'])->group(function () {
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -54,6 +54,11 @@ export default function AppFooter() {
 
                         <ul className="space-y-4 text-netral-600">
                             <li>
+                                <a href="/skrining" className="hover:text-primary">
+                                    Tes Skrining Siswa
+                                </a>
+                            </li>
+                            <li>
                                 <a href="/login" className="hover:text-primary">
                                     Masuk Akun
                                 </a>

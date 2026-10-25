@@ -83,7 +83,7 @@ export default function FilterBar({
 
     return (
         <div
-            className={`flex items-center gap-2 w-full lg:w-1/2 ${className}`}
+            className={`flex items-center gap-2 w-full ${className}`}
         >
             {/* SEARCH */}
             {search && (
