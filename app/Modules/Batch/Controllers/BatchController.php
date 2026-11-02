@@ -89,6 +89,7 @@ class BatchController extends Controller
             return Inertia::render('Dashboard/Psychologist/Batch/Show', [
                 'batch' => $batch,
                 'participants' => $participants,
+                'back_route' => route('batch.index'),
             ]);
         }
 
@@ -96,12 +97,17 @@ class BatchController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $backRoute = $user->role === 'superadmin'
+            ? route('admin.batch.index')
+            : route('batch.index');
+
         return Inertia::render('Dashboard/School/Batch/Show', [
             'batch' => $batch,
             'participants' => $participants,
             'psychologists' => $psychologists,
             'screening_url' => $screeningUrl,
             'qr_code_svg' => $qrCodeSvg,
+            'back_route' => $backRoute,
         ]);
     }
 
@@ -123,10 +129,18 @@ class BatchController extends Controller
     public function assign(AssignPsychologistRequest $request, string $id)
     {
         try {
+            $batch = $this->service->getBatchDetail($id);
+            $user = auth()->user();
+
+            // Superadmin bisa assign ke batch milik sekolah manapun
+            $actingAsSchool = $user->role === 'superadmin'
+                ? $batch->school_user_id
+                : $user->id;
+
             $this->service->assignPsychologist(
                 $id,
                 $request->validated()['psychologist_id'],
-                auth()->id()
+                $actingAsSchool
             );
 
             return back()->with('success', 'Psikolog berhasil di-assign.');

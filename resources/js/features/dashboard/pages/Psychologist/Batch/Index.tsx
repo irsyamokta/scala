@@ -1,15 +1,19 @@
-import { Head, router, usePage } from "@inertiajs/react";
-import {
-    LuKeyRound,
-    LuUsers,
-    LuCircleCheck,
-    LuClock,
-    LuChevronRight,
-    LuClipboardList,
-} from "react-icons/lu";
+import { Head, usePage } from "@inertiajs/react";
+import { LuChevronRight } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
+import Badge from "@/shared/components/ui/badge/Badge";
+import Pagination from "@/shared/components/ui/pagination/Pagination";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableRow,
+} from "@/shared/components/ui/table";
+import { EmptyTable } from "@/shared/components/empty/EmptyTable";
 import { Batch, BatchIndexPageProps } from "@/types/batch";
+import { capitalized } from "@/shared/utils/capitalize";
 
 export default function PsychologistBatchIndex() {
     const { batches } = usePage<BatchIndexPageProps>().props;
@@ -19,125 +23,122 @@ export default function PsychologistBatchIndex() {
             <Head title="Batch Skrining" />
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
-
                 <div className="col-span-12">
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-                            Batch Skrining
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Daftar batch yang di-assign kepada Anda untuk dianalisis.
-                        </p>
+                    <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold text-netral-900">
+                                Batch Skrining
+                            </h2>
+                            <p className="text-sm text-netral-600 mt-1">
+                                Daftar batch yang ditugaskan kepada Anda untuk dianalisis.
+                            </p>
+                        </div>
+
+                        <div className="border border-netral-300 rounded-xl">
+                            <div className="w-full overflow-x-auto overflow-y-visible">
+                                <Table>
+                                    <TableHeader className="border-netral-300 border-b">
+                                        <TableRow>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Label Batch
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Sekolah
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Kelas
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Instrumen
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Progress
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                Status
+                                            </TableCell>
+                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
+                                                {" "}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {batches.data.length === 0 ? (
+                                            <EmptyTable
+                                                colspan={7}
+                                                description="Belum ada batch yang ditugaskan."
+                                            />
+                                        ) : batches.data.map((batch) => (
+                                            <BatchRow key={batch.id} batch={batch} />
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+
+                        <Pagination
+                            links={batches.links}
+                            filters={{}}
+                            routeName="batch.index"
+                        />
                     </div>
-                </div>
-
-                <div className="col-span-12">
-                    {batches.data.length === 0 ? (
-                        <EmptyState />
-                    ) : (
-                        <div className="space-y-3">
-                            {batches.data.map((batch) => (
-                                <BatchCard key={batch.id} batch={batch} />
-                            ))}
-                        </div>
-                    )}
-
-                    {batches.last_page > 1 && (
-                        <div className="mt-4 flex justify-center gap-1">
-                            {batches.links.map((link, i) => (
-                                <button
-                                    key={i}
-                                    disabled={!link.url}
-                                    onClick={() => link.url && router.visit(link.url)}
-                                    className={`min-w-[36px] rounded-lg px-3 py-1.5 text-sm transition ${
-                                        link.active
-                                            ? "bg-primary text-white"
-                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
-                                    }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </DashboardLayout>
     );
 }
 
-function BatchCard({ batch }: { batch: Batch }) {
-    const usedCount  = batch.tested_count ?? 0;
-    const totalCount = batch.total_subjects ?? 0;
-    const pct        = totalCount > 0 ? Math.round((usedCount / totalCount) * 100) : 0;
+function BatchRow({ batch }: { batch: Batch }) {
+    const used  = batch.tested_count ?? 0;
+    const total = batch.total_subjects ?? 0;
+    const pct   = total > 0 ? Math.round((used / total) * 100) : 0;
+    const isClosed = batch.status === "closed";
 
     return (
-        <a
-            href={route("batch.show", batch.id)}
-            className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white px-5 py-4 transition hover:border-primary/30 hover:shadow-sm dark:border-gray-700 dark:bg-gray-900"
-        >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <LuKeyRound size={20} />
-            </div>
-
-            <div className="flex-1 min-w-0">
-                <p className="truncate font-semibold text-gray-800 dark:text-white">
-                    {batch.label}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                        <LuUsers size={11} />
-                        {batch.class?.class_name ?? "-"}
-                    </span>
-                    <span>{batch.instrument?.name ?? "-"}</span>
-                    <span className="text-gray-400">dari {batch.school?.name ?? "-"}</span>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-2 flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700">
+        <TableRow className="border-netral-300 border-b">
+            <TableCell className="px-6 py-4 text-sm font-medium text-netral-900">
+                <p>{batch.label}</p>
+                {batch.expires_at && (
+                    <p className="text-xs text-netral-500 mt-0.5">
+                        Exp: {new Date(batch.expires_at).toLocaleDateString("id-ID")}
+                    </p>
+                )}
+            </TableCell>
+            <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
+                {capitalized(batch.school?.school_name ?? "-") ?? batch.school?.name ?? "-"}
+            </TableCell>
+            <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
+                {batch.class?.class_name ?? "-"}
+            </TableCell>
+            <TableCell className="px-6 py-4 whitespace-nowrap">
+                <Badge color={batch.instrument?.name === "SDQ" ? "success" : "info"} size="sm">
+                    {batch.instrument?.name ?? "-"}
+                </Badge>
+            </TableCell>
+            <TableCell className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                    <div className="w-20 h-1.5 rounded-full bg-netral-200">
                         <div
-                            className="h-1.5 rounded-full bg-primary transition-all"
+                            className="h-1.5 rounded-full bg-primary"
                             style={{ width: `${pct}%` }}
                         />
                     </div>
-                    <span className="text-xs text-gray-500 shrink-0">
-                        {usedCount}/{totalCount} selesai
-                    </span>
+                    <span className="text-xs text-netral-500">{used}/{total}</span>
                 </div>
-            </div>
-
-            <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <BatchStatusBadge status={batch.status} />
-            </div>
-
-            <LuChevronRight size={16} className="shrink-0 text-gray-400" />
-        </a>
-    );
-}
-
-function BatchStatusBadge({ status }: { status: string }) {
-    if (status === "closed") {
-        return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                <LuCircleCheck size={10} />
-                Selesai
-            </span>
-        );
-    }
-    return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700">
-            <LuClock size={10} />
-            Perlu Analisis
-        </span>
-    );
-}
-
-function EmptyState() {
-    return (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-20 text-gray-400 dark:border-gray-700">
-            <LuClipboardList size={40} className="mb-3 opacity-30" />
-            <p className="text-sm">Belum ada batch yang di-assign.</p>
-            <p className="mt-1 text-xs">Hubungi Guru BK untuk meng-assign batch.</p>
-        </div>
+            </TableCell>
+            <TableCell className="px-6 py-4 whitespace-nowrap">
+                <Badge color={isClosed ? "dark" : "warning"} size="sm">
+                    {isClosed ? "Selesai" : "Perlu Analisis"}
+                </Badge>
+            </TableCell>
+            <TableCell className="px-6 py-4 whitespace-nowrap">
+                <a
+                    href={route("batch.show", batch.id)}
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                    Lihat <LuChevronRight size={12} />
+                </a>
+            </TableCell>
+        </TableRow>
     );
 }

@@ -35,7 +35,7 @@ class BatchRepository
         return Batch::with([
             'class:id,class_name',
             'instrument:id,name',
-            'school:id,name',
+            'school:id,name,school_name',
         ])
             ->where('assigned_psychologist_id', $psychologistId)
             ->withCount(['entries as tested_count' => fn ($q) => $q->whereNotNull('used_at')])
@@ -51,7 +51,7 @@ class BatchRepository
             'class:id,class_name',
             'instrument:id,name',
             'assignedPsychologist:id,name',
-            'school:id,name',
+            'school:id,name,school_name',
         ])->findOrFail($id);
 
         $batch->autoCloseIfExpired();
@@ -60,7 +60,7 @@ class BatchRepository
             'class:id,class_name',
             'instrument:id,name',
             'assignedPsychologist:id,name',
-            'school:id,name',
+            'school:id,name,school_name',
         ]);
     }
 

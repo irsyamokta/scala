@@ -13,6 +13,7 @@ interface BatchClass {
 interface BatchSchool {
     id: string;
     name: string;
+    school_name: string | null;
 }
 
 interface BatchPsychologist {
@@ -102,6 +103,7 @@ interface BatchShowPageProps extends PageProps {
     psychologists?: { id: string; name: string }[];
     screening_url: string;
     qr_code_svg: string;
+    back_route: string;
 }
 
 interface StudentDashboardPageProps extends PageProps {

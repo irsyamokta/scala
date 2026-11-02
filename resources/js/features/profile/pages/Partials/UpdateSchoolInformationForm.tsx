@@ -5,7 +5,7 @@ import { UserCardProps } from "@/types/user";
 import SectionTitle from "@/shared/components/ui/SectionTitle";
 import UpdateProfileSchoolModal from "../Components/modal/UpdateProfileSchoolModal";
 
-import { capitalizeEachWord } from "@/shared/utils/capitalize";
+import { capitalizeEachWord, capitalized } from "@/shared/utils/capitalize";
 
 export default function SchoolInformationCard({
     user,
@@ -38,7 +38,7 @@ export default function SchoolInformationCard({
                     <div className="flex justify-between font-medium">
                         <span className="text-netral-600">Nama Sekolah</span>
                         <span className="text-netral-900">
-                            {user.school_name ? capitalizeEachWord(user.school_name) : "(Belum diatur)"}
+                            {user.school_name ? capitalized(user.school_name) : "(Belum diatur)"}
                         </span>
                     </div>
 

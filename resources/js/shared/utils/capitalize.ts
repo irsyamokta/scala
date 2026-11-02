@@ -8,3 +8,6 @@ export const capitalizeEachWord = (str: string): string =>
         .filter(Boolean)
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
+
+export const capitalized = (str: string): string => 
+    str.toUpperCase();

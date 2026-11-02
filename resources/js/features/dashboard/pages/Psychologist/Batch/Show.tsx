@@ -1,211 +1,178 @@
 import { useState } from "react";
-import { Head, usePage } from "@inertiajs/react";
-import {
-    LuArrowLeft,
-    LuKeyRound,
-    LuUsers,
-    LuCircleCheck,
-    LuClock,
-    LuClipboardList,
-} from "react-icons/lu";
+import { Head, Link, usePage } from "@inertiajs/react";
+import { IoIosArrowRoundBack } from "react-icons/io";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { BatchShowPageProps, BatchSubject, BatchParticipant } from "@/types/batch";
-import { ScreeningResult } from "@/types/screening";
+import Button from "@/shared/components/ui/button/Button";
+import Badge from "@/shared/components/ui/badge/Badge";
 import ScreeningDetailModal from "../Screening/Components/modal/ScreeningModal";
+import ParticipantTable from "../../School/Batch/Components/table/ParticipantTable";
+import ParticipantRecapTable from "../../School/Batch/Components/table/ParticipantRecapTable";
+import { capitalized } from "@/shared/utils/capitalize";
+import { BatchShowPageProps } from "@/types/batch";
+import { ScreeningResult } from "@/types/screening";
+
+import Decorative from "@assets/svg/bg-decoration-2.svg";
+
+type TabType = "participants" | "recap";
 
 export default function PsychologistBatchShow() {
-    const { batch, participants } = usePage<BatchShowPageProps>().props;
+    const { batch, participants, back_route } = usePage<BatchShowPageProps>().props;
 
-    const [modalOpen, setModalOpen] = useState(false);
-    const [selected, setSelected] = useState<ScreeningResult | null>(null);
+    const [tab, setTab] = useState<TabType>("participants");
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [selectedScreening, setSelectedScreening] = useState<ScreeningResult | null>(null);
+
+    function handleViewScreening(screening: ScreeningResult) {
+        setSelectedScreening(screening);
+        setDetailOpen(true);
+    }
+
+    const isClosed  = batch.status === "closed";
+    const isExpired = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
 
     const testedCount = participants.filter((s) => s.batch_entries.length > 0).length;
     const doneCount   = participants.filter(
         (s) => s.batch_entries[0]?.screening?.status === "Selesai Dievaluasi"
     ).length;
+    const totalCount  = participants.length;
 
-    function handleView(subject: BatchSubject) {
-        const record = subject.batch_entries[0];
-        if (!record?.screening_id) return;
-        window.location.href = route("screening.batch.screening", {
-            batch: batch.id,
-            screening: record.screening_id,
-        });
-    }
+    const statusColor: "success" | "error" | "dark" =
+        isClosed ? "dark" : isExpired ? "error" : "success";
+    const statusLabel = isClosed ? "Ditutup" : isExpired ? "Kedaluwarsa" : "Aktif";
 
     return (
         <DashboardLayout title={batch.label}>
             <Head title={batch.label} />
 
             <ScreeningDetailModal
-                isOpen={modalOpen}
-                onClose={() => { setModalOpen(false); setSelected(null); }}
-                screening={selected}
+                isOpen={detailOpen}
+                onClose={() => { setDetailOpen(false); setSelectedScreening(null); }}
+                screening={selectedScreening}
             />
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
+                <div className="col-span-12">
+                    <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300 overflow-hidden">
+                        <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
 
-                <div className="col-span-12 flex items-center gap-3">
-                    <a
-                        href={route("batch.index")}
-                        className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition hover:text-primary"
-                    >
-                        <LuArrowLeft size={15} />
-                        Batch Skrining
-                    </a>
-                    <span className="text-gray-300">/</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                        {batch.label}
-                    </span>
-                </div>
-
-                <div className="col-span-12 md:col-span-4">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900 space-y-4">
-                        <h2 className="font-bold text-gray-800 dark:text-white">{batch.label}</h2>
-
-                        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            <p className="flex items-center gap-2">
-                                <LuUsers size={14} className="text-gray-400" />
-                                Kelas: <strong>{batch.class?.class_name ?? "Semua Kelas"}</strong>
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <LuKeyRound size={14} className="text-gray-400" />
-                                Instrumen: <strong>{batch.instrument?.name ?? "-"}</strong>
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <LuUsers size={14} className="text-gray-400" />
-                                Dari Guru BK: <strong>{batch.school?.name ?? "-"}</strong>
-                            </p>
+                        <div className="flex items-center gap-3">
+                            <Link href={back_route}>
+                                <Button size="icon" variant="outline">
+                                    <IoIosArrowRoundBack size={24} />
+                                </Button>
+                            </Link>
+                            <h2 className="text-lg font-semibold text-netral-900 truncate flex-1">
+                                {batch.label}
+                            </h2>
+                            <Badge color={statusColor} size="sm">{statusLabel}</Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 pt-2">
-                            <StatChip label="Total Siswa" value={participants.length} color="blue" />
-                            <StatChip label="Sudah Tes" value={testedCount} color="yellow" />
-                            <StatChip label="Dianalisis" value={doneCount} color="green" />
-                        </div>
+                        <div className="grid grid-cols-[140px_1fr] gap-y-3 mt-6 max-w-md">
+                            <p className="text-sm text-netral-600">Kelas</p>
+                            <p className="text-sm font-semibold text-netral-900">
+                                {batch.class?.class_name ?? <span className="italic text-netral-500">Semua Kelas</span>}
+                            </p>
 
-                        <div>
-                            <div className="mb-1 flex justify-between text-xs text-gray-500">
-                                <span>Progress analisis</span>
-                                <span>{testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%</span>
+                            <p className="text-sm text-netral-600">Instrumen</p>
+                            <p className="text-sm font-semibold text-netral-900">
+                                {batch.instrument?.name ?? "-"}
+                            </p>
+
+                            <p className="text-sm text-netral-600">Dari Guru BK</p>
+                            <p className="text-sm font-semibold text-netral-900">
+                                {capitalized(batch.school?.school_name ?? '-') ?? batch.school?.name ?? "-"}
+                            </p>
+
+                            {batch.expires_at && (
+                                <>
+                                    <p className="text-sm text-netral-600">Kedaluwarsa</p>
+                                    <p className={`text-sm font-semibold ${isExpired ? "text-red-600" : "text-netral-900"}`}>
+                                        {new Date(batch.expires_at).toLocaleString("id-ID")}
+                                    </p>
+                                </>
+                            )}
+
+                            <p className="text-sm text-netral-600">Progress Tes</p>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 h-2 rounded-full bg-netral-200">
+                                    <div
+                                        className="h-2 rounded-full bg-primary transition-all"
+                                        style={{ width: `${totalCount > 0 ? Math.round((testedCount / totalCount) * 100) : 0}%` }}
+                                    />
+                                </div>
+                                <span className="text-sm font-semibold text-netral-900 shrink-0">
+                                    {testedCount}/{totalCount}
+                                </span>
                             </div>
-                            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                                <div
-                                    className="h-2 rounded-full bg-primary transition-all"
-                                    style={{
-                                        width: `${testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%`,
-                                    }}
+                        </div>
+
+                        <div className="flex gap-1 mt-6 border-b border-netral-200">
+                            {(["participants", "recap"] as TabType[]).map((t) => (
+                                <button
+                                    key={t}
+                                    onClick={() => setTab(t)}
+                                    className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+                                        tab === t
+                                            ? "border-primary text-primary"
+                                            : "border-transparent text-netral-500 hover:text-netral-700"
+                                    }`}
+                                >
+                                    {t === "participants"
+                                        ? `Peserta (${totalCount})`
+                                        : "Rekap Hasil"}
+                                </button>
+                            ))}
+                        </div>
+
+                        {tab === "participants" && (
+                            <div className="mt-4">
+                                <ParticipantTable participants={participants} />
+                            </div>
+                        )}
+
+                        {tab === "recap" && (
+                            <div className="mt-4 space-y-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {[
+                                        { label: "Total Siswa",        value: totalCount,              color: "bg-blue-50   text-blue-600" },
+                                        { label: "Sudah Tes",          value: testedCount,             color: "bg-yellow-50 text-yellow-600" },
+                                        { label: "Menunggu Analisis",  value: testedCount - doneCount, color: "bg-orange-50 text-orange-600" },
+                                        { label: "Selesai Dianalisis", value: doneCount,               color: "bg-green-50  text-green-600" },
+                                    ].map((s) => (
+                                        <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
+                                            <p className="text-2xl font-bold">{s.value}</p>
+                                            <p className="text-xs mt-0.5">{s.label}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="rounded-xl border border-netral-200 bg-white p-4">
+                                    <div className="mb-1 flex justify-between text-xs text-netral-500">
+                                        <span>Progress analisis</span>
+                                        <span>{testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%</span>
+                                    </div>
+                                    <div className="h-2.5 w-full rounded-full bg-netral-200">
+                                        <div
+                                            className="h-2.5 rounded-full bg-primary transition-all duration-500"
+                                            style={{ width: `${testedCount > 0 ? Math.round((doneCount / testedCount) * 100) : 0}%` }}
+                                        />
+                                    </div>
+                                    <div className="mt-1 flex justify-between text-xs text-netral-400">
+                                        <span>{doneCount} dianalisis</span>
+                                        <span>{testedCount} tes selesai dari {totalCount} siswa</span>
+                                    </div>
+                                </div>
+
+                                <ParticipantRecapTable
+                                    participants={participants}
+                                    onView={handleViewScreening}
                                 />
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
-
-                <div className="col-span-12 md:col-span-8">
-                    <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 overflow-hidden">
-                        <div className="flex items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-700">
-                            <LuClipboardList size={16} className="text-gray-400" />
-                            <h3 className="font-semibold text-gray-800 dark:text-white">
-                                Daftar Peserta ({testedCount} tes selesai)
-                            </h3>
-                        </div>
-
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-gray-50 text-xs text-gray-500 uppercase dark:bg-gray-800">
-                                    <tr>
-                                        <th className="px-4 py-3">Siswa</th>
-                                        <th className="px-4 py-3">Status</th>
-                                        <th className="px-4 py-3">Tanggal Tes</th>
-                                        <th className="px-4 py-3">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {participants.map((subject) => (
-                                        <ParticipantRow
-                                            key={subject.id}
-                                            subject={subject}
-                                            onAnalyze={() => handleView(subject)}
-                                        />
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </DashboardLayout>
-    );
-}
-
-function ParticipantRow({
-    subject,
-    onAnalyze,
-}: {
-    subject: BatchSubject;
-    onAnalyze: () => void;
-}) {
-    const record    = subject.batch_entries[0] as BatchParticipant | undefined;
-    const hasTested = !!record;
-    const isDone    = record?.screening?.status === "Selesai Dievaluasi";
-    const isPending = hasTested && !isDone;
-
-    return (
-        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-            <td className="px-4 py-3">
-                <p className="font-medium text-gray-800 dark:text-white">{subject.name}</p>
-                {subject.nis && <p className="text-xs text-gray-400">NIS: {subject.nis}</p>}
-            </td>
-            <td className="px-4 py-3">
-                {!hasTested && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                        Belum Tes
-                    </span>
-                )}
-                {isPending && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700">
-                        <LuClock size={10} />
-                        Menunggu Analisis
-                    </span>
-                )}
-                {isDone && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                        <LuCircleCheck size={10} />
-                        Selesai
-                    </span>
-                )}
-            </td>
-            <td className="px-4 py-3 text-xs text-gray-500">
-                {record?.screening?.date_taken
-                    ? new Date(record.screening.date_taken).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                    })
-                    : "-"}
-            </td>
-            <td className="px-4 py-3">
-                {hasTested && (
-                    <button
-                        onClick={onAnalyze}
-                        className="inline-flex items-center gap-1 rounded-lg border border-primary px-3 py-1.5 text-xs font-medium text-primary transition hover:bg-primary hover:text-white"
-                    >
-                        {isDone ? "Lihat Analisis" : "Analisis"}
-                    </button>
-                )}
-            </td>
-        </tr>
-    );
-}
-
-function StatChip({ label, value, color }: { label: string; value: number; color: "blue" | "yellow" | "green" }) {
-    const bg = { blue: "bg-blue-50 text-blue-700", yellow: "bg-yellow-50 text-yellow-700", green: "bg-green-50 text-green-700" };
-    return (
-        <div className={`rounded-xl p-2 text-center ${bg[color]}`}>
-            <p className="text-lg font-bold">{value}</p>
-            <p className="text-xs">{label}</p>
-        </div>
     );
 }

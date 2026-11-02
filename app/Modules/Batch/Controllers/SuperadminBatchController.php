@@ -17,7 +17,7 @@ class SuperadminBatchController extends Controller
         $perPage = $request->integer('per_page', 15);
 
         $batches = Batch::with([
-            'school:id,name',
+            'school:id,name,school_name',
             'class:id,class_name',
             'instrument:id,name',
             'assignedPsychologist:id,name',

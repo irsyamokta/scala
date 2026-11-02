@@ -25,21 +25,11 @@ type AppSidebarProps = {
     sections: SidebarSection[];
 };
 
-/** Tentukan apakah menu item tertentu perlu badge notifikasi */
-function resolveNotifCount(itemPath: string | undefined, notifications: any): number {
-    if (!itemPath || !notifications) return 0;
-    if (itemPath === "/batch") {
-        const count = (notifications.pending_analysis ?? 0) + (notifications.batch_unassigned ?? 0);
-        return count > 0 ? count : 0;
-    }
-    return 0;
-}
 
 const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
     const { url, props } = usePage<any>();
 
     const subjectId = props?.auth.subjects?.[0]?.id;
-    const notifications = props?.auth?.notifications ?? {};
     const user = props?.auth?.user;
 
     const {
@@ -126,7 +116,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                         <ul className="space-y-1">
                             {section.items.map((item) => {
                                 const itemPath = resolvePath(item);
-                                const notifCount = resolveNotifCount(item.path, notifications);
 
                                 const childActive = isChildActive(item.children);
                                 const parentActive = isActive(itemPath) || childActive;
@@ -152,21 +141,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                                             >
                                                 <span className="relative text-lg">
                                                     {item.icon}
-                                                    {notifCount > 0 && !expanded && (
-                                                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                                                            {notifCount > 9 ? "9+" : notifCount}
-                                                        </span>
-                                                    )}
                                                 </span>
 
                                                 {expanded && (
                                                     <span className="flex flex-1 items-center justify-between">
                                                         {item.name}
-                                                        {notifCount > 0 && (
-                                                            <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                                                                {notifCount > 99 ? "99+" : notifCount}
-                                                            </span>
-                                                        )}
                                                     </span>
                                                 )}
                                             </Link>

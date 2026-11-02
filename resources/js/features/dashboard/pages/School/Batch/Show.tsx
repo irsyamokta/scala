@@ -22,8 +22,10 @@ import Decorative from "@assets/svg/bg-decoration-2.svg";
 type TabType = "participants" | "recap";
 
 export default function BatchShow() {
-    const { batch, participants, psychologists = [], screening_url, qr_code_svg } =
+    const { batch, participants, psychologists = [], screening_url, qr_code_svg, back_route, auth } =
         usePage<BatchShowPageProps>().props;
+
+    const isSuperadmin = auth.user.role === "superadmin";
 
     const [tab, setTab]           = useState<TabType>("participants");
     const [assignOpen, setAssignOpen] = useState(false);
@@ -144,7 +146,7 @@ export default function BatchShow() {
                         <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
 
                         <div className="flex items-center gap-3">
-                            <Link href={route("batch.index")}>
+                            <Link href={back_route}>
                                 <Button size="icon" variant="outline">
                                     <IoIosArrowRoundBack size={24} />
                                 </Button>
@@ -154,7 +156,7 @@ export default function BatchShow() {
                             </h2>
                             <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                            {!isClosed && (
+                            {isSuperadmin && (
                                 <Button
                                     startIcon={<LuUserCheck size={14} />}
                                     onClick={() => setAssignOpen(true)}
