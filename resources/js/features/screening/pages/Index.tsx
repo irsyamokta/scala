@@ -1,9 +1,11 @@
 import { Head, useForm, usePage } from "@inertiajs/react";
-import { LuCalendar, LuIdCard } from "react-icons/lu";
+import { LuIdCard } from "react-icons/lu";
 
 import InputField from "@/shared/components/forms/InputField";
+import DateSegmentInput from "@/shared/components/forms/DateSegmentInput";
 import Form from "@/shared/components/forms/Form";
 import { PageProps } from "@/types";
+import { toIsoDate } from "@/shared/utils/dateTime";
 
 interface BatchInfo {
     token: string;
@@ -14,36 +16,20 @@ interface BatchInfo {
 
 type GuestScreeningPageProps = PageProps<{ batch: BatchInfo }>;
 
-/** Konversi DD/MM/YYYY → YYYY-MM-DD untuk dikirim ke backend. */
-function toIsoDate(dmy: string): string {
-    const [d, m, y] = dmy.split("/");
-    if (!d || !m || !y || y.length < 4) return "";
-    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
-/** Format input otomatis: tambah / setelah DD dan MM. */
-function formatDmy(raw: string): string {
-    const digits = raw.replace(/\D/g, "").slice(0, 8);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-}
-
 export default function GuestScreeningIndex() {
     const { batch } = usePage<GuestScreeningPageProps>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         nis: "",
-        tanggal_lahir: "",      // YYYY-MM-DD — dikirim ke backend
+        tanggal_lahir: "", // YYYY-MM-DD — dikirim ke backend
         tanggal_lahir_display: "", // DD/MM/YYYY — ditampilkan ke user
     });
 
-    function handleTanggalLahir(e: React.ChangeEvent<HTMLInputElement>) {
-        const formatted = formatDmy(e.target.value);
-        const iso = toIsoDate(formatted);
+    function handleTanggalLahir(val: string) {
+        const iso = toIsoDate(val);
         setData({
             ...data,
-            tanggal_lahir_display: formatted,
+            tanggal_lahir_display: val,
             tanggal_lahir: iso,
         });
     }
@@ -61,7 +47,6 @@ export default function GuestScreeningIndex() {
 
             <div className="flex items-center justify-center px-4 min-h-screen bg-gray-50">
                 <div className="w-full max-w-md py-12">
-
                     <div className="mb-8 text-center">
                         <h1 className="text-2xl font-bold text-gray-900">
                             {batch.label}
@@ -84,7 +69,6 @@ export default function GuestScreeningIndex() {
 
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                         <Form id="guest-screening-form" onSubmit={handleSubmit} className="space-y-5">
-
                             <InputField
                                 label="NIS (Nomor Induk Siswa)"
                                 required
@@ -98,12 +82,9 @@ export default function GuestScreeningIndex() {
                                 error={errors.nis}
                             />
 
-                            <InputField
+                            <DateSegmentInput
                                 label="Tanggal Lahir"
                                 required
-                                placeholder="DD/MM/YYYY"
-                                startIcon={<LuCalendar size={16} />}
-                                inputMode="numeric"
                                 value={data.tanggal_lahir_display}
                                 onChange={handleTanggalLahir}
                                 error={errors.tanggal_lahir}

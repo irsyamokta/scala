@@ -11,6 +11,7 @@ use App\Modules\Batch\Exports\BatchExport;
 use App\Modules\Batch\Exports\BatchRecapExport;
 use App\Modules\Batch\Requests\AssignPsychologistRequest;
 use App\Modules\Batch\Requests\BatchRequest;
+use App\Modules\Batch\Requests\UpdateBatchRequest;
 use App\Modules\Batch\Services\BatchService;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
@@ -79,6 +80,25 @@ class BatchController extends Controller
         }
     }
 
+    public function update(UpdateBatchRequest $request, string $id)
+    {
+        try {
+            $this->service->updateBatch(
+                $id,
+                $request->validated(),
+                auth()->id()
+            );
+
+            return back()->with('success', 'Batch Skrining berhasil diperbarui.');
+        } catch (DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'Terjadi kesalahan sistem.');
+        }
+    }
+
     public function show(string $id)
     {
         $user = auth()->user();
@@ -96,6 +116,12 @@ class BatchController extends Controller
             ]);
         }
 
+        $classes = Clazz::where('school_user_id', $batch->school_user_id)
+            ->select('id', 'class_name')
+            ->get();
+
+        $instruments = Instrument::select('id', 'name')->get();
+
         $psychologists = User::where('role', 'psychologist')
             ->select('id', 'name')
             ->get();
@@ -107,6 +133,8 @@ class BatchController extends Controller
         return Inertia::render('Dashboard/School/Batch/Show', [
             'batch' => $batch,
             'participants' => $participants,
+            'classes' => $classes,
+            'instruments' => $instruments,
             'psychologists' => $psychologists,
             'screening_url' => $screeningUrl,
             'qr_code_svg' => $qrCodeSvg,

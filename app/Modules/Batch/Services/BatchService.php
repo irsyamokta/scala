@@ -98,6 +98,76 @@ class BatchService
         });
     }
 
+    public function updateBatch(string $batchId, array $data, string $schoolUserId): Batch
+    {
+        $batch = $this->batchRepo->findOrFail($batchId);
+
+        $this->authorizeSchool($batch, $schoolUserId);
+
+        $hasTested = $batch->entries()->whereNotNull('used_at')->exists();
+
+        $updateData = [
+            'label' => $data['label'],
+            'expires_at' => ! empty($data['expires_at']) ? $data['expires_at'] : null,
+        ];
+
+        if (! empty($updateData['expires_at'])) {
+            $newExpiry = \Carbon\Carbon::parse($updateData['expires_at']);
+            if ($newExpiry->isFuture() && $batch->status === 'closed' && $batch->isExpired()) {
+                $updateData['status'] = 'active';
+            }
+        }
+
+        // Jika belum ada siswa yang tes, boleh ubah kelas & instrumen
+        if (! $hasTested) {
+            if (array_key_exists('class_id', $data)) {
+                $allClasses = $data['class_id'] === 'all';
+
+                if ($allClasses) {
+                    $classes = Clazz::where('school_user_id', $schoolUserId)->get();
+
+                    if ($classes->isEmpty()) {
+                        throw new DomainException('Belum ada kelas. Buat kelas dan import siswa terlebih dahulu.');
+                    }
+
+                    $classIds = $classes->pluck('id')->toArray();
+
+                    $hasStudents = Subject::whereIn('class_id', $classIds)
+                        ->where('owner_user_id', $schoolUserId)
+                        ->exists();
+
+                    if (! $hasStudents) {
+                        throw new DomainException('Tidak ada siswa di semua kelas. Import siswa terlebih dahulu.');
+                    }
+
+                    $updateData['class_id'] = null;
+                } elseif (! empty($data['class_id'])) {
+                    $class = Clazz::findOrFail($data['class_id']);
+
+                    if ($class->school_user_id !== $schoolUserId) {
+                        throw new DomainException('Kelas tidak ditemukan atau bukan milik Anda.');
+                    }
+
+                    $hasStudents = Subject::where('class_id', $class->id)
+                        ->where('owner_user_id', $schoolUserId)
+                        ->exists();
+
+                    if (! $hasStudents) {
+                        throw new DomainException('Tidak ada siswa di kelas ini. Import siswa terlebih dahulu.');
+                    }
+
+                    $updateData['class_id'] = $class->id;
+                }
+            }
+
+            if (! empty($data['instrument_id'])) {
+                $updateData['instrument_id'] = $data['instrument_id'];
+            }
+        }
+
+        return $this->batchRepo->update($batch, $updateData);
+    }
+
     public function closeBatch(string $batchId, string $schoolUserId): Batch
     {
         $batch = $this->batchRepo->findOrFail($batchId);

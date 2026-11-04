@@ -1,5 +1,5 @@
 import { router } from "@inertiajs/react";
-import { LuKeyRound, LuUsers, LuChevronRight, LuLock, LuTrash2 } from "react-icons/lu";
+import { LuKeyRound, LuUsers, LuChevronRight, LuLock, LuTrash2, LuPencil } from "react-icons/lu";
 
 import {
     Table,
@@ -20,6 +20,7 @@ interface BatchTableProps {
     allChecked: boolean;
     onToggleAll: () => void;
     onToggleOne: (id: string) => void;
+    onEdit?: (batch: Batch) => void;
     canDelete?: boolean;
 }
 
@@ -29,6 +30,7 @@ export default function BatchTable({
     allChecked,
     onToggleAll,
     onToggleOne,
+    onEdit,
     canDelete = false,
 }: BatchTableProps) {
     if (batches.data.length === 0) return null;
@@ -63,6 +65,7 @@ export default function BatchTable({
                                     batch={batch}
                                     checked={selected.includes(batch.id)}
                                     onCheck={() => onToggleOne(batch.id)}
+                                    onEdit={onEdit}
                                     canDelete={canDelete}
                                 />
                             ))}
@@ -86,11 +89,13 @@ function BatchItem({
     batch,
     checked,
     onCheck,
+    onEdit,
     canDelete,
 }: {
     batch: Batch;
     checked: boolean;
     onCheck: () => void;
+    onEdit?: (batch: Batch) => void;
     canDelete: boolean;
 }) {
     const isClosed   = batch.status === "closed";
@@ -173,11 +178,27 @@ function BatchItem({
 
             {/* Status + Progress + Actions */}
             <TableCell className="px-4 py-3 whitespace-nowrap">
-                <div className="flex items-center gap-3 justify-end">
+                <div className="flex items-center gap-2 justify-end">
                     {totalCount > 0 && (
-                        <span className="text-xs text-netral-500">{usedCount}/{totalCount} terpakai</span>
+                        <span className="text-xs text-netral-500 mr-1">{usedCount}/{totalCount} terpakai</span>
                     )}
                     <Badge color={statusColor} size="sm">{statusLabel}</Badge>
+
+                    {/* Edit button (ikon pensil) disamping kanan badge */}
+                    {onEdit && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onEdit(batch);
+                            }}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-200 hover:text-netral-900 transition"
+                            title="Edit batch"
+                        >
+                            <LuPencil size={15} />
+                        </button>
+                    )}
 
                     {/* Delete button — hanya untuk superadmin */}
                     {canDelete && (

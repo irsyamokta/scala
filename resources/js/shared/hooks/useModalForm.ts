@@ -86,7 +86,7 @@ export function useModalForm<T extends Record<string, any>>({
         } else if (!isOpen) {
             reset();
         }
-    }, [isOpen, isEditing, editData]);
+    }, [isOpen, isEditing, editId]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();

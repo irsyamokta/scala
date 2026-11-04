@@ -4,8 +4,7 @@ import { Head, usePage } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import BatchModal from "./Components/modal/BatchModal";
 import BatchCard from "./Components/card/BatchCard";
-import { BatchIndexPageProps } from "@/types/batch";
-import { PageProps } from "@/types";
+import { Batch, BatchIndexPageProps } from "@/types/batch";
 
 interface BatchPageProps extends BatchIndexPageProps {
     classes: { id: string; class_name: string }[];
@@ -17,8 +16,24 @@ export default function BatchIndex() {
         usePage<BatchPageProps>().props;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
 
     const canDelete = auth.user.role === "superadmin";
+
+    function handleCreate() {
+        setEditingBatch(null);
+        setIsModalOpen(true);
+    }
+
+    function handleEdit(batch: Batch) {
+        setEditingBatch(batch);
+        setIsModalOpen(true);
+    }
+
+    function handleClose() {
+        setIsModalOpen(false);
+        setEditingBatch(null);
+    }
 
     return (
         <DashboardLayout title="Batch Skrining">
@@ -26,16 +41,18 @@ export default function BatchIndex() {
 
             <BatchModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleClose}
                 classes={classes}
                 instruments={instruments}
+                batch={editingBatch}
             />
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
                 <div className="col-span-12">
                     <BatchCard
                         batches={batches}
-                        onCreate={() => setIsModalOpen(true)}
+                        onCreate={handleCreate}
+                        onEdit={handleEdit}
                         canDelete={canDelete}
                     />
                 </div>

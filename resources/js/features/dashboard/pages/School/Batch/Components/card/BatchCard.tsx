@@ -10,10 +10,16 @@ import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 interface BatchCardProps {
     batches: PaginatedResponse<Batch>;
     onCreate: () => void;
+    onEdit?: (batch: Batch) => void;
     canDelete?: boolean;
 }
 
-export default function BatchCard({ batches, onCreate, canDelete = false }: BatchCardProps) {
+export default function BatchCard({
+    batches,
+    onCreate,
+    onEdit,
+    canDelete = false,
+}: BatchCardProps) {
     const [selected, setSelected] = useState<string[]>([]);
 
     const allIds   = batches.data.map((b) => b.id);
@@ -90,6 +96,7 @@ export default function BatchCard({ batches, onCreate, canDelete = false }: Batc
                     allChecked={allChecked}
                     onToggleAll={toggleAll}
                     onToggleOne={toggleOne}
+                    onEdit={onEdit}
                     canDelete={canDelete}
                 />
             )}

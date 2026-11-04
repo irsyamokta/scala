@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
-import { LuUserCheck, LuLock, LuDownload, LuLink, LuQrCode } from "react-icons/lu";
+import { LuUserCheck, LuLock, LuDownload, LuLink, LuQrCode, LuPencil } from "react-icons/lu";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import Form from "@/shared/components/forms/Form";
 import { Modal } from "@/shared/components/ui/modal";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import ScreeningDetailModal from "../Subject/Components/modal/ScreeningModal";
+import BatchModal from "./Components/modal/BatchModal";
 import ParticipantTable from "./Components/table/ParticipantTable";
 import ParticipantRecapTable from "../Batch/Components/table/ParticipantRecapTable";
 import { BatchShowPageProps } from "@/types/batch";
@@ -22,7 +23,7 @@ import Decorative from "@assets/svg/bg-decoration-2.svg";
 type TabType = "participants" | "recap";
 
 export default function BatchShow() {
-    const { batch, participants, psychologists = [], screening_url, qr_code_svg, back_route, auth } =
+    const { batch, participants, classes = [], instruments = [], psychologists = [], screening_url, qr_code_svg, back_route, auth } =
         usePage<BatchShowPageProps>().props;
 
     const isSuperadmin = auth.user.role === "superadmin";
@@ -31,6 +32,7 @@ export default function BatchShow() {
     const [assignOpen, setAssignOpen] = useState(false);
     const [qrOpen, setQrOpen]     = useState(false);
     const [detailOpen, setDetailOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
     const [selectedScreening, setSelectedScreening] = useState<ScreeningResult | null>(null);
 
     function handleViewScreening(screening: ScreeningResult) {
@@ -87,6 +89,20 @@ export default function BatchShow() {
                 onClose={() => { setDetailOpen(false); setSelectedScreening(null); }}
                 screening={selectedScreening}
             />
+
+            {/* Modal Edit Batch */}
+            {classes.length > 0 && instruments.length > 0 && (
+                <BatchModal
+                    isOpen={editOpen}
+                    onClose={() => setEditOpen(false)}
+                    classes={classes}
+                    instruments={instruments}
+                    batch={{
+                        ...batch,
+                        tested_count: testedCount,
+                    }}
+                />
+            )}
 
             {/* Modal Assign Psikolog */}
             <Modal
@@ -155,6 +171,18 @@ export default function BatchShow() {
                                 {batch.label}
                             </h2>
                             <Badge color={statusColor} size="sm">{statusLabel}</Badge>
+
+                            {/* Edit Button beside badge */}
+                            {classes.length > 0 && instruments.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setEditOpen(true)}
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-200 hover:text-netral-900 transition"
+                                    title="Edit batch"
+                                >
+                                    <LuPencil size={15} />
+                                </button>
+                            )}
 
                             {isSuperadmin && (
                                 <Button

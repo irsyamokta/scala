@@ -15,6 +15,10 @@ Route::middleware(['auth', 'onboarding.complete'])->prefix('batch')->group(funct
         ->middleware('permission:manage.pin.batch')
         ->name('batch.store');
 
+    Route::patch('/{batch}', [BatchController::class, 'update'])
+        ->middleware('permission:manage.pin.batch')
+        ->name('batch.update');
+
     Route::get('/{batch}', [BatchController::class, 'show'])
         ->middleware('permission:manage.pin.batch|view.assigned.batch')
         ->name('batch.show');

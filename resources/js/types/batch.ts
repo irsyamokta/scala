@@ -43,7 +43,6 @@ interface Batch {
     tested_count?: number;
 }
 
-/** Catatan partisipasi siswa dalam batch (satu record per siswa yang sudah tes). */
 interface BatchParticipant {
     id: string;
     batch_id: string;
@@ -74,7 +73,6 @@ interface BatchParticipant {
     };
 }
 
-/** Data siswa dalam kelas batch beserta status tesnya. */
 interface BatchSubject {
     id: string;
     name: string;
@@ -100,6 +98,8 @@ interface BatchIndexPageProps extends PageProps {
 interface BatchShowPageProps extends PageProps {
     batch: Batch;
     participants: BatchSubject[];
+    classes?: { id: string; class_name: string }[];
+    instruments?: { id: string; name: string }[];
     psychologists?: { id: string; name: string }[];
     screening_url: string;
     qr_code_svg: string;
