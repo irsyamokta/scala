@@ -3,7 +3,7 @@ import { UserDetailModalProps } from "@/types/user";
 
 import SectionTitle from "@/shared/components/ui/SectionTitle";
 
-import { capitalizeEachWord } from "@/shared/utils/capitalize";
+import { capitalizeEachWord, capitalized } from "@/shared/utils/capitalize";
 
 export default function UserDetailModal({
     isOpen,
@@ -111,7 +111,7 @@ export default function UserDetailModal({
                                 <div className="flex justify-between">
                                     <p className="text-netral-600">Nama Sekolah</p>
                                     <p className="font-medium">
-                                        {user?.school_name ? capitalizeEachWord(user?.school_name) : "-"}
+                                        {user?.school_name ? capitalized(user?.school_name) : "-"}
                                     </p>
                                 </div>
 
