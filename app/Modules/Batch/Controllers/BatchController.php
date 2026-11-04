@@ -33,6 +33,10 @@ class BatchController extends Controller
         $user = auth()->user();
         $perPage = $request->integer('per_page', 10);
 
+        if ($user->role === 'superadmin') {
+            return redirect()->route('admin.batch.index');
+        }
+
         if ($user->role === 'psychologist') {
             $batches = $this->service->getBatchesForPsychologist($user->id, $perPage);
 
