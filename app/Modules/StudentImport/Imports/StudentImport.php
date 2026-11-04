@@ -27,6 +27,8 @@ class StudentImport implements SkipsEmptyRows, SkipsOnError, SkipsOnFailure, ToM
 
     private array $errors = [];
 
+    private array $classCache = [];
+
     private int $currentRow = 1;
 
     public function __construct(string $schoolUserId)
@@ -58,10 +60,13 @@ class StudentImport implements SkipsEmptyRows, SkipsOnError, SkipsOnFailure, ToM
             return null;
         }
 
-        $class = Clazz::firstOrCreate([
-            'class_name' => $className,
-            'school_user_id' => $this->schoolUserId,
-        ]);
+        if (! isset($this->classCache[$className])) {
+            $this->classCache[$className] = Clazz::firstOrCreate([
+                'class_name' => $className,
+                'school_user_id' => $this->schoolUserId,
+            ]);
+        }
+        $class = $this->classCache[$className];
 
         DB::transaction(function () use ($namaRow, $nisRow, $gender, $age, $tanggalLahir, $class) {
             if ($nisRow !== '') {

@@ -100,11 +100,11 @@ class ScreeningService
             $this->answerRepo->insertMany($answers);
 
             if ($instrument->name === 'SDQ') {
-                $this->calculateSDQ($screening->id, $answers, $typeName, $questionMap);
+                $this->calculateSDQ($screening->id, $subject->id, $answers, $typeName, $questionMap);
             }
 
             if ($instrument->name === 'SRQ') {
-                $this->calculateSRQ($screening->id, $answers, $questionMap);
+                $this->calculateSRQ($screening->id, $subject->id, $answers, $questionMap);
             }
 
             return $screening;
@@ -138,7 +138,7 @@ class ScreeningService
         }
     }
 
-    private function calculateSDQ($screeningId, $answers, $type, $questionMap)
+    private function calculateSDQ($screeningId, $subjectId, $answers, $type, $questionMap)
     {
         $answers = collect($answers)->map(function ($a) use ($questionMap) {
             $a['question_number'] = $questionMap[$a['question_id']];
@@ -185,15 +185,13 @@ class ScreeningService
             'overall_category' => $category,
         ]);
 
-        Subject::whereHas('screenings', function ($q) use ($screeningId) {
-            $q->where('id', $screeningId);
-        })->update([
+        Subject::where('id', $subjectId)->update([
             'last_result' => $category,
             'has_previous_screening' => true,
         ]);
     }
 
-    private function calculateSRQ($screeningId, $answers, $questionMap)
+    private function calculateSRQ($screeningId, $subjectId, $answers, $questionMap)
     {
         $yesAnswers = collect($answers)
             ->where('raw_score', 1)
@@ -238,9 +236,7 @@ class ScreeningService
             'ptsd_symptom_indication' => $ptsd,
         ]);
 
-        Subject::whereHas('screenings', function ($q) use ($screeningId) {
-            $q->where('id', $screeningId);
-        })->update([
+        Subject::where('id', $subjectId)->update([
             'last_result' => $status,
             'has_previous_screening' => true,
         ]);

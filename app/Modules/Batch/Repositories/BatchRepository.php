@@ -56,12 +56,7 @@ class BatchRepository
 
         $batch->autoCloseIfExpired();
 
-        return $batch->fresh([
-            'class:id,class_name',
-            'instrument:id,name',
-            'assignedPsychologist:id,name',
-            'school:id,name,school_name',
-        ]);
+        return $batch;
     }
 
     public function create(array $data): Batch
@@ -118,7 +113,7 @@ class BatchRepository
         if ($batch) {
             $batch->autoCloseIfExpired();
 
-            return $batch->fresh(['class:id,class_name', 'instrument:id,name']);
+            return $batch;
         }
 
         return null;

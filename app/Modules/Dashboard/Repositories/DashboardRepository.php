@@ -112,7 +112,12 @@ class DashboardRepository
 
     public function latestScreeningsForPsychologist(int $limit = 5)
     {
-        return Screening::with(['subject', 'instrument', 'instrumentType'])
+        return Screening::with([
+            'subject:id,name',
+            'instrument:id,name',
+            'instrumentType:id,type_name',
+        ])
+            ->select('id', 'subject_id', 'instrument_id', 'type_id', 'date_taken', 'status')
             ->latest('date_taken')
             ->limit($limit)
             ->get()
@@ -181,7 +186,12 @@ class DashboardRepository
 
     public function latestResults($userId)
     {
-        return Screening::with(['subject', 'sdqResult', 'srqResult'])
+        return Screening::with([
+            'subject:id,name,owner_user_id',
+            'sdqResult:id,screening_id,overall_category',
+            'srqResult:id,screening_id,gme_indication,substance_use_indication,psychotic_symptom_indication,ptsd_symptom_indication',
+        ])
+            ->select('id', 'subject_id', 'date_taken')
             ->whereHas('subject', fn ($q) => $q->where('owner_user_id', $userId))
             ->latest('date_taken')
             ->limit(4)
@@ -229,61 +239,50 @@ class DashboardRepository
 
     public function schoolChart($userId, string $month, $class = null)
     {
-        $monthNumber = Carbon::parse($month)->month;
+        $start = Carbon::parse($month)->startOfMonth();
+        $end = Carbon::parse($month)->endOfMonth();
 
-        $categories = [
-            'Normal',
-            'Borderline',
-            'Abnormal',
-            'Terindikasi',
-            'Tidak Terindikasi',
-        ];
+        $screeningQuery = Screening::query()
+            ->join('subjects', 'subjects.id', '=', 'screenings.subject_id')
+            ->join('classes', 'classes.id', '=', 'subjects.class_id')
+            ->where('classes.school_user_id', $userId)
+            ->whereBetween('screenings.created_at', [$start, $end]);
 
-        $result = array_fill_keys($categories, 0);
-
-        $screenings = Screening::with([
-            'subject.class',
-            'sdqResult',
-            'srqResult',
-        ])
-            ->whereHas('subject.class', function ($q) use ($userId, $class) {
-                $q->where('school_user_id', $userId);
-
-                if ($class && $class !== 'all') {
-                    $q->where('class_name', $class);
-                }
-            })
-            ->whereMonth('created_at', $monthNumber)
-            ->get();
-
-        foreach ($screenings as $item) {
-            if (! $item->subject || ! $item->subject->class) {
-                continue;
-            }
-
-            // SDQ
-            if ($item->sdqResult) {
-                $category = $item->sdqResult->overall_category;
-                if (isset($result[$category])) {
-                    $result[$category]++;
-                }
-            }
-
-            // SRQ
-            if ($item->srqResult) {
-                $isIndicated =
-                    $item->srqResult->gme_indication ||
-                    $item->srqResult->substance_use_indication ||
-                    $item->srqResult->psychotic_symptom_indication ||
-                    $item->srqResult->ptsd_symptom_indication;
-
-                $category = $isIndicated
-                    ? 'Terindikasi'
-                    : 'Tidak Terindikasi';
-
-                $result[$category]++;
-            }
+        if ($class && $class !== 'all') {
+            $screeningQuery->where('classes.class_name', $class);
         }
+
+        $sdqCounts = (clone $screeningQuery)
+            ->join('sdq_results', 'sdq_results.screening_id', '=', 'screenings.id')
+            ->selectRaw('sdq_results.overall_category, COUNT(*) as total')
+            ->groupBy('sdq_results.overall_category')
+            ->pluck('total', 'overall_category')
+            ->toArray();
+
+        $srqCounts = (clone $screeningQuery)
+            ->join('srq_results', 'srq_results.screening_id', '=', 'screenings.id')
+            ->selectRaw('
+                CASE
+                    WHEN srq_results.gme_indication = 1
+                      OR srq_results.substance_use_indication = 1
+                      OR srq_results.psychotic_symptom_indication = 1
+                      OR srq_results.ptsd_symptom_indication = 1
+                    THEN "Terindikasi"
+                    ELSE "Tidak Terindikasi"
+                END as category,
+                COUNT(*) as total
+            ')
+            ->groupBy('category')
+            ->pluck('total', 'category')
+            ->toArray();
+
+        $result = [
+            'Normal' => $sdqCounts['Normal'] ?? 0,
+            'Borderline' => $sdqCounts['Borderline'] ?? 0,
+            'Abnormal' => $sdqCounts['Abnormal'] ?? 0,
+            'Terindikasi' => $srqCounts['Terindikasi'] ?? 0,
+            'Tidak Terindikasi' => $srqCounts['Tidak Terindikasi'] ?? 0,
+        ];
 
         return [
             'labels' => array_keys($result),

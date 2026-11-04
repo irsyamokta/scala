@@ -25,7 +25,6 @@ class SubjectController extends Controller
         $search = $request->search;
         $genders = $request->gender;
         $classIds = $request->class_id;
-        $classes = $this->class->getClasses($user->id);
 
         $subjects = $this->service->getSubjects(
             $user->id,

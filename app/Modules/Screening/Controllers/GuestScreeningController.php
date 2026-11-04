@@ -217,7 +217,7 @@ class GuestScreeningController extends Controller
                 $this->answerRepo->insertMany($answers);
 
                 if ($instrument->name === 'SDQ') {
-                    $this->calculateSDQ($screening->id, $answers, $typeName, $questionMap);
+                    $this->calculateSDQ($screening->id, $subject->id, $answers, $typeName, $questionMap);
                 }
 
                 $this->participantRepo->markUsed($batch->id, $subject->id, $screening->id);
@@ -256,7 +256,7 @@ class GuestScreeningController extends Controller
         return $query->first();
     }
 
-    private function calculateSDQ(string $screeningId, array $answers, string $type, $questionMap): void
+    private function calculateSDQ(string $screeningId, string $subjectId, array $answers, string $type, $questionMap): void
     {
         $answers = collect($answers)->map(function ($a) use ($questionMap) {
             $a['question_number'] = $questionMap[$a['question_id']];
@@ -291,7 +291,7 @@ class GuestScreeningController extends Controller
             'overall_category' => $category,
         ]);
 
-        Subject::whereHas('screenings', fn ($q) => $q->where('id', $screeningId))
+        Subject::where('id', $subjectId)
             ->update(['last_result' => $category, 'has_previous_screening' => true]);
     }
 }

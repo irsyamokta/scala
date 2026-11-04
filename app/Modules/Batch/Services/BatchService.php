@@ -42,13 +42,11 @@ class BatchService
         $allClasses = $data['class_id'] === 'all';
 
         if ($allClasses) {
-            $classes = Clazz::where('school_user_id', $schoolUserId)->get();
+            $classIds = Clazz::where('school_user_id', $schoolUserId)->pluck('id')->toArray();
 
-            if ($classes->isEmpty()) {
+            if (empty($classIds)) {
                 throw new DomainException('Belum ada kelas. Buat kelas dan import siswa terlebih dahulu.');
             }
-
-            $classIds = $classes->pluck('id')->toArray();
 
             $hasStudents = Subject::whereIn('class_id', $classIds)
                 ->where('owner_user_id', $schoolUserId)
@@ -124,13 +122,11 @@ class BatchService
                 $allClasses = $data['class_id'] === 'all';
 
                 if ($allClasses) {
-                    $classes = Clazz::where('school_user_id', $schoolUserId)->get();
+                    $classIds = Clazz::where('school_user_id', $schoolUserId)->pluck('id')->toArray();
 
-                    if ($classes->isEmpty()) {
+                    if (empty($classIds)) {
                         throw new DomainException('Belum ada kelas. Buat kelas dan import siswa terlebih dahulu.');
                     }
-
-                    $classIds = $classes->pluck('id')->toArray();
 
                     $hasStudents = Subject::whereIn('class_id', $classIds)
                         ->where('owner_user_id', $schoolUserId)

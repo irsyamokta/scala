@@ -37,11 +37,18 @@ class SuperadminBatchController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $rawStats = Batch::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN status = "closed" THEN 1 ELSE 0 END) as closed,
+            SUM(CASE WHEN assigned_psychologist_id IS NOT NULL THEN 1 ELSE 0 END) as assigned
+        ')->first();
+
         $stats = [
-            'total' => Batch::count(),
-            'active' => Batch::where('status', 'active')->count(),
-            'closed' => Batch::where('status', 'closed')->count(),
-            'assigned' => Batch::whereNotNull('assigned_psychologist_id')->count(),
+            'total' => (int) ($rawStats->total ?? 0),
+            'active' => (int) ($rawStats->active ?? 0),
+            'closed' => (int) ($rawStats->closed ?? 0),
+            'assigned' => (int) ($rawStats->assigned ?? 0),
         ];
 
         return Inertia::render('Dashboard/Superadmin/Batch/Index', [

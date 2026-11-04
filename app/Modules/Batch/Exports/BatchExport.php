@@ -29,9 +29,10 @@ class BatchExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles
 
     public function array(): array
     {
-        $doneSubjectIds = $this->batch->entries()->pluck('subject_id');
+        $doneSubjectIds = $this->batch->entries()->pluck('subject_id')->flip();
 
         $query = Subject::with('class:id,class_name')
+            ->select('id', 'name', 'nis', 'class_id')
             ->where('owner_user_id', $this->batch->school_user_id)
             ->where('is_self', false);
 
@@ -47,7 +48,7 @@ class BatchExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles
                     $subject->name,
                     $subject->nis ?? '-',
                     $subject->class?->class_name ?? '-',
-                    $doneSubjectIds->contains($subject->id) ? 'Sudah Tes' : 'Belum Tes',
+                    isset($doneSubjectIds[$subject->id]) ? 'Sudah Tes' : 'Belum Tes',
                 ];
             })
             ->toArray();
