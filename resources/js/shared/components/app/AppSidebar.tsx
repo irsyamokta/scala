@@ -87,7 +87,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
             onMouseLeave={() => !isMobileOpen && setIsHovered(false)}
         >
             {/* Logo */}
-            <div className="flex items-center px-4 py-5 border-b gap-1">
+            <div className={`flex items-center py-5 border-b gap-1 ${expanded ? "px-4 justify-start" : "justify-center"}`}>
                 <h1 className="font-bold text-primary text-2xl">
                     Sca<span className="text-netral-900">la</span>
                 </h1>
@@ -139,13 +139,13 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                                                     }
                                             `}
                                             >
-                                                <span className="relative text-lg">
+                                                <span className="shrink-0 relative flex items-center justify-center text-lg">
                                                     {item.icon}
                                                 </span>
 
                                                 {expanded && (
-                                                    <span className="flex flex-1 items-center justify-between">
-                                                        {item.name}
+                                                    <span className="flex flex-1 items-center overflow-hidden min-w-0">
+                                                        <span className="truncate whitespace-nowrap">{item.name}</span>
                                                     </span>
                                                 )}
                                             </Link>
@@ -163,15 +163,21 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                                                     ${parentActive ? "bg-secondary text-primary" : "hover:bg-netral-200"}
                                                 `}
                                                 >
-                                                    <span className="flex items-center gap-3">
-                                                        {item.icon}
-                                                        {expanded && item.name}
+                                                    <span className={`flex items-center ${expanded ? "gap-3" : ""} min-w-0`}>
+                                                        <span className="shrink-0 flex items-center justify-center text-lg">{item.icon}</span>
+                                                        {expanded && (
+                                                            <span className="truncate whitespace-nowrap">
+                                                                {item.name}
+                                                            </span>
+                                                        )}
                                                     </span>
 
                                                     {expanded && (
-                                                        <HiChevronDown
-                                                            className={`transition ${submenuOpen ? "rotate-180" : ""}`}
-                                                        />
+                                                        <span className="shrink-0">
+                                                            <HiChevronDown
+                                                                className={`transition-transform ${submenuOpen ? "rotate-180" : ""}`}
+                                                            />
+                                                        </span>
                                                     )}
                                                 </button>
 
@@ -217,18 +223,17 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                         ${expanded ? "gap-3 justify-between" : "justify-center"}
                     `}
                 >
-                    <div className={`flex items-center ${expanded ? "gap-3" : ""}`}>
-                        {/* Avatar */}
+                    <div className={`flex items-center ${expanded ? "gap-3" : ""} min-w-0`}>
                         <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm border border-primary/20">
                             {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
                         </div>
 
                         {expanded && (
-                            <div className="text-left min-w-0">
-                                <p className="text-sm font-semibold text-netral-900 truncate max-w-32">
+                            <div className="text-left min-w-0 overflow-hidden">
+                                <p className="text-sm font-semibold text-netral-900 truncate whitespace-nowrap max-w-32">
                                     {user?.name ?? "Pengguna"}
                                 </p>
-                                <p className="text-xs text-netral-500 truncate max-w-32">
+                                <p className="text-xs text-netral-500 truncate whitespace-nowrap max-w-32">
                                     {user?.email ?? ""}
                                 </p>
                             </div>
@@ -236,9 +241,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ sections }) => {
                     </div>
 
                     {expanded && (
-                        <HiChevronUp
-                            className={`flex-shrink-0 text-netral-500 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
-                        />
+                        <span className="flex-shrink-0">
+                            <HiChevronUp
+                                className={`text-netral-500 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+                            />
+                        </span>
                     )}
                 </button>
 
