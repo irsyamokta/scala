@@ -65,8 +65,7 @@ class BatchController extends Controller
             );
 
             return redirect()
-                ->route('batch.show', $batch->id)
-                ->with('success', 'Batch berhasil dibuat.');
+                ->route('batch.show', $batch->id);
         } catch (DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (Throwable $e) {
@@ -171,8 +170,9 @@ class BatchController extends Controller
     {
         try {
             $batch = $this->service->getBatchDetail($id);
+            $user = auth()->user();
 
-            if ($batch->school_user_id !== auth()->id()) {
+            if ($user->role !== 'superadmin' && $batch->school_user_id !== $user->id) {
                 abort(403);
             }
 
@@ -189,12 +189,13 @@ class BatchController extends Controller
     public function destroy(string $id)
     {
         try {
-            $batch = $this->service->getBatchDetail($id);
+            $user = auth()->user();
 
-            if ($batch->school_user_id !== auth()->id()) {
+            if ($user->role !== 'superadmin') {
                 abort(403);
             }
 
+            $batch = $this->service->getBatchDetail($id);
             $batch->delete();
 
             return redirect()->route('batch.index')
@@ -214,9 +215,11 @@ class BatchController extends Controller
         ]);
 
         try {
-            $deleted = Batch::whereIn('id', $request->ids)
-                ->where('school_user_id', auth()->id())
-                ->delete();
+            if (auth()->user()->role !== 'superadmin') {
+                abort(403);
+            }
+
+            $deleted = Batch::whereIn('id', $request->ids)->delete();
 
             return back()->with('success', "{$deleted} batch berhasil dihapus.");
         } catch (Throwable $e) {

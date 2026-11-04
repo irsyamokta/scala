@@ -28,8 +28,8 @@ export default function Index() {
     });
 
     return (
-        <DashboardLayout title="Tes Skrining">
-            <Head title="Tes Skrining" />
+        <DashboardLayout title="Hasil Skrining">
+            <Head title="Hasil Skrining" />
 
             <ScreeningDetailModal
                 isOpen={isModalOpen}

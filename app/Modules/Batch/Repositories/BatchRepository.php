@@ -93,7 +93,9 @@ class BatchRepository
                     'screening.instrument:id,name',
                     'screening.instrumentType:id,type_name',
                     'screening.sdqResult',
+                    'screening.sdqResult.psychologist:id,name',
                     'screening.srqResult',
+                    'screening.srqResult.psychologist:id,name',
                 ]),
         ])
             ->where('owner_user_id', $batch->school_user_id)

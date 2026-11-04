@@ -23,7 +23,7 @@ class ScreeningRepository
     {
         return Screening::query()
             ->with([
-                'subject:id,name',
+                'subject:id,name,age',
                 'reporter:id,name',
                 'instrument:id,name',
                 'instrumentType:id,type_name',

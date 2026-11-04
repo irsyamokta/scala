@@ -19,8 +19,8 @@ import {
 } from "@/shared/components/ui/table";
 import SectionTitle from "@/shared/components/ui/SectionTitle";
 
-import { typeLabels, categoryColor, SDQ_RANGES } from "@/shared/constants/screening";
-import { getScreeningDetailRows, getScreeningCategory, getSdqRanges } from "@/shared/utils/screeningData";
+import { typeLabels, categoryColor } from "@/shared/constants/screening";
+import { getScreeningDetailRows, getScreeningCategory } from "@/shared/utils/screeningData";
 import { formatDateTime } from "@/shared/utils/formatDate";
 
 import { ScreeningResult, ScreeningNoteForm } from "@/types/screening";
@@ -64,7 +64,6 @@ export default function BatchScreeningDetail() {
 
     const rows     = getScreeningDetailRows(screening);
     const category = getScreeningCategory(screening);
-    const sdqRanges = getSdqRanges(screening.instrument_type?.type_name ?? "");
 
     const psychologist =
         screening.sdq_result?.psychologist ??
@@ -146,22 +145,6 @@ export default function BatchScreeningDetail() {
                                 value={analysisDate ? formatDateTime(analysisDate) : "-"}
                             />
                         </InfoCard>
-
-                        {/* Rentang Nilai */}
-                        <InfoCard title="Rentang Nilai">
-                            {isSDQ ? (
-                                sdqRanges.map((r) => (
-                                    <InfoRow key={r.label} label={r.label} value={r.range} />
-                                ))
-                            ) : (
-                                <>
-                                    <InfoRow label="GME" value="≥5 YA dari pertanyaan 1-20" />
-                                    <InfoRow label="Penggunaan Zat" value="YA pada pertanyaan 21" />
-                                    <InfoRow label="Gejala Psikotik" value="YA pada pertanyaan 22-24" />
-                                    <InfoRow label="Gejala PTSD" value="YA pada pertanyaan 25-29" />
-                                </>
-                            )}
-                        </InfoCard>
                     </div>
 
                     {/* Right col: analisis form */}
@@ -177,8 +160,8 @@ export default function BatchScreeningDetail() {
                                     <TableHeader className="border-b border-gray-100 dark:border-gray-700">
                                         <TableRow>
                                             <TableCell isHeader className="px-4 py-3 text-sm font-semibold">Aspek</TableCell>
-                                            <TableCell isHeader className="px-4 py-3 text-sm font-semibold">Rentang</TableCell>
                                             <TableCell isHeader className="px-4 py-3 text-sm font-semibold">Hasil</TableCell>
+                                            <TableCell isHeader className="px-4 py-3 text-sm font-semibold">Interpretasi</TableCell>
                                             <TableCell isHeader className="px-4 py-3 text-sm font-semibold">Catatan Psikolog</TableCell>
                                         </TableRow>
                                     </TableHeader>
@@ -186,8 +169,8 @@ export default function BatchScreeningDetail() {
                                         {rows.map((row, i) => (
                                             <TableRow key={i} className="border-b border-gray-100 dark:border-gray-700">
                                                 <TableCell className="px-4 py-3 text-sm font-medium">{row.aspect}</TableCell>
-                                                <TableCell className="px-4 py-3 text-sm text-gray-500">{row.range}</TableCell>
                                                 <TableCell className="px-4 py-3 text-sm font-semibold">{row.result}</TableCell>
+                                                <TableCell className="px-4 py-3 text-sm text-gray-500">{row.interpretation}</TableCell>
                                                 <TableCell className="px-4 py-3 min-w-[200px]">
                                                     {row.noteField && (
                                                         <InputField

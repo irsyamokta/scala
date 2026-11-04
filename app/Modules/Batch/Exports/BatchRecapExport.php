@@ -5,14 +5,16 @@ namespace App\Modules\Batch\Exports;
 use App\Models\Batch;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class BatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles, WithTitle
+class BatchRecapExport implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
 {
     public function __construct(private Batch $batch) {}
 
@@ -27,6 +29,17 @@ class BatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithS
             'No', 'Nama Siswa', 'NIS', 'Jenis Kelamin', 'Kelas', 'Tanggal Tes',
             'Emotional Symptoms', 'Conduct Problems', 'Hyperactivity',
             'Peer Problems', 'Prosocial Behavior', 'Hasil Akhir',
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'G' => NumberFormat::FORMAT_NUMBER,
+            'H' => NumberFormat::FORMAT_NUMBER,
+            'I' => NumberFormat::FORMAT_NUMBER,
+            'J' => NumberFormat::FORMAT_NUMBER,
+            'K' => NumberFormat::FORMAT_NUMBER,
         ];
     }
 
@@ -59,11 +72,11 @@ class BatchRecapExport implements FromArray, ShouldAutoSize, WithHeadings, WithS
                 $gender,
                 $subject?->class?->class_name ?? '-',
                 $screening?->date_taken ? $screening->date_taken->format('d/m/Y') : 'Belum tes',
-                $sdq !== null ? (int) $sdq->emotional_score : '-',
-                $sdq !== null ? (int) $sdq->conduct_score : '-',
-                $sdq !== null ? (int) $sdq->hyperactivity_score : '-',
-                $sdq !== null ? (int) $sdq->peer_score : '-',
-                $sdq !== null ? (int) $sdq->prosocial_score : '-',
+                $sdq !== null ? (int) $sdq->emotional_score : null,
+                $sdq !== null ? (int) $sdq->conduct_score : null,
+                $sdq !== null ? (int) $sdq->hyperactivity_score : null,
+                $sdq !== null ? (int) $sdq->peer_score : null,
+                $sdq !== null ? (int) $sdq->prosocial_score : null,
                 $sdq?->overall_category ?? '-',
             ];
         })->toArray();

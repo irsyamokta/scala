@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
-import { LuChevronRight } from "react-icons/lu";
+import { LuChevronRight, LuTrash2 } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import StatCard from "@/shared/components/card/StatCard";
 import FilterBar from "@/shared/components/filter/FilterBar";
 import Select from "@/shared/components/forms/Select";
 import Badge from "@/shared/components/ui/badge/Badge";
+import Button from "@/shared/components/ui/button/Button";
+import Checkbox from "@/shared/components/forms/Checkbox";
 import Pagination from "@/shared/components/ui/pagination/Pagination";
 import {
     Table,
@@ -16,6 +18,7 @@ import {
     TableRow,
 } from "@/shared/components/ui/table";
 import { EmptyTable } from "@/shared/components/empty/EmptyTable";
+import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import { Batch, PaginatedResponse } from "@/types/batch";
 import { PageProps } from "@/types";
 import { PER_PAGE_OPTIONS } from "@/shared/constants/filterOptions";
@@ -41,6 +44,11 @@ export default function SuperadminBatchIndex() {
 
     const [search, setSearch] = useState(filters.search ?? "");
     const [status, setStatus] = useState(filters.status ?? "");
+    const [selected, setSelected] = useState<string[]>([]);
+
+    const allIds     = batches.data.map((b) => b.id);
+    const allChecked = allIds.length > 0 && allIds.every((id) => selected.includes(id));
+    const someChecked = selected.length > 0;
 
     function setFilter(key: string, value: string | number) {
         const payload: Record<string, string | number | undefined> = {
@@ -56,6 +64,31 @@ export default function SuperadminBatchIndex() {
         router.get(route("admin.batch.index"), payload, {
             preserveState: true,
             replace: true,
+        });
+    }
+
+    function toggleAll() {
+        setSelected(allChecked ? [] : allIds);
+    }
+
+    function toggleOne(id: string) {
+        setSelected((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    }
+
+    async function handleDeleteSelected() {
+        const confirmed = await ConfirmationDialog({
+            title: `Hapus ${selected.length} Batch?`,
+            text: "Seluruh data terkait batch akan ikut terhapus permanen. Tindakan ini tidak dapat dibatalkan.",
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+        });
+        if (!confirmed) return;
+
+        router.delete(route("batch.destroy-bulk"), {
+            data: { ids: selected },
+            onSuccess: () => setSelected([]),
         });
     }
 
@@ -90,6 +123,17 @@ export default function SuperadminBatchIndex() {
                             </div>
 
                             <div className="w-full md:w-auto flex items-center gap-2">
+                                {someChecked && (
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        startIcon={<LuTrash2 size={15} />}
+                                        onClick={handleDeleteSelected}
+                                        className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap shrink-0"
+                                    >
+                                        Hapus ({selected.length})
+                                    </Button>
+                                )}
                                 <FilterBar
                                     className="flex-1"
                                     search={{
@@ -116,6 +160,13 @@ export default function SuperadminBatchIndex() {
                                 <Table>
                                     <TableHeader className="border-netral-300 border-b">
                                         <TableRow>
+                                            <TableCell isHeader className="px-4 py-3 w-10">
+                                                <Checkbox
+                                                    checked={allChecked}
+                                                    onChange={toggleAll}
+                                                    label=""
+                                                />
+                                            </TableCell>
                                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
                                                 Label Batch
                                             </TableCell>
@@ -132,9 +183,6 @@ export default function SuperadminBatchIndex() {
                                                 Progress
                                             </TableCell>
                                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
-                                                Psikolog
-                                            </TableCell>
-                                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
                                                 Status
                                             </TableCell>
                                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">
@@ -146,7 +194,12 @@ export default function SuperadminBatchIndex() {
                                         {batches.data.length === 0 ? (
                                             <EmptyTable colspan={8} description="Tidak ada data batch." />
                                         ) : batches.data.map((batch) => (
-                                            <BatchRow key={batch.id} batch={batch} />
+                                            <BatchRow
+                                                key={batch.id}
+                                                batch={batch}
+                                                checked={selected.includes(batch.id)}
+                                                onCheck={() => toggleOne(batch.id)}
+                                            />
                                         ))}
                                     </TableBody>
                                 </Table>
@@ -175,14 +228,42 @@ export default function SuperadminBatchIndex() {
     );
 }
 
-function BatchRow({ batch }: { batch: Batch }) {
-    const used  = batch.tested_count ?? 0;
-    const total = batch.total_subjects ?? 0;
-    const pct   = total > 0 ? Math.round((used / total) * 100) : 0;
+function BatchRow({
+    batch,
+    checked,
+    onCheck,
+}: {
+    batch: Batch;
+    checked: boolean;
+    onCheck: () => void;
+}) {
+    const used     = batch.tested_count ?? 0;
+    const total    = batch.total_subjects ?? 0;
+    const pct      = total > 0 ? Math.round((used / total) * 100) : 0;
     const isClosed = batch.status === "closed";
 
+    async function handleDelete(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const confirmed = await ConfirmationDialog({
+            title: "Hapus Batch Ini?",
+            text: `"${batch.label}" beserta seluruh data terkait akan terhapus permanen.`,
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+        });
+        if (!confirmed) return;
+
+        router.delete(route("batch.destroy", batch.id));
+    }
+
     return (
-        <TableRow key={batch.id} className="border-netral-300 border-b">
+        <TableRow className="border-netral-300 border-b">
+            <TableCell className="px-4 py-3 w-10">
+                <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox checked={checked} onChange={onCheck} label="" />
+                </div>
+            </TableCell>
             <TableCell className="px-6 py-4 text-sm font-medium text-netral-900">
                 <p>{batch.label}</p>
                 {batch.expires_at && (
@@ -192,7 +273,7 @@ function BatchRow({ batch }: { batch: Batch }) {
                 )}
             </TableCell>
             <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
-                {capitalized(batch.school?.school_name ?? "-") ?? batch.school?.name ?? "-"}
+                {capitalized(batch.school?.school_name ?? "") || batch.school?.name || "-"}
             </TableCell>
             <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
                 {batch.class?.class_name ?? "-"}
@@ -213,23 +294,27 @@ function BatchRow({ batch }: { batch: Batch }) {
                     <span className="text-xs text-netral-500">{used}/{total}</span>
                 </div>
             </TableCell>
-            <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
-                {batch.assigned_psychologist?.name ?? (
-                    <span className="text-netral-400 italic text-xs">Belum</span>
-                )}
-            </TableCell>
             <TableCell className="px-6 py-4 whitespace-nowrap">
                 <Badge color={isClosed ? "dark" : "success"} size="sm">
                     {isClosed ? "Ditutup" : "Aktif"}
                 </Badge>
             </TableCell>
             <TableCell className="px-6 py-4 whitespace-nowrap">
-                <a
-                    href={route("batch.show", batch.id)}
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                >
-                    Detail <LuChevronRight size={12} />
-                </a>
+                <div className="flex items-center gap-3 justify-end">
+                    <button
+                        onClick={handleDelete}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition"
+                        title="Hapus batch"
+                    >
+                        <LuTrash2 size={15} />
+                    </button>
+                    <a
+                        href={route("batch.show", batch.id)}
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                        Detail <LuChevronRight size={12} />
+                    </a>
+                </div>
             </TableCell>
         </TableRow>
     );

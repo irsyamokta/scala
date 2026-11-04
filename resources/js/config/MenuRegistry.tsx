@@ -33,6 +33,12 @@ export const MENU = {
         path: "/tes-skrining",
     },
 
+    screening_results: {
+        name: "Hasil Skrining",
+        icon: <RiFileCopy2Line size={22} />,
+        path: "/tes-skrining",
+    },
+
     instrument: {
         name: "Instrumen Tes",
         icon: <PiFolderOpen size={22} />,

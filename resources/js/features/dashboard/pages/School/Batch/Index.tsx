@@ -5,6 +5,7 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import BatchModal from "./Components/modal/BatchModal";
 import BatchCard from "./Components/card/BatchCard";
 import { BatchIndexPageProps } from "@/types/batch";
+import { PageProps } from "@/types";
 
 interface BatchPageProps extends BatchIndexPageProps {
     classes: { id: string; class_name: string }[];
@@ -12,10 +13,12 @@ interface BatchPageProps extends BatchIndexPageProps {
 }
 
 export default function BatchIndex() {
-    const { batches, classes, instruments } =
+    const { batches, classes, instruments, auth } =
         usePage<BatchPageProps>().props;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const canDelete = auth.user.role === "superadmin";
 
     return (
         <DashboardLayout title="Batch Skrining">
@@ -33,6 +36,7 @@ export default function BatchIndex() {
                     <BatchCard
                         batches={batches}
                         onCreate={() => setIsModalOpen(true)}
+                        canDelete={canDelete}
                     />
                 </div>
             </div>

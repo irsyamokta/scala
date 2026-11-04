@@ -20,6 +20,7 @@ interface BatchTableProps {
     allChecked: boolean;
     onToggleAll: () => void;
     onToggleOne: (id: string) => void;
+    canDelete?: boolean;
 }
 
 export default function BatchTable({
@@ -28,6 +29,7 @@ export default function BatchTable({
     allChecked,
     onToggleAll,
     onToggleOne,
+    canDelete = false,
 }: BatchTableProps) {
     if (batches.data.length === 0) return null;
 
@@ -38,14 +40,15 @@ export default function BatchTable({
                     <Table>
                         <TableHeader className="border-b border-netral-300">
                             <TableRow>
-                                {/* Checkbox select all */}
-                                <TableCell isHeader className="px-4 py-3 w-10">
-                                    <Checkbox
-                                        checked={allChecked}
-                                        onChange={onToggleAll}
-                                        label=""
-                                    />
-                                </TableCell>
+                                {canDelete && (
+                                    <TableCell isHeader className="px-4 py-3 w-10">
+                                        <Checkbox
+                                            checked={allChecked}
+                                            onChange={onToggleAll}
+                                            label=""
+                                        />
+                                    </TableCell>
+                                )}
                                 <TableCell isHeader className="px-4 py-3" colSpan={1}>
                                     <span className="text-sm font-semibold text-netral-900 text-start">
                                         Batch
@@ -60,6 +63,7 @@ export default function BatchTable({
                                     batch={batch}
                                     checked={selected.includes(batch.id)}
                                     onCheck={() => onToggleOne(batch.id)}
+                                    canDelete={canDelete}
                                 />
                             ))}
                         </TableBody>
@@ -82,10 +86,12 @@ function BatchItem({
     batch,
     checked,
     onCheck,
+    canDelete,
 }: {
     batch: Batch;
     checked: boolean;
     onCheck: () => void;
+    canDelete: boolean;
 }) {
     const isClosed   = batch.status === "closed";
     const isExpired  = batch.expires_at ? new Date(batch.expires_at) < new Date() : false;
@@ -121,11 +127,13 @@ function BatchItem({
     return (
         <TableRow className="border-b border-netral-300 hover:bg-netral-50 transition">
             {/* Checkbox */}
-            <TableCell className="px-4 py-3 w-10">
-                <div onClick={(e) => e.stopPropagation()}>
-                    <Checkbox checked={checked} onChange={onCheck} label="" />
-                </div>
-            </TableCell>
+            {canDelete && (
+                <TableCell className="px-4 py-3 w-10">
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <Checkbox checked={checked} onChange={onCheck} label="" />
+                    </div>
+                </TableCell>
+            )}
 
             {/* Icon */}
             <TableCell className="px-2 py-3 w-12">
@@ -171,14 +179,16 @@ function BatchItem({
                     )}
                     <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                    {/* Delete button */}
-                    <button
-                        onClick={handleDelete}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition"
-                        title="Hapus batch"
-                    >
-                        <LuTrash2 size={15} />
-                    </button>
+                    {/* Delete button — hanya untuk superadmin */}
+                    {canDelete && (
+                        <button
+                            onClick={handleDelete}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition"
+                            title="Hapus batch"
+                        >
+                            <LuTrash2 size={15} />
+                        </button>
+                    )}
 
                     <a href={route("batch.show", batch.id)} className="no-underline">
                         <LuChevronRight size={16} className="text-netral-400" />

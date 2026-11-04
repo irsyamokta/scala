@@ -10,9 +10,10 @@ import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 interface BatchCardProps {
     batches: PaginatedResponse<Batch>;
     onCreate: () => void;
+    canDelete?: boolean;
 }
 
-export default function BatchCard({ batches, onCreate }: BatchCardProps) {
+export default function BatchCard({ batches, onCreate, canDelete = false }: BatchCardProps) {
     const [selected, setSelected] = useState<string[]>([]);
 
     const allIds   = batches.data.map((b) => b.id);
@@ -57,7 +58,7 @@ export default function BatchCard({ batches, onCreate }: BatchCardProps) {
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
-                    {someChecked && (
+                    {canDelete && someChecked && (
                         <Button
                             variant="outline"
                             size="lg"
@@ -89,6 +90,7 @@ export default function BatchCard({ batches, onCreate }: BatchCardProps) {
                     allChecked={allChecked}
                     onToggleAll={toggleAll}
                     onToggleOne={toggleOne}
+                    canDelete={canDelete}
                 />
             )}
         </div>
