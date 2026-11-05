@@ -34,10 +34,10 @@ export default function AppFooter() {
                         <div className="flex items-center gap-3">
                             <HiOutlineMail className="text-netral-600" size={18} />
                             <a
-                                href="mailto:info@scala.id"
+                                href="mailto:info@scalacare.id"
                                 className="hover:text-primary"
                             >
-                                info@scala.id
+                                info@scalacare.id
                             </a>
                         </div>
                     </div>

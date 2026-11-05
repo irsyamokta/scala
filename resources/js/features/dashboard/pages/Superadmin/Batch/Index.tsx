@@ -112,7 +112,8 @@ export default function SuperadminBatchIndex() {
 
                 <div className="col-span-12">
                     <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
-                        <div className="w-full flex flex-col md:flex-row items-start justify-between gap-4 mb-6">
+                        {/* Header: Title & Action */}
+                        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                             <div>
                                 <h2 className="text-lg font-semibold text-netral-900">
                                     Daftar Batch
@@ -122,37 +123,47 @@ export default function SuperadminBatchIndex() {
                                 </p>
                             </div>
 
-                            <div className="w-full md:w-auto flex items-center gap-2">
-                                {someChecked && (
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        startIcon={<LuTrash2 size={15} />}
-                                        onClick={handleDeleteSelected}
-                                        className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap shrink-0"
-                                    >
-                                        Hapus ({selected.length})
-                                    </Button>
-                                )}
-                                <FilterBar
-                                    className="flex-1"
-                                    search={{
-                                        value: search,
-                                        placeholder: "Cari label batch...",
-                                        onChange: (value) => setSearch(value),
-                                    }}
-                                    filter={{
-                                        label: "Status",
-                                        value: status ? [status] : [],
-                                        options: [
-                                            { value: "active", label: "Aktif" },
-                                            { value: "closed", label: "Ditutup" },
-                                        ],
-                                        onChange: (value) =>
-                                            setFilter("status", Array.isArray(value) ? value[0] : value),
-                                    }}
-                                />
-                            </div>
+                            {someChecked && (
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    startIcon={<LuTrash2 size={15} />}
+                                    onClick={handleDeleteSelected}
+                                    className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap shrink-0"
+                                >
+                                    Hapus ({selected.length})
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Toolbar: Per Page (Left) & Search/Filter (Right) */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <Select
+                                value={filters.per_page ?? 10}
+                                placeholder="10"
+                                onChange={(value) => setFilter("per_page", Number(value))}
+                                className="max-w-18 shrink-0"
+                                options={PER_PAGE_OPTIONS}
+                            />
+
+                            <FilterBar
+                                className="w-full sm:w-auto"
+                                search={{
+                                    value: search,
+                                    placeholder: "Cari label batch...",
+                                    onChange: (value) => setSearch(value),
+                                }}
+                                filter={{
+                                    label: "Status",
+                                    value: status ? [status] : [],
+                                    options: [
+                                        { value: "active", label: "Aktif" },
+                                        { value: "closed", label: "Ditutup" },
+                                    ],
+                                    onChange: (value) =>
+                                        setFilter("status", Array.isArray(value) ? value[0] : value),
+                                }}
+                            />
                         </div>
 
                         <div className="border border-netral-300 rounded-xl">
@@ -206,15 +217,7 @@ export default function SuperadminBatchIndex() {
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-center gap-2 mt-6">
-                            <Select
-                                value={filters.per_page ?? 10}
-                                placeholder="10"
-                                onChange={(value) => setFilter("per_page", Number(value))}
-                                className="max-w-18"
-                                options={PER_PAGE_OPTIONS}
-                            />
-
+                        <div className="flex justify-center items-center mt-6">
                             <Pagination
                                 links={batches.links}
                                 filters={{ search, status }}
@@ -258,7 +261,10 @@ function BatchRow({
     }
 
     return (
-        <TableRow className="border-netral-300 border-b">
+        <TableRow
+            onClick={() => router.visit(route("batch.show", batch.id))}
+            className="border-netral-300 border-b hover:bg-netral-200/40 transition-colors cursor-pointer group"
+        >
             <TableCell className="px-4 py-3 w-10">
                 <div onClick={(e) => e.stopPropagation()}>
                     <Checkbox checked={checked} onChange={onCheck} label="" />

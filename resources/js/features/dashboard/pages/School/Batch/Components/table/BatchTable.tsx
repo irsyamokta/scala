@@ -130,7 +130,10 @@ function BatchItem({
     }
 
     return (
-        <TableRow className="border-b border-netral-300 hover:bg-netral-50 transition">
+        <TableRow
+            onClick={() => router.visit(route("batch.show", batch.id))}
+            className="border-b border-netral-300 hover:bg-netral-200/40 transition-colors cursor-pointer group"
+        >
             {/* Checkbox */}
             {canDelete && (
                 <TableCell className="px-4 py-3 w-10">
@@ -141,39 +144,39 @@ function BatchItem({
             )}
 
             {/* Icon */}
-            <TableCell className="px-2 py-3 w-12">
-                <a href={route("batch.show", batch.id)} className="flex no-underline">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                        isClosed || isExpired ? "bg-netral-200 text-netral-400" : "bg-primary/10 text-primary"
-                    }`}>
-                        {isClosed ? <LuLock size={18} /> : <LuKeyRound size={18} />}
-                    </div>
-                </a>
+            <TableCell className="px-4 py-3 w-12">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition ${
+                    isClosed || isExpired
+                        ? "bg-netral-200 text-netral-400"
+                        : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white group-hover:scale-105"
+                }`}>
+                    {isClosed ? <LuLock size={18} /> : <LuKeyRound size={18} />}
+                </div>
             </TableCell>
 
             {/* Info */}
             <TableCell className="px-4 py-3 w-full">
-                <a href={route("batch.show", batch.id)} className="block no-underline">
-                    <p className="font-semibold text-netral-900 truncate">{batch.label}</p>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-netral-600">
-                        <span className="flex items-center gap-1">
-                            <LuUsers size={10} />
-                            {batch.class?.class_name ?? "Semua Kelas"}
+                <p className="font-semibold text-netral-900 truncate group-hover:text-primary transition-colors">
+                    {batch.label}
+                </p>
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-netral-600">
+                    <span className="flex items-center gap-1">
+                        <LuUsers size={10} />
+                        {batch.class?.class_name ?? "Semua Kelas"}
+                    </span>
+                    <span className="font-medium">{batch.instrument?.name ?? "-"}</span>
+                    <span className="text-netral-600">
+                        Dibuat {new Date(batch.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                    {batch.expires_at ? (
+                        <span className={isExpired ? "text-red-500" : "text-netral-600"}>
+                            {isExpired ? "Kedaluwarsa" : "Berlaku s/d"}{" "}
+                            {new Date(batch.expires_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                         </span>
-                        <span className="font-medium">{batch.instrument?.name ?? "-"}</span>
-                        <span className="text-netral-600">
-                            Dibuat {new Date(batch.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                        </span>
-                        {batch.expires_at ? (
-                            <span className={isExpired ? "text-red-500" : "text-netral-600"}>
-                                {isExpired ? "Kedaluwarsa" : "Berlaku s/d"}{" "}
-                                {new Date(batch.expires_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                            </span>
-                        ) : (
-                            <span className="text-netral-600">Tidak ada batas waktu</span>
-                        )}
-                    </div>
-                </a>
+                    ) : (
+                        <span className="text-netral-600">Tidak ada batas waktu</span>
+                    )}
+                </div>
             </TableCell>
 
             {/* Status + Progress + Actions */}
@@ -184,7 +187,7 @@ function BatchItem({
                     )}
                     <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                    {/* Edit button (ikon pensil) disamping kanan badge */}
+                    {/* Edit button */}
                     {onEdit && (
                         <button
                             type="button"
@@ -193,7 +196,7 @@ function BatchItem({
                                 e.stopPropagation();
                                 onEdit(batch);
                             }}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-200 hover:text-netral-900 transition"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-300/60 hover:text-netral-900 transition"
                             title="Edit batch"
                         >
                             <LuPencil size={15} />
@@ -211,9 +214,9 @@ function BatchItem({
                         </button>
                     )}
 
-                    <a href={route("batch.show", batch.id)} className="no-underline">
-                        <LuChevronRight size={16} className="text-netral-400" />
-                    </a>
+                    <div className="text-netral-400 group-hover:text-primary group-hover:translate-x-0.5 transition-all">
+                        <LuChevronRight size={18} />
+                    </div>
                 </div>
             </TableCell>
         </TableRow>

@@ -8,41 +8,64 @@ interface PaginationLink {
 }
 
 interface PaginationProps {
-    links: PaginationLink[];
-    filters: Record<string, any>;
-    routeName: string;
+    links?: PaginationLink[];
+    filters?: Record<string, any>;
+    routeName?: string;
     routeParams?: Record<string, any>;
     className?: string;
+
+    currentPage?: number;
+    lastPage?: number;
+    onPageChange?: (page: number) => void;
 }
 
 export default function Pagination({
     links,
-    filters,
+    filters = {},
     routeName,
     routeParams,
     className = "",
+    currentPage: propCurrentPage,
+    lastPage: propLastPage,
+    onPageChange,
 }: PaginationProps) {
-    if (!links || links.length <= 3) return null;
+    let currentPage = 1;
+    let lastPage = 1;
 
-    const rawPages = links.slice(1, -1);
-    const activeItem = rawPages.find((p) => p.active);
-    const currentPage = activeItem ? parseInt(activeItem.label, 10) : 1;
+    if (onPageChange) {
+        currentPage = propCurrentPage ?? 1;
+        lastPage = propLastPage ?? 1;
+        if (lastPage <= 1) return null;
+    } else {
+        if (!links || links.length <= 3) return null;
 
-    const numericPages = rawPages
-        .map((p) => parseInt(p.label, 10))
-        .filter((n) => !isNaN(n));
-    const lastPage = numericPages.length > 0 ? Math.max(...numericPages) : 1;
+        const rawPages = links.slice(1, -1);
+        const activeItem = rawPages.find((p) => p.active);
+        currentPage = activeItem ? parseInt(activeItem.label, 10) : 1;
 
-    if (lastPage <= 1) return null;
+        const numericPages = rawPages
+            .map((p) => parseInt(p.label, 10))
+            .filter((n) => !isNaN(n));
+        lastPage = numericPages.length > 0 ? Math.max(...numericPages) : 1;
+
+        if (lastPage <= 1) return null;
+    }
 
     const navigateToPage = (page: number) => {
         if (page < 1 || page > lastPage || page === currentPage) return;
 
-        router.get(
-            routeParams ? route(routeName, routeParams) : route(routeName),
-            { ...filters, page },
-            { preserveState: true }
-        );
+        if (onPageChange) {
+            onPageChange(page);
+            return;
+        }
+
+        if (routeName) {
+            router.get(
+                routeParams ? route(routeName, routeParams) : route(routeName),
+                { ...filters, page },
+                { preserveState: true }
+            );
+        }
     };
 
     const getVisiblePages = (current: number, total: number): (number | "...")[] => {

@@ -63,8 +63,8 @@ export default function SubjectStudentCard({
     return (
         <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
 
-            {/* Header */}
-            <div className="w-full flex flex-col lg:flex-row items-start justify-between gap-4">
+            {/* Header: Title & Action */}
+            <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-lg font-semibold text-netral-900">Daftar Siswa</h2>
                     <p className="text-sm text-netral-600 mt-1">
@@ -72,36 +72,7 @@ export default function SubjectStudentCard({
                     </p>
                 </div>
 
-                <div className="w-full lg:w-auto flex flex-col md:flex-row items-center gap-2">
-                    <FilterBar
-                        className="w-full lg:w-2/3"
-                        search={{
-                            value: filters.search,
-                            placeholder: "Cari nama atau NIS...",
-                            onChange: (value) => setFilter("search", value),
-                        }}
-                        filters={[
-                            {
-                                label: "Kelas",
-                                value: filters.class_id ?? [],
-                                options: (classes ?? []).map((c) => ({
-                                    value: String(c.value ?? c.id),
-                                    label: c.label ?? c.class_name,
-                                })),
-                                onChange: (value) => setFilter("class_id", value),
-                            },
-                            {
-                                label: "Gender",
-                                value: filters.gender ?? [],
-                                options: [
-                                    { value: "male", label: "Laki-laki" },
-                                    { value: "female", label: "Perempuan" },
-                                ],
-                                onChange: (value) => setFilter("gender", value),
-                            },
-                        ]}
-                    />
-
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                     {selected.length > 0 && (
                         <Button
                             variant="outline"
@@ -118,11 +89,51 @@ export default function SubjectStudentCard({
                         size="lg"
                         startIcon={<LuPlus />}
                         onClick={onCreate}
-                        className="text-sm w-full md:w-auto whitespace-nowrap shrink-0"
+                        className="text-sm w-full sm:w-auto whitespace-nowrap shrink-0"
                     >
                         Tambah Siswa
                     </Button>
                 </div>
+            </div>
+
+            {/* Toolbar: Per Page (Left) & Search/Filter (Right) */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6">
+                <Select
+                    value={filters?.per_page ?? 10}
+                    placeholder="10"
+                    onChange={(value) => setFilter("per_page", value)}
+                    className="max-w-18 shrink-0"
+                    options={PER_PAGE_OPTIONS}
+                />
+
+                <FilterBar
+                    className="w-full sm:w-auto"
+                    search={{
+                        value: filters.search,
+                        placeholder: "Cari nama atau NIS...",
+                        onChange: (value) => setFilter("search", value),
+                    }}
+                    filters={[
+                        {
+                            label: "Kelas",
+                            value: filters.class_id ?? [],
+                            options: (classes ?? []).map((c) => ({
+                                value: String(c.value ?? c.id),
+                                label: c.label ?? c.class_name,
+                            })),
+                            onChange: (value) => setFilter("class_id", value),
+                        },
+                        {
+                            label: "Gender",
+                            value: filters.gender ?? [],
+                            options: [
+                                { value: "male", label: "Laki-laki" },
+                                { value: "female", label: "Perempuan" },
+                            ],
+                            onChange: (value) => setFilter("gender", value),
+                        },
+                    ]}
+                />
             </div>
 
             {/* Table */}
@@ -135,16 +146,8 @@ export default function SubjectStudentCard({
                 onEdit={onEdit}
             />
 
-            {/* Footer: Per Page + Pagination */}
-            <div className="flex justify-between items-center gap-2 mt-4">
-                <Select
-                    value={filters?.per_page ?? 10}
-                    placeholder="10"
-                    onChange={(value) => setFilter("per_page", value)}
-                    className="max-w-18"
-                    options={PER_PAGE_OPTIONS}
-                />
-
+            {/* Footer: Pagination */}
+            <div className="flex justify-center items-center mt-6">
                 <Pagination
                     links={paginated?.links ?? []}
                     filters={filters}

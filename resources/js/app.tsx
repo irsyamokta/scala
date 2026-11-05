@@ -14,7 +14,7 @@ type AppWrapperProps = {
     props: any;
 };
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Scala';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

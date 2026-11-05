@@ -119,7 +119,7 @@ export default function FilterBar({
                     </button>
 
                     {open && (
-                        <div className="absolute z-50 right-0 mt-2 w-64 bg-netral-100 border rounded-xl shadow-lg p-4 space-y-4">
+                        <div className="absolute z-50 right-0 mt-2 w-64 bg-netral-100 border border-netral-300 rounded-xl shadow-lg p-4 space-y-4 max-h-[80vh] overflow-y-auto">
 
                             {/* MULTI GROUP */}
                             {filters ? (

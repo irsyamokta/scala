@@ -41,9 +41,11 @@ export default function TestHistoryCard({
             : subject.last_result;
 
     return (
-        <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300 overflow-hidden">
+        <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
             {/* Decoration */}
-            <img src={Decorative} alt="" className="absolute -top-16 -right-26 rotate-1 hidden sm:block" />
+            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-xl">
+                <img src={Decorative} alt="" className="absolute -top-16 -right-26 rotate-1 hidden sm:block" />
+            </div>
 
             {/* Header */}
             <div className="flex items-center gap-4">

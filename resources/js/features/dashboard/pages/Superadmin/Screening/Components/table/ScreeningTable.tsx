@@ -53,40 +53,45 @@ export default function ScreeningTable({
 
     return (
         <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
-            {/* Header */}
-            <div className="w-full flex flex-col md:flex-row items-start justify-between gap-4 mb-6">
+            {/* Header: Title */}
+            <div className="mb-6">
+                <h2 className="text-lg font-semibold text-netral-900">
+                    Daftar Hasil Tes
+                </h2>
 
-                <div>
-                    <h2 className="text-lg font-semibold text-netral-900">
-                        Daftar Hasil Tes
-                    </h2>
+                <p className="text-sm text-netral-600 mt-1">
+                    Berikut adalah daftar hasil tes yang sudah dikerjakan.
+                </p>
+            </div>
 
-                    <p className="text-sm text-netral-600 mt-1">
-                        Berikut adalah daftar hasil tes yang sudah dikerjakan.
-                    </p>
-                </div>
+            {/* Toolbar: Per Page (Left) & Search/Filter (Right) */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <Select
+                    value={filters?.per_page ?? 10}
+                    placeholder="10"
+                    onChange={(value) => setFilter?.("per_page", value)}
+                    className="max-w-18 shrink-0"
+                    options={PER_PAGE_OPTIONS}
+                />
 
-                <div className="w-full md:w-auto flex items-center gap-2">
-
-                    <FilterBar
-                        className="flex-1"
-                        search={{
-                            value: filters?.search ?? "",
-                            placeholder: "Cari nama anak",
-                            onChange: (value) => setFilter?.("search", value)
-                        }}
-                        filter={{
-                            label: "Kategori",
-                            value: filters?.category ?? [],
-                            options: RESULT_OPTIONS,
-                            onChange: (value) =>
-                                setFilter?.(
-                                    "category",
-                                    Array.isArray(value) ? value : [value]
-                                )
-                        }}
-                    />
-                </div>
+                <FilterBar
+                    className="w-full sm:w-auto"
+                    search={{
+                        value: filters?.search ?? "",
+                        placeholder: "Cari nama anak",
+                        onChange: (value) => setFilter?.("search", value)
+                    }}
+                    filter={{
+                        label: "Kategori",
+                        value: filters?.category ?? [],
+                        options: RESULT_OPTIONS,
+                        onChange: (value) =>
+                            setFilter?.(
+                                "category",
+                                Array.isArray(value) ? value : [value]
+                            )
+                    }}
+                />
             </div>
 
             {/* Table */}
@@ -221,15 +226,7 @@ export default function ScreeningTable({
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-between items-center gap-2 mt-6">
-                <Select
-                    value={filters?.per_page ?? 10}
-                    placeholder="10"
-                    onChange={(value) => setFilter?.("per_page", value)}
-                    className="max-w-18"
-                    options={PER_PAGE_OPTIONS}
-                />
-
+            <div className="flex justify-center items-center mt-6">
                 <Pagination
                     links={screenings.links}
                     filters={filters ?? {}}

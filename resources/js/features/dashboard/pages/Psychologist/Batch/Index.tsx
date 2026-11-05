@@ -1,4 +1,4 @@
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { LuChevronRight } from "react-icons/lu";
 
 import DashboardLayout from "@/Layouts/DashboardLayout";
@@ -95,7 +95,10 @@ function BatchRow({ batch }: { batch: Batch }) {
     const isClosed = batch.status === "closed";
 
     return (
-        <TableRow className="border-netral-300 border-b">
+        <TableRow
+            onClick={() => router.visit(route("batch.show", batch.id))}
+            className="border-netral-300 border-b hover:bg-netral-200/70 transition-colors cursor-pointer group"
+        >
             <TableCell className="px-6 py-4 text-sm font-medium text-netral-900">
                 <p>{batch.label}</p>
                 {batch.expires_at && (

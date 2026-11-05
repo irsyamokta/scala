@@ -158,8 +158,10 @@ export default function BatchShow() {
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
                 <div className="col-span-12">
-                    <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300 overflow-hidden">
-                        <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
+                    <div className="relative bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-xl">
+                            <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
+                        </div>
 
                         <div className="flex items-center gap-3">
                             <Link href={back_route}>
