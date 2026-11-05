@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Onboarding\services;
+namespace App\Modules\Onboarding\Services;
 
 use App\Models\User;
 use App\Modules\Onboarding\Repositories\OnboardingRepository;

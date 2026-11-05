@@ -48,7 +48,7 @@ export const formatDateTime = (date: string | Date): string => {
         hour12: false,
     };
 
-    const formatterDate = new Intl.DateTimeFormat('en-GB', dateOptions).format(parsedDate);
+    const formatterDate = new Intl.DateTimeFormat('en-GB', { ...dateOptions, timeZone: 'Asia/Jakarta' }).format(parsedDate);
     const formatterTime = new Intl.DateTimeFormat('en-GB', { ...timeOptions, timeZone: 'Asia/Jakarta' }).format(parsedDate);
 
     return `${formatterDate} - ${formatterTime}`;

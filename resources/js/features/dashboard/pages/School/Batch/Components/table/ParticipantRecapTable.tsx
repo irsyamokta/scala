@@ -13,6 +13,7 @@ import FilterBar from "@/shared/components/filter/FilterBar";
 import Pagination from "@/shared/components/ui/pagination/Pagination";
 import { EmptyTable } from "@/shared/components/empty/EmptyTable";
 import { PER_PAGE_OPTIONS } from "@/shared/constants/filterOptions";
+import { formatDateTime } from "@/shared/utils/formatDate";
 import { BatchSubject } from "@/types/batch";
 import { ScreeningResult } from "@/types/screening";
 import { IoEyeOutline } from "react-icons/io5";
@@ -167,9 +168,7 @@ export default function ParticipantRecapTable({ participants, onView }: Particip
                                         </TableCell>
                                         <TableCell className="px-6 py-4 text-sm text-netral-600 whitespace-nowrap">
                                             {screening?.date_taken
-                                                ? new Date(screening.date_taken).toLocaleDateString("id-ID", {
-                                                    day: "numeric", month: "short", year: "numeric",
-                                                })
+                                                ? formatDateTime(screening.date_taken)
                                                 : <span className="italic text-netral-500">Belum tes</span>}
                                         </TableCell>
                                         <TableCell className="px-6 py-4 whitespace-nowrap">

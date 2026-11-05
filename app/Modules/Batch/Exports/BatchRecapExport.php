@@ -40,7 +40,7 @@ class BatchRecapExport extends DefaultValueBinder implements FromArray, ShouldAu
     public function headings(): array
     {
         return [
-            'No', 'Nama Siswa', 'NIS', 'Jenis Kelamin', 'Kelas', 'Tanggal Tes',
+            'No', 'Nama Siswa', 'Tanggal Lahir', 'NIS', 'Jenis Kelamin', 'Kelas', 'Tanggal Tes',
             'Emotional Symptoms', 'Conduct Problems', 'Hyperactivity',
             'Peer Problems', 'Prosocial Behavior', 'Hasil Akhir',
         ];
@@ -49,11 +49,11 @@ class BatchRecapExport extends DefaultValueBinder implements FromArray, ShouldAu
     public function columnFormats(): array
     {
         return [
-            'G' => NumberFormat::FORMAT_NUMBER,
             'H' => NumberFormat::FORMAT_NUMBER,
             'I' => NumberFormat::FORMAT_NUMBER,
             'J' => NumberFormat::FORMAT_NUMBER,
             'K' => NumberFormat::FORMAT_NUMBER,
+            'L' => NumberFormat::FORMAT_NUMBER,
         ];
     }
 
@@ -61,7 +61,7 @@ class BatchRecapExport extends DefaultValueBinder implements FromArray, ShouldAu
     {
         $entries = $this->batch->entries()
             ->with([
-                'subject:id,name,nis,gender,class_id',
+                'subject:id,name,nis,gender,class_id,tanggal_lahir',
                 'subject.class:id,class_name',
                 'screening:id,pin_id,date_taken',
                 'screening.sdqResult:id,screening_id,emotional_score,conduct_score,hyperactivity_score,peer_score,prosocial_score,overall_category',
@@ -79,13 +79,22 @@ class BatchRecapExport extends DefaultValueBinder implements FromArray, ShouldAu
                 default => '-',
             };
 
+            $tanggalLahir = $subject?->tanggal_lahir
+                ? \Carbon\Carbon::parse($subject->tanggal_lahir)->format('d/m/Y')
+                : '-';
+
+            $dateTaken = $screening?->date_taken
+                ? \Carbon\Carbon::parse($screening->date_taken)->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d/m/Y - H:i:s')
+                : 'Belum tes';
+
             return [
                 $i + 1,
                 $subject?->name ?? '-',
+                $tanggalLahir,
                 $subject?->nis ?? '-',
                 $gender,
                 $subject?->class?->class_name ?? '-',
-                $screening?->date_taken ? $screening->date_taken->format('d/m/Y') : 'Belum tes',
+                $dateTaken,
                 $sdq !== null ? (int) $sdq->emotional_score : '',
                 $sdq !== null ? (int) $sdq->conduct_score : '',
                 $sdq !== null ? (int) $sdq->hyperactivity_score : '',
