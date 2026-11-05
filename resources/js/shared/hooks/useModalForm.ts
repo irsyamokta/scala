@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEventHandler } from "react";
+import { useState, useEffect, useRef, FormEventHandler } from "react";
 import { router } from "@inertiajs/react";
 
 import { toast } from "sonner";
@@ -35,6 +35,9 @@ export function useModalForm<T extends Record<string, any>>({
     const [data, setDataState] = useState<T>(initialValues);
     const [loading, setLoading] = useState(false);
     const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
+
+    const editDataRef = useRef<Partial<T> | null | undefined>(editData);
+    editDataRef.current = editData;
 
     const isEditing = !!editData;
 
@@ -78,10 +81,10 @@ export function useModalForm<T extends Record<string, any>>({
     };
 
     useEffect(() => {
-        if (isOpen && isEditing && editData) {
+        if (isOpen && isEditing && editDataRef.current) {
             setDataState({
                 ...initialValues,
-                ...editData,
+                ...editDataRef.current,
             });
         } else if (!isOpen) {
             reset();

@@ -88,6 +88,7 @@ interface UserProfileForm {
     contact: string;
     age: string;
     gender: string;
+    password?: string;
 }
 
 interface UserProfileSchoolForm {

@@ -12,16 +12,17 @@ export default function ProfileInformationCard({
     subject
 }: UserCardProps) {
     const [open, setOpen] = useState(false);
+    const isSuperadmin = user.role === "superadmin";
 
     return (
         <>
             <div className="bg-netral-100 rounded-xl border border-netral-300 p-6 w-full lg:max-w-2xl">
                 <div className="flex items-center justify-between mb-4">
-                    <SectionTitle title="Informasi Umum" />
+                    <SectionTitle title={isSuperadmin ? "Informasi Akun Administrator" : "Informasi Umum"} />
 
                     <button
                         onClick={() => setOpen(true)}
-                        className="text-sm text-primary font-medium hover:underline"
+                        className="text-sm text-primary font-medium hover:underline cursor-pointer"
                     >
                         Ubah
                     </button>
@@ -36,9 +37,9 @@ export default function ProfileInformationCard({
                     </div>
 
                     <div className="flex justify-between font-medium">
-                        <span className="text-netral-600">Domisili</span>
+                        <span className="text-netral-600">Email</span>
                         <span className="text-netral-900">
-                            {user.domicile ? capitalizeEachWord(user.domicile) : "(Belum diatur)"}
+                            {user.email}
                         </span>
                     </div>
 
@@ -50,24 +51,35 @@ export default function ProfileInformationCard({
                     </div>
 
                     <div className="flex justify-between font-medium">
-                        <span className="text-netral-600">Usia</span>
+                        <span className="text-netral-600">Domisili</span>
                         <span className="text-netral-900">
-                            {subject?.age ?? "(Belum diatur)"}
+                            {user.domicile ? capitalizeEachWord(user.domicile) : "(Belum diatur)"}
                         </span>
                     </div>
 
-                    <div className="flex justify-between font-medium">
-                        <span className="text-netral-600">Jenis Kelamin</span>
-                        <span className="text-netral-900">
-                            {
-                                subject?.gender === "male"
-                                    ? "Laki-laki"
-                                    : subject?.gender === "female"
-                                        ? "Perempuan"
-                                        : "(Belum diatur)"
-                            }
-                        </span>
-                    </div>
+                    {!isSuperadmin && (
+                        <>
+                            <div className="flex justify-between font-medium">
+                                <span className="text-netral-600">Usia</span>
+                                <span className="text-netral-900">
+                                    {subject?.age ?? "(Belum diatur)"}
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between font-medium">
+                                <span className="text-netral-600">Jenis Kelamin</span>
+                                <span className="text-netral-900">
+                                    {
+                                        subject?.gender === "male"
+                                            ? "Laki-laki"
+                                            : subject?.gender === "female"
+                                                ? "Perempuan"
+                                                : "(Belum diatur)"
+                                    }
+                                </span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

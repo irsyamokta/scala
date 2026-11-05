@@ -18,6 +18,16 @@ class UserRequest extends FormRequest
     }
 
     /**
+     * Convert empty password string to null before validation.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->password === '' || $this->password === null) {
+            $this->merge(['password' => null]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -25,6 +35,7 @@ class UserRequest extends FormRequest
     public function rules()
     {
         $userId = $this->route('id');
+        $isUpdate = filled($userId);
 
         return [
             'name' => 'required|string|max:100',
@@ -32,7 +43,7 @@ class UserRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                'unique:users,email,'.$userId,
+                'unique:users,email,' . $userId,
             ],
 
             'role' => 'required|string|in:parent,school,general,psychologist',
@@ -45,9 +56,9 @@ class UserRequest extends FormRequest
                 Rule::unique('users', 'contact')->ignore($userId),
             ],
 
-            'password' => $this->isMethod('post')
-                ? 'required|string|min:8'
-                : 'nullable|string|min:8',
+            'password' => $isUpdate
+                ? 'nullable|string|min:8'
+                : 'required|string|min:8',
         ];
     }
 }

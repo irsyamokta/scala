@@ -9,23 +9,37 @@ class ProfileService
 {
     public function updateProfile(User $user, array $data): void
     {
-        $user->update([
+        $updateData = [
             'name' => $data['name'],
-            'domicile' => $data['domicile'],
-            'contact' => $data['contact'],
-        ]);
+        ];
 
-        $user->subjects()->updateOrCreate(
-            [
-                'owner_user_id' => $user->id,
-                'is_self' => true,
-            ],
-            [
-                'name' => $user->name,
-                'age' => $data['age'],
-                'gender' => $data['gender'],
-            ]
-        );
+        if (array_key_exists('domicile', $data) && $data['domicile'] !== null) {
+            $updateData['domicile'] = $data['domicile'];
+        }
+
+        if (array_key_exists('contact', $data) && $data['contact'] !== null) {
+            $updateData['contact'] = $data['contact'];
+        }
+
+        if (! empty($data['password'])) {
+            $updateData['password'] = $data['password'];
+        }
+
+        $user->update($updateData);
+
+        if ($user->role !== 'superadmin' && isset($data['age'], $data['gender'])) {
+            $user->subjects()->updateOrCreate(
+                [
+                    'owner_user_id' => $user->id,
+                    'is_self' => true,
+                ],
+                [
+                    'name' => $user->name,
+                    'age' => $data['age'],
+                    'gender' => $data['gender'],
+                ]
+            );
+        }
     }
 
     public function updateSchool(User $user, array $data): void

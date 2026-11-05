@@ -12,6 +12,10 @@ export default function UserModal({
     onClose,
     user
 }: UserModalProps) {
+    const editData: UserForm | null = user
+        ? { name: user.name, email: user.email, contact: user.contact, role: user.role, password: "" }
+        : null;
+
     const {
         data,
         setData,
@@ -29,7 +33,7 @@ export default function UserModal({
             role: "",
             password: "",
         },
-        editData: user,
+        editData,
         editId: user?.id,
         createMessage: "Pengguna berhasil disimpan",
         updateMessage: "Pengguna berhasil diperbarui",
@@ -107,14 +111,13 @@ export default function UserModal({
 
                 {/* Password */}
                 <Input
-                    label="Password"
+                    label={isEditing ? "Password baru (opsional)" : "Password"}
                     name="password"
                     type="password"
-                    placeholder="Masukkan password Anda"
+                    placeholder={isEditing ? "Kosongkan jika tidak ingin mengubah" : "Masukkan password Anda"}
                     value={data.password}
                     onChange={(e) => setData("password", e.target.value)}
                     required={!isEditing}
-                    disabled={isEditing}
                     error={serverErrors.password}
                 />
             </Form>

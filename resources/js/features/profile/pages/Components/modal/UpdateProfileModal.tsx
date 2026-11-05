@@ -13,6 +13,18 @@ export default function UpdateProfileModal({
     user,
     subject,
 }: UserProfileModalProps) {
+    const isSuperadmin = user?.role === "superadmin";
+
+    const editData: UserProfileForm | null = user
+        ? {
+            name: user.name || "",
+            domicile: user.domicile || "",
+            contact: user.contact || "",
+            age: subject?.age ? String(subject.age) : "",
+            gender: subject?.gender || "",
+            password: "",
+        }
+        : null;
 
     const {
         data,
@@ -20,7 +32,6 @@ export default function UpdateProfileModal({
         handleSubmit,
         loading,
         serverErrors,
-        isEditing
     } = useModalForm<UserProfileForm>({
         isOpen,
         onClose,
@@ -28,13 +39,14 @@ export default function UpdateProfileModal({
             name: "",
             domicile: "",
             contact: "",
-            age: subject?.age ?? "",
+            age: subject?.age ? String(subject.age) : "",
             gender: subject?.gender ?? "",
+            password: "",
         },
-        editData: user,
+        editData,
         editId: user?.id,
-        createMessage: "Informasi umum berhasil disimpan",
-        updateMessage: "Informasi umum berhasil diperbarui",
+        createMessage: "Informasi profil berhasil disimpan",
+        updateMessage: "Informasi profil berhasil diperbarui",
         storeRoute: "profile.update",
         updateRoute: "profile.update",
     });
@@ -43,7 +55,7 @@ export default function UpdateProfileModal({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Ubah Informasi Umum"
+            title={isSuperadmin ? "Ubah Akun Administrator" : "Ubah Informasi Umum"}
             formId="update-profile-form"
             submitLabel="Simpan Perubahan"
             cancelLabel="Batal"
@@ -64,6 +76,7 @@ export default function UpdateProfileModal({
                     value={data.name}
                     onChange={(e) => setData("name", e.target.value)}
                     error={serverErrors.name}
+                    required
                 />
 
                 {/* Domicile */}
@@ -74,6 +87,7 @@ export default function UpdateProfileModal({
                     value={data.domicile}
                     onChange={(e) => setData("domicile", e.target.value)}
                     error={serverErrors.domicile}
+                    required={!isSuperadmin}
                 />
 
                 {/* Contact */}
@@ -81,35 +95,55 @@ export default function UpdateProfileModal({
                     label="Kontak"
                     name="contact"
                     type="number"
-                    placeholder="Masukkan kontak Anda"
+                    placeholder="Masukkan kontak Anda (cth: 08123456789)"
                     value={data.contact}
                     onChange={(e) => setData("contact", e.target.value)}
                     error={serverErrors.contact}
+                    required={!isSuperadmin}
                 />
 
-                {/* Age */}
-                <Input
-                    label="Usia"
-                    name="age"
-                    type="number"
-                    placeholder="Masukkan usia Anda"
-                    value={data.age}
-                    onChange={(e) => setData("age", e.target.value)}
-                    error={serverErrors.age}
-                />
+                {/* Age & Gender (Khusus non-superadmin) */}
+                {!isSuperadmin && (
+                    <>
+                        {/* Age */}
+                        <Input
+                            label="Usia"
+                            name="age"
+                            type="number"
+                            placeholder="Masukkan usia Anda"
+                            value={data.age}
+                            onChange={(e) => setData("age", e.target.value)}
+                            error={serverErrors.age}
+                            required
+                        />
 
-                {/* Gender */}
-                <RadioButtonGroup
-                    label="Jenis Kelamin"
-                    name="gender"
-                    height="h-10"
-                    options={[
-                        { value: "male", label: "Laki-laki" },
-                        { value: "female", label: "Perempuan" },
-                    ]}
-                    value={data.gender}
-                    onChange={(value) => setData("gender", value)}
-                />
+                        {/* Gender */}
+                        <RadioButtonGroup
+                            label="Jenis Kelamin"
+                            name="gender"
+                            height="h-10"
+                            options={[
+                                { value: "male", label: "Laki-laki" },
+                                { value: "female", label: "Perempuan" },
+                            ]}
+                            value={data.gender}
+                            onChange={(value) => setData("gender", value)}
+                        />
+                    </>
+                )}
+
+                {/* Password Baru (Khusus Administrator) */}
+                {isSuperadmin && (
+                    <Input
+                        label="Password Baru (opsional)"
+                        name="password"
+                        type="password"
+                        placeholder="Kosongkan jika tidak ingin mengubah"
+                        value={data.password ?? ""}
+                        onChange={(e) => setData("password", e.target.value)}
+                        error={serverErrors.password}
+                    />
+                )}
             </Form>
         </Modal>
     );
