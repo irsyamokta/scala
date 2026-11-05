@@ -11,7 +11,8 @@ RUN composer install \
     --no-interaction \
     --prefer-dist \
     --no-scripts \
-    --no-autoloader
+    --no-autoloader \
+    --ignore-platform-reqs
 
 # ========================================================
 # STAGE 2: Frontend Build (Node + Vite + TypeScript)
