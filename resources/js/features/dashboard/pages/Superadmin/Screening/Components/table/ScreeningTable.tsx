@@ -221,12 +221,12 @@ export default function ScreeningTable({
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-between items-center gap-2">
+            <div className="flex justify-between items-center gap-2 mt-6">
                 <Select
                     value={filters?.per_page ?? 10}
                     placeholder="10"
                     onChange={(value) => setFilter?.("per_page", value)}
-                    className="max-w-18 mt-6"
+                    className="max-w-18"
                     options={PER_PAGE_OPTIONS}
                 />
 

@@ -2,11 +2,15 @@ import { useState } from "react";
 import { router } from "@inertiajs/react";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
 
-import { SubjectCardProps } from "@/types/subject";
+import { PaginatedSubjects, SubjectCardProps } from "@/types/subject";
 import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 import FilterBar from "@/shared/components/filter/FilterBar";
 import Button from "@/shared/components/ui/button/Button";
+import Select from "@/shared/components/forms/Select";
+import Pagination from "@/shared/components/ui/pagination/Pagination";
 import SubjectStudentTable from "../table/SubjectStudentTable";
+
+import { PER_PAGE_OPTIONS } from "@/shared/constants/filterOptions";
 
 export default function SubjectStudentCard({
     subjects,
@@ -16,10 +20,13 @@ export default function SubjectStudentCard({
     onCreate,
     onEdit,
 }: SubjectCardProps) {
+    const paginated = subjects as PaginatedSubjects;
+    const subjectList = paginated?.data ?? (subjects as any);
+
     const [selected, setSelected] = useState<string[]>([]);
 
-    const allIds     = subjects.map((s) => s.id);
-    const allChecked = allIds.length > 0 && allIds.every((id) => selected.includes(id));
+    const allIds     = subjectList.map((s: any) => s.id);
+    const allChecked = allIds.length > 0 && allIds.every((id: string) => selected.includes(id));
 
     function toggleAll() {
         setSelected(allChecked ? [] : allIds);
@@ -120,13 +127,30 @@ export default function SubjectStudentCard({
 
             {/* Table */}
             <SubjectStudentTable
-                subjects={subjects}
+                subjects={subjectList}
                 selected={selected}
                 allChecked={allChecked}
                 onToggleAll={toggleAll}
                 onToggleOne={toggleOne}
                 onEdit={onEdit}
             />
+
+            {/* Footer: Per Page + Pagination */}
+            <div className="flex justify-between items-center gap-2 mt-4">
+                <Select
+                    value={filters?.per_page ?? 10}
+                    placeholder="10"
+                    onChange={(value) => setFilter("per_page", value)}
+                    className="max-w-18"
+                    options={PER_PAGE_OPTIONS}
+                />
+
+                <Pagination
+                    links={paginated?.links ?? []}
+                    filters={filters}
+                    routeName="subject.school.index"
+                />
+            </div>
         </div>
     );
 }

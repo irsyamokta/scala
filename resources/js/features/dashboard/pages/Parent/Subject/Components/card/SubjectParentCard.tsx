@@ -19,6 +19,8 @@ export default function SubjectParentCard({
     onEdit,
 }: SubjectCardProps) {
 
+    const subjectList = Array.isArray(subjects) ? subjects : (subjects?.data ?? []);
+
     const { handleDelete } = useDelete({
         routeName: "subject.destroy",
         confirmTitle: "Hapus Data Keluarga?",
@@ -76,8 +78,8 @@ export default function SubjectParentCard({
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-6">
-                {subjects?.length > 0 ? (
-                    subjects.map((subject) => (
+                {subjectList.length > 0 ? (
+                    subjectList.map((subject) => (
                         <SubjectCard
                             key={subject.id}
                             name={subject.name}

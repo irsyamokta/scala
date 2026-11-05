@@ -22,40 +22,51 @@ class SubjectController extends Controller
     {
         $user = auth()->user();
 
-        $search = $request->search;
-        $genders = $request->gender;
+        $search   = $request->search;
+        $genders  = $request->gender;
         $classIds = $request->class_id;
-
-        $subjects = $this->service->getSubjects(
-            $user->id,
-            $user->role,
-            $search,
-            $genders,
-            $classIds
-        );
+        $perPage  = $request->integer('per_page', 10);
 
         if ($user->role == 'parent') {
+            $subjects = $this->service->getSubjects(
+                $user->id,
+                $user->role,
+                $search,
+                $genders,
+                $classIds
+            );
+
             return Inertia::render('Dashboard/Parent/Subject/Index', [
                 'subjects' => $subjects,
-                'filters' => [
+                'filters'  => [
                     'search' => $search,
                     'gender' => $genders,
                 ],
             ]);
         }
 
+        $subjects = $this->service->getPaginatedSubjects(
+            $user->id,
+            $user->role,
+            $search,
+            $genders,
+            $classIds,
+            $perPage
+        );
+
         $classes = $this->class->getClasses($user->id);
 
         return Inertia::render('Dashboard/School/Subject/Index', [
-            'classes' => $classes->map(fn ($c) => [
+            'classes'  => $classes->map(fn ($c) => [
                 'value' => (string) $c->id,
                 'label' => $c->class_name,
             ]),
             'subjects' => $subjects,
-            'filters' => [
-                'search' => $search,
-                'gender' => $genders,
+            'filters'  => [
+                'search'   => $search,
+                'gender'   => $genders,
                 'class_id' => $classIds,
+                'per_page' => $perPage,
             ],
         ]);
     }

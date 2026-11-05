@@ -1,5 +1,14 @@
 import { PageProps } from ".";
 
+interface PaginatedSubjects {
+    data: Subject[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    links: { url: string | null; label: string; active: boolean }[];
+}
+
 interface Subject {
     id: string;
     name: string;
@@ -18,10 +27,22 @@ interface Subject {
 interface SubjectPageProps extends PageProps {
     subjects: Subject[];
     classes?: Class[];
+    filters?: {
+        search?: string;
+        gender?: string[];
+        class_id?: string[];
+        per_page?: number;
+    };
+}
+
+interface SchoolSubjectPageProps extends PageProps {
+    subjects: PaginatedSubjects;
+    classes: Class[];
     filters: {
-        search: string;
-        gender: [];
-        class_id?: []
+        search?: string;
+        gender?: string[];
+        class_id?: string[];
+        per_page?: number;
     };
 }
 
@@ -52,7 +73,7 @@ interface SubjectForm {
 };
 
 interface SubjectCardProps {
-    subjects: Subject[];
+    subjects: PaginatedSubjects | Subject[];
     classes?: Class[];
     filters: any;
     setFilter: any;
@@ -91,7 +112,9 @@ interface ClassCardProps {
 
 export type {
     Subject,
+    PaginatedSubjects,
     SubjectPageProps,
+    SchoolSubjectPageProps,
     SubjectModalProps,
     SubjectSelectedModalProps,
     SubjectForm,

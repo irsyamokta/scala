@@ -17,6 +17,20 @@ class SubjectRepository
         return $this->baseQuery($ownerId, $role, $search, $genders, $classIds)->get();
     }
 
+    public function getPaginated(
+        string $ownerId,
+        string $role,
+        ?string $search = null,
+        ?array $genders = null,
+        ?array $classIds = null,
+        int $perPage = 10
+    ) {
+        return $this->baseQuery($ownerId, $role, $search, $genders, $classIds)
+            ->paginate($perPage)
+            ->onEachSide(1)
+            ->withQueryString();
+    }
+
     private function baseQuery(
         string $ownerId,
         string $role,

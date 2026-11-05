@@ -18,11 +18,22 @@ class SubjectService
     public function getSubjects(
         string $ownerId,
         string $role,
-        ?string $search,
-        ?array $genders,
-        ?array $classIds
+        ?string $search = null,
+        ?array $genders = null,
+        ?array $classIds = null
     ) {
         return $this->repo->getAll($ownerId, $role, $search, $genders, $classIds);
+    }
+
+    public function getPaginatedSubjects(
+        string $ownerId,
+        string $role,
+        ?string $search = null,
+        ?array $genders = null,
+        ?array $classIds = null,
+        int $perPage = 10
+    ) {
+        return $this->repo->getPaginated($ownerId, $role, $search, $genders, $classIds, $perPage);
     }
 
     public function getSubjectScreenings(string $subjectId)
