@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
 import { LuUpload, LuPencil, LuFileSpreadsheet } from "react-icons/lu";
 
@@ -24,9 +24,21 @@ export default function SubjectStudentModal({
     const [tab, setTab] = useState<TabMode>("manual");
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [dateError, setDateError] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const isEditing = !!subject;
+
+    const formattedSubject = subject
+        ? {
+              ...subject,
+              tanggal_lahir: subject.tanggal_lahir
+                  ? (subject.tanggal_lahir.includes("T")
+                      ? subject.tanggal_lahir.split("T")[0]
+                      : subject.tanggal_lahir)
+                  : "",
+          }
+        : null;
 
     const {
         data,
@@ -45,13 +57,59 @@ export default function SubjectStudentModal({
             has_previous_screening: false,
             last_result: "",
         },
-        editData: subject,
+        editData: formattedSubject,
         editId: subject?.id,
         createMessage: "Profil siswa berhasil disimpan",
         updateMessage: "Profil siswa berhasil diperbarui",
         storeRoute: "subject.store",
         updateRoute: "subject.update",
     });
+
+    useEffect(() => {
+        if (!isOpen) {
+            setDateError(null);
+        }
+    }, [isOpen]);
+
+    function validateTanggalLahir(val: string): string | null {
+        if (!val || !val.trim()) {
+            return "Tanggal lahir wajib diisi.";
+        }
+        const cleanVal = val.includes("T") ? val.split("T")[0] : val.trim();
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(cleanVal)) {
+            return "Format tanggal lahir harus YYYY-MM-DD (contoh: 2010-05-12).";
+        }
+        const [y, m, d] = cleanVal.split("-").map(Number);
+        if (m < 1 || m > 12) {
+            return "Bulan tidak valid (harus 01-12).";
+        }
+        const dateObj = new Date(y, m - 1, d);
+        if (
+            dateObj.getFullYear() !== y ||
+            dateObj.getMonth() !== m - 1 ||
+            dateObj.getDate() !== d
+        ) {
+            return "Tanggal tidak valid.";
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (dateObj > today) {
+            return "Tanggal lahir tidak boleh di masa depan.";
+        }
+        return null;
+    }
+
+    const handleManualSubmit: React.FormEventHandler = (e) => {
+        e.preventDefault();
+        const err = validateTanggalLahir(data.tanggal_lahir ?? "");
+        if (err) {
+            setDateError(err);
+            return;
+        }
+        setDateError(null);
+        handleSubmit(e);
+    };
 
     function handleImportSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -72,6 +130,7 @@ export default function SubjectStudentModal({
     const handleClose = () => {
         setTab("manual");
         setFile(null);
+        setDateError(null);
         onClose();
     };
 
@@ -133,7 +192,7 @@ export default function SubjectStudentModal({
             {(tab === "manual" || isEditing) && (
                 <Form
                     id="subject-school-form"
-                    onSubmit={handleSubmit}
+                    onSubmit={handleManualSubmit}
                     className="p-4 space-y-5"
                 >
                     {/* Nama */}
@@ -178,10 +237,28 @@ export default function SubjectStudentModal({
                         label="Tanggal Lahir"
                         required
                         placeholder="YYYY-MM-DD (contoh: 2010-05-12)"
-                        value={data.tanggal_lahir ?? ""}
-                        onChange={(e) => setData("tanggal_lahir", e.target.value)}
+                        value={
+                            data.tanggal_lahir
+                                ? (data.tanggal_lahir.includes("T")
+                                    ? data.tanggal_lahir.split("T")[0]
+                                    : data.tanggal_lahir)
+                                : ""
+                        }
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            setData("tanggal_lahir", val);
+                            if (dateError) {
+                                setDateError(validateTanggalLahir(val));
+                            }
+                        }}
+                        onBlur={(e) => {
+                            const val = e.target.value;
+                            if (val.trim()) {
+                                setDateError(validateTanggalLahir(val));
+                            }
+                        }}
                         hint="Usia dihitung otomatis dari tanggal lahir"
-                        error={serverErrors.tanggal_lahir}
+                        error={dateError || serverErrors.tanggal_lahir}
                     />
 
                     {/* Kelas */}

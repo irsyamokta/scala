@@ -17,7 +17,7 @@ class SubjectRequest extends FormRequest
             'name' => 'required|string|max:100',
             'nis' => 'required|digits_between:1,20',
             'gender' => 'required|in:male,female',
-            'tanggal_lahir' => 'required|date',
+            'tanggal_lahir' => 'required|date_format:Y-m-d|before:today',
             'class_id' => 'nullable|uuid|exists:classes,id',
             'is_self' => 'boolean',
         ];
@@ -31,7 +31,8 @@ class SubjectRequest extends FormRequest
             'nis.digits_between' => 'NIS harus berupa angka.',
             'gender.required' => 'Jenis kelamin wajib dipilih.',
             'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
-            'tanggal_lahir.date' => 'Format tanggal lahir tidak valid.',
+            'tanggal_lahir.date_format' => 'Format tanggal lahir harus YYYY-MM-DD (contoh: 2010-05-12).',
+            'tanggal_lahir.before' => 'Tanggal lahir tidak boleh di masa depan.',
         ];
     }
 }

@@ -47,8 +47,17 @@ class Subject extends Model
     protected $casts = [
         'is_self' => 'boolean',
         'has_previous_screening' => 'boolean',
-        'tanggal_lahir' => 'date',
+        'tanggal_lahir' => 'date:Y-m-d',
     ];
+
+    public function getTanggalLahirAttribute($value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
 
     public function owner()
     {
