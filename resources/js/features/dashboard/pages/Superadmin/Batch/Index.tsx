@@ -104,10 +104,10 @@ export default function SuperadminBatchIndex() {
                     <StatCard title="Aktif" value={stats.active} />
                 </div>
                 <div className="col-span-6 lg:col-span-3">
-                    <StatCard title="Sudah Ditutup" value={stats.closed} />
+                    <StatCard title="Ditutup" value={stats.closed} />
                 </div>
                 <div className="col-span-6 lg:col-span-3">
-                    <StatCard title="Sudah Assigned" value={stats.assigned} />
+                    <StatCard title="Ditugaskan" value={stats.assigned} />
                 </div>
 
                 <div className="col-span-12">
@@ -270,7 +270,7 @@ function BatchRow({
                     <Checkbox checked={checked} onChange={onCheck} label="" />
                 </div>
             </TableCell>
-            <TableCell className="px-6 py-4 text-sm font-medium text-netral-900">
+            <TableCell className="px-6 py-4 text-sm font-medium text-netral-900 whitespace-nowrap">
                 <p>{batch.label}</p>
                 {batch.expires_at && (
                     <p className="text-xs text-netral-500 mt-0.5">

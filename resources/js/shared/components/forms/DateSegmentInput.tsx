@@ -165,7 +165,7 @@ export default function DateSegmentInput({
         ? "text-gray-500 border-gray-300 bg-gray-100 cursor-not-allowed opacity-60"
         : error
         ? "border-error-500 focus-within:border-error-300 focus-within:ring-1 focus-within:ring-error-500/20"
-        : "bg-white text-gray-800 border-gray-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20";
+        : "bg-transparent text-gray-800 border-gray-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20";
 
     return (
         <div className={`w-full space-y-1.5 ${className}`}>

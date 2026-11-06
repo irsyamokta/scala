@@ -155,7 +155,7 @@ function BatchItem({
             </TableCell>
 
             {/* Info */}
-            <TableCell className="px-4 py-3 w-full">
+            <TableCell className="px-4 py-3 w-full whitespace-nowrap">
                 <p className="font-semibold text-netral-900 truncate group-hover:text-primary transition-colors">
                     {batch.label}
                 </p>

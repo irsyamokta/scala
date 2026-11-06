@@ -99,7 +99,7 @@ function BatchRow({ batch }: { batch: Batch }) {
             onClick={() => router.visit(route("batch.show", batch.id))}
             className="border-netral-300 border-b hover:bg-netral-200/70 transition-colors cursor-pointer group"
         >
-            <TableCell className="px-6 py-4 text-sm font-medium text-netral-900">
+            <TableCell className="px-6 py-4 text-sm font-medium text-netral-900 whitespace-nowrap">
                 <p>{batch.label}</p>
                 {batch.expires_at && (
                     <p className="text-xs text-netral-500 mt-0.5">
