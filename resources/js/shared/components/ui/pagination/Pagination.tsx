@@ -68,7 +68,8 @@ export default function Pagination({
         }
     };
 
-    const getVisiblePages = (current: number, total: number): (number | "...")[] => {
+    // Desktop view: 1 - 5 lalu "..."
+    const getDesktopPages = (current: number, total: number): (number | "...")[] => {
         if (total <= 7) {
             return Array.from({ length: total }, (_, i) => i + 1);
         }
@@ -84,68 +85,97 @@ export default function Pagination({
         return [1, "...", current - 1, current, current + 1, "...", total];
     };
 
-    const visiblePages = getVisiblePages(currentPage, lastPage);
+    // Mobile view: 1 - 3 lalu "..."
+    const getMobilePages = (current: number, total: number): (number | "...")[] => {
+        if (total <= 5) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+
+        if (current <= 3) {
+            return [1, 2, 3, "...", total];
+        }
+
+        if (current >= total - 2) {
+            return [1, "...", total - 2, total - 1, total];
+        }
+
+        return [1, "...", current, "...", total];
+    };
+
+    const desktopPages = getDesktopPages(currentPage, lastPage);
+    const mobilePages = getMobilePages(currentPage, lastPage);
+
+    const renderPageItem = (page: number | "...", key: string) => {
+        if (page === "...") {
+            return (
+                <span
+                    key={key}
+                    className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm text-netral-500 select-none"
+                >
+                    ...
+                </span>
+            );
+        }
+
+        const isActive = page === currentPage;
+
+        return (
+            <button
+                type="button"
+                key={key}
+                onClick={() => navigateToPage(page)}
+                className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border text-xs sm:text-sm font-medium transition cursor-pointer
+                    ${isActive
+                        ? "bg-primary border-primary text-white"
+                        : "bg-netral-100 border-netral-300 text-netral-700 hover:bg-netral-200"
+                    }`}
+            >
+                {page}
+            </button>
+        );
+    };
 
     return (
         <div className={`flex items-center justify-center ${className}`}>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5">
                 {/* Previous */}
                 <button
                     type="button"
                     disabled={currentPage <= 1}
                     onClick={() => navigateToPage(currentPage - 1)}
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition
+                    aria-label="Previous Page"
+                    className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition
                         ${currentPage > 1
                             ? "bg-netral-100 border-netral-300 hover:bg-netral-200 text-netral-700 cursor-pointer"
                             : "bg-netral-200 border-netral-200 text-netral-400 cursor-not-allowed"
                         }`}
                 >
-                    <LuChevronLeft size={18} />
+                    <LuChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
 
-                {/* Page numbers */}
-                {visiblePages.map((page, i) => {
-                    if (page === "...") {
-                        return (
-                            <span
-                                key={`dots-${i}`}
-                                className="flex items-center justify-center w-10 h-10 text-netral-500 select-none"
-                            >
-                                ...
-                            </span>
-                        );
-                    }
+                {/* Mobile Page Numbers (1 - 3 ... total) */}
+                <div className="flex sm:hidden items-center gap-1">
+                    {mobilePages.map((page, i) => renderPageItem(page, `m-${page}-${i}`))}
+                </div>
 
-                    const isActive = page === currentPage;
-
-                    return (
-                        <button
-                            type="button"
-                            key={page}
-                            onClick={() => navigateToPage(page)}
-                            className={`flex items-center justify-center w-10 h-10 rounded-lg border text-sm font-medium transition cursor-pointer
-                                ${isActive
-                                    ? "bg-primary border-primary text-white"
-                                    : "bg-netral-100 border-netral-300 text-netral-700 hover:bg-netral-200"
-                                }`}
-                        >
-                            {page}
-                        </button>
-                    );
-                })}
+                {/* Desktop Page Numbers (1 - 5 ... total) */}
+                <div className="hidden sm:flex items-center gap-1.5">
+                    {desktopPages.map((page, i) => renderPageItem(page, `d-${page}-${i}`))}
+                </div>
 
                 {/* Next */}
                 <button
                     type="button"
                     disabled={currentPage >= lastPage}
                     onClick={() => navigateToPage(currentPage + 1)}
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition
+                    aria-label="Next Page"
+                    className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border transition
                         ${currentPage < lastPage
                             ? "bg-netral-100 border-netral-300 hover:bg-netral-200 text-netral-700 cursor-pointer"
                             : "bg-netral-200 border-netral-200 text-netral-400 cursor-not-allowed"
                         }`}
                 >
-                    <LuChevronRight size={18} />
+                    <LuChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
             </div>
         </div>
