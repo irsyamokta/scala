@@ -67,9 +67,11 @@ const AppHeader: React.FC<Props> = ({
                     </button>
 
                     {/* Title */}
-                    <h1 className="text-xl font-semibold text-netral-900">
-                        {title}
-                    </h1>
+                    {title && (
+                        <h1 className="text-xl font-semibold text-netral-900">
+                            {title}
+                        </h1>
+                    )}
                 </div>
 
                 {/* RIGHT */}
@@ -79,7 +81,7 @@ const AppHeader: React.FC<Props> = ({
                     <button
                         onClick={onToggleDarkMode}
                         title={isDarkMode ? "Beralih ke Light Mode" : "Beralih ke Dark Mode"}
-                        className="flex items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
+                        className="hidden items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
                     >
                         {isDarkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
                     </button>
@@ -88,7 +90,7 @@ const AppHeader: React.FC<Props> = ({
                     <button
                         onClick={onToggleNotifications}
                         title="Notifikasi"
-                        className="relative flex items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
+                        className="relative hidden items-center justify-center w-10 h-10 border rounded-lg text-netral-600 hover:bg-netral-200 transition"
                     >
                         <FiBell size={18} />
                         {notificationCount > 0 && (

@@ -16,9 +16,10 @@ import { BatchSubject } from "@/types/batch";
 
 interface ParticipantTableProps {
     participants: BatchSubject[];
+    actions?: React.ReactNode;
 }
 
-export default function ParticipantTable({ participants }: ParticipantTableProps) {
+export default function ParticipantTable({ participants, actions }: ParticipantTableProps) {
     const [perPage, setPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [search, setSearch] = useState("");
@@ -65,13 +66,16 @@ export default function ParticipantTable({ participants }: ParticipantTableProps
         <div>
             {/* Toolbar: Per Page (Left) & Search/Filter (Right) */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <Select
-                    value={perPage}
-                    placeholder="10"
-                    onChange={handlePerPageChange}
-                    className="max-w-18 shrink-0"
-                    options={PER_PAGE_OPTIONS}
-                />
+                <div className="flex items-center gap-2 shrink-0">
+                    <Select
+                        value={perPage}
+                        placeholder="10"
+                        onChange={handlePerPageChange}
+                        className="max-w-18"
+                        options={PER_PAGE_OPTIONS}
+                    />
+                    {actions}
+                </div>
 
                 <FilterBar
                     className="w-full sm:w-auto"

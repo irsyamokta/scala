@@ -42,8 +42,8 @@ export default function PsychologistBatchShow() {
     const statusLabel = isClosed ? "Ditutup" : isExpired ? "Kedaluwarsa" : "Aktif";
 
     return (
-        <DashboardLayout title={batch.label}>
-            <Head title={batch.label} />
+        <DashboardLayout title="Detail Batch">
+            <Head title="Detail Batch" />
 
             <ScreeningDetailModal
                 isOpen={detailOpen}
@@ -58,19 +58,19 @@ export default function PsychologistBatchShow() {
                             <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between gap-3">
                             <Link href={back_route}>
                                 <Button size="icon" variant="outline">
                                     <IoIosArrowRoundBack size={24} />
                                 </Button>
                             </Link>
-                            <h2 className="text-lg font-semibold text-netral-900 truncate flex-1">
-                                {batch.label}
-                            </h2>
                             <Badge color={statusColor} size="sm">{statusLabel}</Badge>
                         </div>
 
                         <div className="grid grid-cols-[140px_1fr] gap-y-3 mt-6 max-w-md">
+                            <p className="text-sm text-netral-600">Label Batch</p>
+                            <p className="text-sm font-semibold text-netral-900">{batch.label}</p>
+
                             <p className="text-sm text-netral-600">Kelas</p>
                             <p className="text-sm font-semibold text-netral-900">
                                 {batch.class?.class_name ?? <span className="italic text-netral-500">Semua Kelas</span>}

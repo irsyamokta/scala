@@ -194,9 +194,6 @@ export default function ScreeningDetailModal({
                                         <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-start text-netral-900">
                                             Interpretasi
                                         </TableCell>
-                                        <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-start text-netral-900 whitespace-nowrap">
-                                            Catatan Psikolog
-                                        </TableCell>
                                     </TableRow>
                                 </TableHeader>
 
@@ -211,18 +208,6 @@ export default function ScreeningDetailModal({
                                             </TableCell>
                                             <TableCell className="px-6 py-4 text-sm text-netral-600">
                                                 {row.interpretation}
-                                            </TableCell>
-                                            <TableCell className="px-6 py-4">
-                                                {row.noteField && (
-                                                    <Input
-                                                        value={data[row.noteField] ?? ""}
-                                                        placeholder="Masukkan catatan"
-                                                        onChange={(e) =>
-                                                            setData(row.noteField!, e.target.value)
-                                                        }
-                                                        error={serverErrors[row.noteField]}
-                                                    />
-                                                )}
                                             </TableCell>
                                         </TableRow>
                                     ))}

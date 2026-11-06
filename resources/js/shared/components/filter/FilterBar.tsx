@@ -113,7 +113,7 @@ export default function FilterBar({
                 <div className="relative" ref={ref}>
                     <button
                         onClick={() => setOpen(!open)}
-                        className="flex items-center justify-center w-12 h-12 rounded-lg bg-netral-200 hover:bg-netral-300"
+                        className="flex items-center justify-center w-11 h-11 rounded-lg bg-netral-200 hover:bg-netral-300"
                     >
                         <FiFilter size={18} />
                     </button>

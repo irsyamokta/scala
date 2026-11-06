@@ -93,8 +93,8 @@ export default function SuperadminBatchIndex() {
     }
 
     return (
-        <DashboardLayout title="Semua Batch Skrining">
-            <Head title="Semua Batch Skrining" />
+        <DashboardLayout title="Monitoring Batch">
+            <Head title="Monitoring Batch" />
 
             <div className="grid grid-cols-12 gap-4 md:gap-6">
                 <div className="col-span-6 lg:col-span-3">

@@ -81,8 +81,8 @@ export default function BatchShow() {
     }
 
     return (
-        <DashboardLayout title={batch.label}>
-            <Head title={batch.label} />
+        <DashboardLayout title="Detail Batch">
+            <Head title="Detail Batch" />
 
             <ScreeningDetailModal
                 isOpen={detailOpen}
@@ -163,42 +163,46 @@ export default function BatchShow() {
                             <img src={Decorative} alt="" className="absolute -top-12 -right-26 rotate-1 hidden sm:block pointer-events-none" />
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                            {/* Left: back button */}
                             <Link href={back_route}>
                                 <Button size="icon" variant="outline">
                                     <IoIosArrowRoundBack size={24} />
                                 </Button>
                             </Link>
-                            <h2 className="text-lg font-semibold text-netral-900 truncate flex-1">
-                                {batch.label}
-                            </h2>
-                            <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                            {/* Edit Button beside badge */}
-                            {classes.length > 0 && instruments.length > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={() => setEditOpen(true)}
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-200 hover:text-netral-900 transition"
-                                    title="Edit batch"
-                                >
-                                    <LuPencil size={15} />
-                                </button>
-                            )}
+                            {/* Right: badge + edit + assign */}
+                            <div className="flex items-center gap-2">
+                                <Badge color={statusColor} size="sm">{statusLabel}</Badge>
 
-                            {isSuperadmin && (
-                                <Button
-                                    startIcon={<LuUserCheck size={14} />}
-                                    onClick={() => setAssignOpen(true)}
-                                    size="sm"
-                                >
-                                    {batch.assigned_psychologist ? "Ganti Psikolog" : "Tugaskan Psikolog"}
-                                </Button>
-                            )}
+                                {classes.length > 0 && instruments.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditOpen(true)}
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg text-netral-500 hover:bg-netral-200 hover:text-netral-900 transition"
+                                        title="Edit batch"
+                                    >
+                                        <LuPencil size={15} />
+                                    </button>
+                                )}
+
+                                {isSuperadmin && (
+                                    <Button
+                                        startIcon={<LuUserCheck size={14} />}
+                                        onClick={() => setAssignOpen(true)}
+                                        size="sm"
+                                    >
+                                        {batch.assigned_psychologist ? "Ganti" : "Tugaskan"}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Info batch */}
                         <div className="grid grid-cols-[140px_1fr] gap-y-3 mt-6 max-w-md">
+                            <p className="text-sm text-netral-600">Label Batch</p>
+                            <p className="text-sm font-semibold text-netral-900">{batch.label}</p>
+
                             <p className="text-sm text-netral-600">Kelas</p>
                             <p className="text-sm font-semibold text-netral-900">
                                 {batch.class?.class_name ?? <span className="italic text-netral-500">Semua Kelas</span>}
@@ -239,42 +243,26 @@ export default function BatchShow() {
                             </p>
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex flex-wrap gap-2 mt-6">
-                            {!isClosed && (
-                                <>
-                                    <Button
-                                        startIcon={<LuQrCode size={14} />}
-                                        onClick={() => setQrOpen(true)}
-                                        size="sm"
-                                    >
-                                        QR Code &amp; Link
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        startIcon={<LuLock size={14} />}
-                                        onClick={handleClose}
-                                        className="border-red-300 text-red-600 hover:bg-red-50"
-                                    >
-                                        Tutup Batch
-                                    </Button>
-                                </>
-                            )}
-                            <Button
-                                variant="outline"
-                                startIcon={<LuDownload size={14} />}
-                                onClick={() => window.location.href = route("batch.export", batch.id)}
-                            >
-                                Export Peserta
-                            </Button>
-                            <Button
-                                variant="outline"
-                                startIcon={<LuDownload size={14} />}
-                                onClick={() => window.location.href = route("batch.export-recap", batch.id)}
-                            >
-                                Export Rekap
-                            </Button>
-                        </div>
+                        {/* Actions: QR & Tutup Batch */}
+                        {!isClosed && (
+                            <div className="flex flex-wrap gap-2 mt-6">
+                                <Button
+                                    startIcon={<LuQrCode size={14} />}
+                                    onClick={() => setQrOpen(true)}
+                                    size="sm"
+                                >
+                                    QR Code &amp; Link
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    startIcon={<LuLock size={14} />}
+                                    onClick={handleClose}
+                                    className="border-red-300 text-red-600 hover:bg-red-50"
+                                >
+                                    Tutup Batch
+                                </Button>
+                            </div>
+                        )}
 
                         {/* Tabs */}
                         <div className="flex gap-1 mt-6 border-b border-netral-200">
@@ -297,7 +285,20 @@ export default function BatchShow() {
 
                         {tab === "participants" && (
                             <div className="mt-4">
-                                <ParticipantTable participants={participants} />
+                                <ParticipantTable
+                                    participants={participants}
+                                    actions={
+                                        <Button
+                                            variant="outline"
+                                            className="h-11"
+                                            size="md"
+                                            startIcon={<LuDownload size={14} />}
+                                            onClick={() => window.location.href = route("batch.export", batch.id)}
+                                        >
+                                            Export
+                                        </Button>
+                                    }
+                                />
                             </div>
                         )}
 
@@ -337,6 +338,17 @@ export default function BatchShow() {
                                 <ParticipantRecapTable
                                     participants={participants}
                                     onView={handleViewScreening}
+                                    actions={
+                                        <Button
+                                            variant="outline"
+                                            className="h-11"
+                                            size="md"
+                                            startIcon={<LuDownload size={14} />}
+                                            onClick={() => window.location.href = route("batch.export-recap", batch.id)}
+                                        >
+                                            Export
+                                        </Button>
+                                    }
                                 />
                             </div>
                         )}
