@@ -10,10 +10,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_MEMORY_LIMIT=-1 \
     COMPOSER_NO_INTERACTION=1
 
-# Dukungan token GitHub opsional jika server terkena rate limit
-ARG GITHUB_TOKEN
-RUN if [ -n "$GITHUB_TOKEN" ]; then composer config --global github-oauth.github.com "$GITHUB_TOKEN"; fi
-
 COPY composer.json composer.lock ./
 
 RUN composer install \
@@ -24,7 +20,8 @@ RUN composer install \
     --no-autoloader \
     --no-progress \
     --no-audit \
-    --ignore-platform-reqs
+    --ignore-platform-reqs \
+    --verbose
 
 # ========================================================
 # STAGE 2: Frontend Build (Node + Vite + TypeScript)
