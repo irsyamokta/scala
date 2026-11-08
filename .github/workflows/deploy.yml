@@ -23,7 +23,8 @@ jobs:
       - name: Build & Push Docker Image
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/scala:latest
-          docker build -t $IMAGE .
+          echo "{\"github-oauth\": {\"github.com\": \"${{ secrets.GITHUB_TOKEN }}\"}}" > /tmp/composer-auth.json
+          docker build --secret id=composer_auth,src=/tmp/composer-auth.json -t $IMAGE .
           docker push $IMAGE
 
       - name: Deploy on VPS via SSH

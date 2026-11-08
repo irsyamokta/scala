@@ -12,7 +12,10 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 
 COPY composer.json composer.lock ./
 
-RUN composer install \
+# Mount secret composer_auth jika disediakan (misal dari GitHub Actions)
+# required=false agar build lokal tanpa secret tetap bisa berjalan
+RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH,required=false \
+    composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
