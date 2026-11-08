@@ -22,9 +22,7 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH,required=false \
     --no-scripts \
     --no-autoloader \
     --no-progress \
-    --no-audit \
-    --ignore-platform-reqs \
-    --verbose
+    --ignore-platform-reqs
 
 # ========================================================
 # STAGE 2: Frontend Build (Node + Vite + TypeScript)
