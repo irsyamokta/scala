@@ -95,4 +95,48 @@ class UserController extends Controller
             );
         }
     }
+
+    public function impersonate(Request $request, $id)
+    {
+        $currentUser = auth()->user();
+
+        if ($currentUser->id === $id) {
+            return back()->with('error', 'Tidak dapat masuk ke akun sendiri.');
+        }
+
+        $targetUser = \App\Models\User::findOrFail($id);
+
+        $request->session()->put('impersonator_id', $currentUser->id);
+
+        auth()->login($targetUser);
+
+        return redirect()->route('dashboard')->with(
+            'success',
+            "Berhasil masuk sebagai {$targetUser->name}."
+        );
+    }
+
+    public function leaveImpersonate(Request $request)
+    {
+        $impersonatorId = $request->session()->get('impersonator_id');
+
+        if (! $impersonatorId) {
+            return redirect()->route('dashboard');
+        }
+
+        $admin = \App\Models\User::find($impersonatorId);
+
+        if (! $admin) {
+            $request->session()->forget('impersonator_id');
+            return redirect()->route('dashboard');
+        }
+
+        $request->session()->forget('impersonator_id');
+        auth()->login($admin);
+
+        return redirect()->route('user.index')->with(
+            'success',
+            'Berhasil kembali ke akun Administrator.'
+        );
+    }
 }

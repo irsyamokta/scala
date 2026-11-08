@@ -1,115 +1,171 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiDotsHorizontal } from "react-icons/hi";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { IoEyeOutline } from "react-icons/io5";
+import { LuPencil, LuTrash2, LuLogIn } from "react-icons/lu";
 
 type ActionDropdownProps = {
     is_self?: boolean;
+    onView?: () => void;
+    onLoginAs?: () => void;
     onEdit?: () => void;
     onDelete?: () => void;
+    viewLabel?: string;
 };
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({
     is_self,
+    onView,
+    onLoginAs,
     onEdit,
     onDelete,
+    viewLabel = "Lihat",
 }) => {
     const [open, setOpen] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0 });
-    const buttonRef = useRef<HTMLButtonElement>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [pos, setPos] = useState({ top: 0, left: 0 });
+    const btnRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!open) return;
 
-        const handleClickOutside = (e: MouseEvent) => {
-            const target = e.target as Node;
-
+        const handler = (e: MouseEvent) => {
             if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(target) &&
-                buttonRef.current &&
-                !buttonRef.current.contains(target)
+                menuRef.current?.contains(e.target as Node) ||
+                btnRef.current?.contains(e.target as Node)
             ) {
-                setOpen(false);
+                return;
             }
+            setOpen(false);
         };
 
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
     }, [open]);
 
-    const toggleDropdown = () => {
-        if (!buttonRef.current) return;
+    // Hitung perkiraan tinggi menu dinamis berdasarkan jumlah item
+    const itemCount = [
+        Boolean(onView),
+        Boolean(onLoginAs && !is_self),
+        Boolean(onEdit),
+        Boolean(onDelete),
+    ].filter(Boolean).length;
 
-        const rect = buttonRef.current.getBoundingClientRect();
+    const menuH = itemCount * 46;
 
-        const dropdownHeight = 96;
-        const spaceBelow = window.innerHeight - rect.bottom;
+    const toggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!btnRef.current) return;
 
-        const openUp = spaceBelow < dropdownHeight;
+        const rect = btnRef.current.getBoundingClientRect();
+        const openUp = window.innerHeight - rect.bottom < menuH;
 
-        setPosition({
-            top: openUp ? rect.top - dropdownHeight : rect.bottom + 4,
-            left: rect.right - 176,
+        setPos({
+            top: openUp ? rect.top - menuH : rect.bottom + 4,
+            left: rect.right - 180,
         });
 
-        setOpen(!open);
+        setOpen((v) => !v);
     };
 
-    const dropdown = (
+    const hasLoginAs = Boolean(onLoginAs && !is_self);
+
+    const menu = (
         <div
-            ref={dropdownRef}
+            ref={menuRef}
             style={{
                 position: "fixed",
-                top: position.top,
-                left: position.left,
-                width: 176,
+                top: pos.top,
+                left: pos.left,
+                width: 180,
             }}
-            className=" z-99 bg-netral-100 border rounded-xl shadow-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            className="z-50 bg-netral-100 border border-netral-200 rounded-xl shadow-lg overflow-hidden"
         >
-            <button
-                onClick={() => {
-                    onEdit?.();
-                    setOpen(false);
-                }}
-                disabled={is_self}
-                className={`flex items-center justify-between w-full px-4 py-3 text-sm hover:bg-netral-200 ${is_self ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-                Ubah
-                <FiEdit2 />
-            </button>
+            {onView && (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onView();
+                            setOpen(false);
+                        }}
+                        className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-netral-700 cursor-pointer"
+                    >
+                        <IoEyeOutline size={15} /> {viewLabel}
+                    </button>
+                    {(hasLoginAs || onEdit || onDelete) && (
+                        <div className="border-t border-netral-200" />
+                    )}
+                </>
+            )}
 
-            <div className="border-t"></div>
+            {onEdit && (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onEdit();
+                            setOpen(false);
+                        }}
+                        disabled={is_self}
+                        className={`flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-netral-700 ${
+                            is_self ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                        }`}
+                    >
+                        <LuPencil size={14} /> Ubah
+                    </button>
+                    {onDelete && <div className="border-t border-netral-200" />}
+                </>
+            )}
 
-            <button
-                onClick={() => {
-                    onDelete?.();
-                    setOpen(false);
-                }}
-                disabled={is_self}
-                className={`flex items-center justify-between w-full px-4 py-3 text-sm text-red-600 hover:bg-netral-200 ${is_self ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-                Hapus
-                <FiTrash2 />
-            </button>
+            {hasLoginAs && (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onLoginAs?.();
+                            setOpen(false);
+                        }}
+                        className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-primary font-medium cursor-pointer"
+                    >
+                        <LuLogIn size={15} /> Masuk
+                    </button>
+                    {(onEdit || onDelete) && (
+                        <div className="border-t border-netral-200" />
+                    )}
+                </>
+            )}
+
+            {onDelete && (
+                <button
+                    type="button"
+                    onClick={() => {
+                        onDelete();
+                        setOpen(false);
+                    }}
+                    disabled={is_self}
+                    className={`flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-red-500 ${
+                        is_self ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                    }`}
+                >
+                    <LuTrash2 size={14} /> Hapus
+                </button>
+            )}
         </div>
     );
 
     return (
         <>
             <button
-                ref={buttonRef}
-                onClick={toggleDropdown}
-                className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-netral-200"
+                ref={btnRef}
+                type="button"
+                onClick={toggle}
+                className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-netral-200 transition cursor-pointer"
             >
                 <HiDotsHorizontal size={16} />
             </button>
-
-            {open && createPortal(dropdown, document.body)}
+            {open && createPortal(menu, document.body)}
         </>
     );
 };

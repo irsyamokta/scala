@@ -8,6 +8,8 @@ export type PageProps<
         notifications?: {
             pending_analysis: number | null;
         };
+        is_impersonating?: boolean;
+        impersonator?: User | null;
     };
     flash?: {
         success?: string | null;

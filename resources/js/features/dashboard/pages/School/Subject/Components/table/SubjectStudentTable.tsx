@@ -1,9 +1,5 @@
 import { router } from "@inertiajs/react";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { IoEyeOutline } from "react-icons/io5";
-import { LuPencil, LuTrash2 } from "react-icons/lu";
-import { HiDotsHorizontal } from "react-icons/hi";
+import ActionDropdown from "@/shared/components/ui/dropdown/ActionDropdown";
 
 import {
     Table,
@@ -60,7 +56,7 @@ export default function SubjectStudentTable({
                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Usia</TableCell>
                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Kelas</TableCell>
                             <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Hasil Terakhir</TableCell>
-                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Aksi</TableCell>
+                            <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">ㅤ</TableCell>
                         </TableRow>
                     </TableHeader>
 
@@ -102,7 +98,7 @@ export default function SubjectStudentTable({
                                     )}
                                 </TableCell>
                                 <TableCell className="px-6 py-4 whitespace-nowrap">
-                                    <SubjectActionMenu
+                                    <ActionDropdown
                                         onView={() => router.visit(route("subject.school.show", subject.id))}
                                         onEdit={() => onEdit(subject)}
                                         onDelete={() => handleDelete(subject.id)}
@@ -114,61 +110,5 @@ export default function SubjectStudentTable({
                 </Table>
             </div>
         </div>
-    );
-}
-
-function SubjectActionMenu({ onView, onEdit, onDelete }: {
-    onView: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
-}) {
-    const [open, setOpen] = useState(false);
-    const [pos, setPos]   = useState({ top: 0, left: 0 });
-    const btnRef          = useRef<HTMLButtonElement>(null);
-    const menuRef         = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!open) return;
-        const handler = (e: MouseEvent) => {
-            if (menuRef.current?.contains(e.target as Node) || btnRef.current?.contains(e.target as Node)) return;
-            setOpen(false);
-        };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
-    }, [open]);
-
-    function toggle() {
-        if (!btnRef.current) return;
-        const rect = btnRef.current.getBoundingClientRect();
-        const menuH = 130;
-        const openUp = window.innerHeight - rect.bottom < menuH;
-        setPos({ top: openUp ? rect.top - menuH : rect.bottom + 4, left: rect.right - 180 });
-        setOpen((v) => !v);
-    }
-
-    const menu = (
-        <div ref={menuRef} style={{ position: "fixed", top: pos.top, left: pos.left, width: 180 }}
-            className="z-50 bg-netral-100 border border-netral-200 rounded-xl shadow-lg overflow-hidden">
-            <button onClick={() => { onView(); setOpen(false); }} className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-netral-700">
-                <IoEyeOutline size={15} /> Lihat
-            </button>
-            <div className="border-t border-netral-200" />
-            <button onClick={() => { onEdit(); setOpen(false); }} className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-netral-700">
-                <LuPencil size={14} /> Ubah
-            </button>
-            <div className="border-t border-netral-200" />
-            <button onClick={() => { onDelete(); setOpen(false); }} className="flex items-center gap-2 w-full px-4 py-3 text-sm hover:bg-netral-200 transition text-red-500">
-                <LuTrash2 size={14} /> Hapus
-            </button>
-        </div>
-    );
-
-    return (
-        <>
-            <button ref={btnRef} onClick={toggle} className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-netral-200 transition">
-                <HiDotsHorizontal size={16} />
-            </button>
-            {open && createPortal(menu, document.body)}
-        </>
     );
 }

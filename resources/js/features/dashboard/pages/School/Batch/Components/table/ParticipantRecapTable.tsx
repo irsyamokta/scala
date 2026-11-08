@@ -148,7 +148,7 @@ export default function ParticipantRecapTable({ participants, onView, actions }:
                                 <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Tanggal Tes</TableCell>
                                 <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Kategori</TableCell>
                                 <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Status Analisis</TableCell>
-                                <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Aksi</TableCell>
+                                <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap">Detail</TableCell>
                             </TableRow>
                         </TableHeader>
 

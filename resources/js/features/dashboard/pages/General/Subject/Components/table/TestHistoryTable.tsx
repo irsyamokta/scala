@@ -56,7 +56,7 @@ export default function TestHistoryTable({
 
                                 {/* Action */}
                                 <TableCell isHeader className="px-6 py-3 text-sm font-semibold text-start text-netral-900 whitespace-nowrap">
-                                    Detail Hasil Tes
+                                    Detail
                                 </TableCell>
 
                             </TableRow>

@@ -11,4 +11,9 @@ Route::middleware(['auth', 'onboarding.complete', 'permission:dashboard.superadm
         Route::post('/', [UserController::class, 'store'])->name('user.store');
         Route::patch('/{id}', [UserController::class, 'update'])->name('user.update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+        Route::post('/{id}/masuk', [UserController::class, 'impersonate'])->name('user.impersonate');
     });
+
+Route::middleware('auth')->group(function () {
+    Route::post('/impersonate/leave', [UserController::class, 'leaveImpersonate'])->name('impersonate.leave');
+});

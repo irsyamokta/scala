@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Batch;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -56,6 +57,11 @@ class HandleInertiaRequests extends Middleware
                 'notifications' => [
                     'pending_analysis' => $psychologistNotif,
                 ],
+
+                'is_impersonating' => $request->session()->has('impersonator_id'),
+                'impersonator' => $request->session()->has('impersonator_id')
+                    ? User::find($request->session()->get('impersonator_id'))
+                    : null,
             ],
 
             'flash' => [

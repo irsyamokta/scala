@@ -1,4 +1,6 @@
+import { router, usePage } from "@inertiajs/react";
 import { useDelete } from "@/shared/hooks/useDelete";
+import { ConfirmationDialog } from "@/shared/components/ui/ConfirmationDialog";
 
 import { UsersTableProps } from "@/types/user";
 
@@ -39,6 +41,8 @@ export default function UserTable({
     onCreate,
     onEdit,
 }: UsersTableProps) {
+    const { auth }: any = usePage().props;
+
     const { handleDelete } = useDelete({
         routeName: "user.destroy",
         confirmTitle: "Hapus Pengguna?",
@@ -46,6 +50,20 @@ export default function UserTable({
         successMessage: "Pengguna berhasil dihapus",
         errorMessage: "Gagal menghapus pengguna",
     });
+
+    const handleLoginAs = async (targetUser: any) => {
+        const confirmed = await ConfirmationDialog({
+            title: `Masuk sebagai ${targetUser.name}?`,
+            text: `Anda akan beralih akun dan masuk ke dashboard sebagai ${targetUser.name} tanpa perlu login.`,
+            confirmButtonText: "Ya, Masuk",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
+        });
+
+        if (!confirmed) return;
+
+        router.post(route("user.impersonate", targetUser.id));
+    };
 
     return (
         <div className="bg-netral-100 p-4 md:p-6 rounded-xl border border-netral-300">
@@ -152,20 +170,12 @@ export default function UserTable({
                                     Tanggal Daftar
                                 </TableCell>
 
-                                {/* View Detail */}
-                                <TableCell
-                                    isHeader
-                                    className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap"
-                                >
-                                    Detail
-                                </TableCell>
-
                                 {/* Action */}
                                 <TableCell
                                     isHeader
                                     className="px-6 py-3 text-sm font-semibold text-netral-900 text-start whitespace-nowrap"
                                 >
-                                    Aksi
+                                    ㅤ
                                 </TableCell>
 
                             </TableRow>
@@ -208,24 +218,15 @@ export default function UserTable({
                                             {user.created_at ? formatDateTime(user.created_at) : '-'}
                                         </TableCell>
 
-                                        {/* View Detail */}
-                                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                                            <Button
-                                                variant="outline"
-                                                startIcon={<IoEyeOutline />}
-                                                onClick={() => onView(user)}
-                                                className="cursor-pointer"
-                                            >
-                                                Lihat Detail
-                                            </Button>
-                                        </TableCell>
-
                                         {/* Action */}
                                         <TableCell className="px-6 py-4 whitespace-nowrap">
                                             <ActionDropdown
+                                                is_self={auth?.user?.id === user.id}
+                                                onView={() => onView(user)}
                                                 onEdit={() =>
                                                     onEdit(user)
                                                 }
+                                                onLoginAs={() => handleLoginAs(user)}
                                                 onDelete={() =>
                                                     handleDelete(user.id)
                                                 }

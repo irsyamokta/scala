@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect } from "react";
-import { usePage } from "@inertiajs/react";
+import { usePage, router } from "@inertiajs/react";
 import { toast } from "sonner";
+import { FiAlertCircle, FiLogOut } from "react-icons/fi";
 
 import Backdrop from "@/Layouts/Backdrop";
 import { SidebarProvider, useSidebar } from "@/Context/SidebarContext";
@@ -34,6 +35,26 @@ function LayoutContent({ children, title }: PropsWithChildren<{ title: string }>
                     } ${isMobileOpen ? "ml-0" : ""}`}
             >
                 <AppHeader title={title} />
+
+                {/* Impersonation Banner */}
+                {auth?.is_impersonating && (
+                    <div className="bg-amber-500 text-white px-4 md:px-6 py-2.5 flex items-center justify-between gap-3 text-sm font-medium shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <FiAlertCircle className="text-amber-100 shrink-0 text-lg" />
+                            <span>
+                                Anda sedang masuk sebagai <strong>{auth?.user?.name}</strong> ({auth?.user?.email}).
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => router.post(route("impersonate.leave"))}
+                            className="inline-flex items-center gap-1.5 bg-white text-amber-900 hover:bg-amber-50 px-3 py-3 rounded-lg text-xs font-semibold transition cursor-pointer shadow-sm"
+                        >
+                            <FiLogOut size={14} />
+                            Keluar
+                        </button>
+                    </div>
+                )}
                 <div className="p-4 md:p-6 w-full">
                     {children}
                 </div>
