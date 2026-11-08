@@ -5,13 +5,25 @@ FROM composer:2 AS vendor
 
 WORKDIR /app
 
+# Mencegah limit memori & non-interactive hang
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_MEMORY_LIMIT=-1 \
+    COMPOSER_NO_INTERACTION=1
+
+# Dukungan token GitHub opsional jika server terkena rate limit
+ARG GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then composer config --global github-oauth.github.com "$GITHUB_TOKEN"; fi
+
 COPY composer.json composer.lock ./
+
 RUN composer install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
     --no-scripts \
     --no-autoloader \
+    --no-progress \
+    --no-audit \
     --ignore-platform-reqs
 
 # ========================================================
@@ -34,11 +46,13 @@ COPY vite.config.* tsconfig.json ./
 RUN npm run build
 
 # ========================================================
-# STAGE 3: Production Runtime (PHP 8.3 Patched + Nginx)
-# Keamanan: Versi 8.3.36+ kebal terhadap CVE-2026-109618 &
-# CVE-2026-109619 (PHP2Shell UAF/OOM RCE).
+# STAGE 3: Production Runtime (PHP 8.3 + Nginx)
 # ========================================================
-FROM php:8.3.36-fpm-alpine
+FROM php:8.3-fpm-alpine
+
+# Environment Composer untuk runtime build
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_MEMORY_LIMIT=-1
 
 # Install Nginx, Bash, runtime libraries untuk GD, ZIP, INTL
 RUN apk add --no-cache \
@@ -70,7 +84,7 @@ RUN apk add --no-cache --virtual .build-deps \
         gd \
     && apk del .build-deps
 
-# Konfigurasi Keamanan PHP (Mitigasi PHP2Shell & Hardening)
+# Konfigurasi Keamanan PHP
 RUN { \
         echo "session.upload_progress.enabled = 0"; \
         echo "expose_php = Off"; \
