@@ -30,11 +30,11 @@ function LayoutContent({ children, title }: PropsWithChildren<{ title: string }>
                 <Backdrop />
             </div>
             <div
-                className={`flex-1 transition-all duration-300 ${isExpanded || isHovered ? "lg:ml-64" : "lg:ml-24"
+                className={`flex-1 min-w-0 transition-all duration-300 ${isExpanded || isHovered ? "lg:ml-64" : "lg:ml-24"
                     } ${isMobileOpen ? "ml-0" : ""}`}
             >
                 <AppHeader title={title} />
-                <div className="py-4 px-3 mx-auto max-w-(--breakpoint-2xl)">
+                <div className="p-4 md:p-6 w-full">
                     {children}
                 </div>
             </div>

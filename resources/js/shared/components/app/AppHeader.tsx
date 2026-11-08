@@ -53,7 +53,7 @@ const AppHeader: React.FC<Props> = ({
     return (
         <header className="sticky top-0 z-50 w-full bg-netral-100 border-b border-netral-300">
 
-            <div className="flex items-center justify-between px-3 py-4">
+            <div className="flex items-center justify-between px-4 md:px-6 py-4">
 
                 {/* LEFT */}
                 <div className="flex items-center gap-4">
