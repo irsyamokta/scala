@@ -19,6 +19,7 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use DomainException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
@@ -188,7 +189,7 @@ class BatchController extends Controller
     {
         try {
             $batch = $this->service->getBatchDetail($id);
-            $filename = 'peserta-'.\Illuminate\Support\Str::slug($batch->label).'.xlsx';
+            $filename = 'peserta-'.Str::slug($batch->label).'.xlsx';
 
             return Excel::download(new BatchExport($batch), $filename);
         } catch (Throwable $e) {
@@ -208,7 +209,7 @@ class BatchController extends Controller
                 abort(403);
             }
 
-            $filename = 'rekap-'.\Illuminate\Support\Str::slug($batch->label).'.xlsx';
+            $filename = 'rekap-'.Str::slug($batch->label).'.xlsx';
 
             return Excel::download(new BatchRecapExport($batch), $filename);
         } catch (Throwable $e) {

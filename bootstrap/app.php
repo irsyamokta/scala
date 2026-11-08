@@ -1,12 +1,20 @@
 <?php
 
+use App\Http\Middleware\EnsureOnboardingCompleted;
+use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 use Inertia\Inertia;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,16 +25,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \Illuminate\Session\Middleware\StartSession::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
+            StartSession::class,
         ]);
 
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'onboarding.complete' => App\Http\Middleware\EnsureOnboardingCompleted::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'onboarding.complete' => EnsureOnboardingCompleted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -43,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->guest(route('login'));
             }
 
-            $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+            $status = $e instanceof HttpExceptionInterface
                 ? $e->getStatusCode()
                 : 500;
 

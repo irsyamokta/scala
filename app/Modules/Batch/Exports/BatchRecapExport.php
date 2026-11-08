@@ -3,6 +3,7 @@
 namespace App\Modules\Batch\Exports;
 
 use App\Models\Batch;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
@@ -80,11 +81,11 @@ class BatchRecapExport extends DefaultValueBinder implements FromArray, ShouldAu
             };
 
             $tanggalLahir = $subject?->tanggal_lahir
-                ? \Carbon\Carbon::parse($subject->tanggal_lahir)->format('d/m/Y')
+                ? Carbon::parse($subject->tanggal_lahir)->format('d/m/Y')
                 : '-';
 
             $dateTaken = $screening?->date_taken
-                ? \Carbon\Carbon::parse($screening->date_taken)->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d/m/Y - H:i:s')
+                ? Carbon::parse($screening->date_taken)->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d/m/Y - H:i:s')
                 : 'Belum tes';
 
             return [

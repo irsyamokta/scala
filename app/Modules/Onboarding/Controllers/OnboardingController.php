@@ -12,6 +12,7 @@ use App\Modules\Onboarding\Services\OnboardingService;
 use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Throwable;
 
@@ -72,7 +73,7 @@ class OnboardingController extends Controller
                 'name' => $e->getMessage(),
             ]);
         } catch (Throwable $e) {
-            \Log::error($e);
+            Log::error($e);
 
             return back()->withErrors([
                 'Terjadi kesalahan, silahkan coba lagi',

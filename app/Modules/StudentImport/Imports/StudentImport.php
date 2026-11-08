@@ -50,7 +50,7 @@ class StudentImport implements SkipsEmptyRows, SkipsOnError, SkipsOnFailure, ToM
         try {
             $birthDate = Carbon::parse($tanggalLahir);
             $age = (int) $birthDate->age;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->failures[] = [
                 'row' => $this->currentRow,
                 'name' => $namaRow,

@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Clazz;
 use App\Models\Subject;
 use App\Modules\Batch\Repositories\BatchRepository;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -110,7 +111,7 @@ class BatchService
         ];
 
         if (! empty($updateData['expires_at'])) {
-            $newExpiry = \Carbon\Carbon::parse($updateData['expires_at']);
+            $newExpiry = Carbon::parse($updateData['expires_at']);
             if ($newExpiry->isFuture() && $batch->status === 'closed' && $batch->isExpired()) {
                 $updateData['status'] = 'active';
             }

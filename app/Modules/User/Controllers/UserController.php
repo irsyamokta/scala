@@ -3,6 +3,7 @@
 namespace App\Modules\User\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\User\Requests\UserRequest;
 use App\Modules\User\Services\UserService;
 use DomainException;
@@ -104,7 +105,7 @@ class UserController extends Controller
             return back()->with('error', 'Tidak dapat masuk ke akun sendiri.');
         }
 
-        $targetUser = \App\Models\User::findOrFail($id);
+        $targetUser = User::findOrFail($id);
 
         $request->session()->put('impersonator_id', $currentUser->id);
 
@@ -124,7 +125,7 @@ class UserController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $admin = \App\Models\User::find($impersonatorId);
+        $admin = User::find($impersonatorId);
 
         if (! $admin) {
             $request->session()->forget('impersonator_id');
